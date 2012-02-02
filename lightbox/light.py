@@ -16,27 +16,25 @@ import time
 # Application modules
 import utils
 
-SINGLE_STRIP = '$%d,%d,%d,%d\r\n'
 
-
-class Strip(object):
-  """Abstraction for an RGB LED strip.
+class Output(object):
+  """Abstraction for an RGB output.
 
   Allows color changing using the associated controller.
   """
-  def __init__(self, controller, strip_id, color):
+  def __init__(self, controller, output_id, color):
     self.adjust = None
-    self.strip_id = strip_id
+    self.output_id = output_id
     self.controller = controller
     self.color = color
     self.Instant(color)
 
   def __del__(self):
-    """When removing a strip from the controller, stop current transitions."""
+    """When removing an output from the controller, stop current transitions."""
     self.StopTransition()
 
   # ############################################################################
-  # Strip output color control
+  # Output color control
   #
   def Blink(self, rgb_triplet, count=1):
     """Blinks the output to the given `rgb_triplet` and back, `count` times."""
@@ -51,7 +49,7 @@ class Strip(object):
     self._Transition(self._TransitionGenerator(self.color, rgb_triplet, steps))
 
   def Instant(self, rgb_triplet):
-    """Instantly cuts the strip over to the given RGB values."""
+    """Instantly cuts the output over to the given RGB values."""
     self._Transition([rgb_triplet])
 
   def StopTransition(self):
@@ -63,7 +61,7 @@ class Strip(object):
   # Private methods for acutal color control and transitions
   #
   def _ActualColorChange(self, rgb_triplet):
-    """Changes the strip output to the given rgb_triplet.
+    """Changes the Output color to the given rgb_triplet.
 
     Additionally, the RGB triplet is stored on teh instance attribute `color`,
     and the appropiate time is spent sleeping to keep to the desired frequency.
@@ -71,26 +69,26 @@ class Strip(object):
     begin_time = time.time()
     self.color = rgb_triplet
     red, green, blue = map(OutPowerAdjust, rgb_triplet)
-    self.controller.Command(SINGLE_STRIP % (self.strip_id, red, green, blue))
+    self.controller.SingleOutput(self.output_id, (red, green, blue))
     self._WaitForTick(begin_time)
 
   def _Transition(self, rgb_tuples):
     """Sets up a separate thread to control the actual transition from.
 
-    This separate thread will cycle the strip through the colors provided by
+    This separate thread will cycle the output through the colors provided by
     the rgb_tuples argument. After each step, a short pause is introduced to
-    keep the strip's command frequency stable, independent of actual controller
+    keep the output's command frequency stable, independent of actual controller
     load.
 
-    If a transition is currently running for this strip, that one will be
+    If a transition is currently running for this output, that one will be
     interrupted before the new one is started.
 
     Arguments:
       @ rgb_tuples: iterable of 3-tuples
-        A list or generator of RGB tuples that the StripAdjuster will cycle.
+        A list or generator of RGB tuples that the OutputAdjuster will cycle.
     """
     self.StopTransition()
-    self.adjust = StripAdjuster(rgb_tuples, self._ActualColorChange)
+    self.adjust = OutputAdjuster(rgb_tuples, self._ActualColorChange)
 
   @staticmethod
   def _TransitionGenerator(from_rgb, to_rgb, steps, envelope=None):
@@ -126,7 +124,7 @@ class Strip(object):
   # Timing control
   #
   def _WaitForTick(self, begin_time):
-    """Sleeps for the remainder of the strip's cycle time."""
+    """Sleeps for the remainder of the output's cycle time."""
     remainder = begin_time + self.period - time.time()
     if remainder > 0:
       time.sleep(remainder)
@@ -143,10 +141,10 @@ class Strip(object):
     return 1.0 / self.controller.frequency * len(self.controller)
 
 
-class StripAdjuster(threading.Thread):
-  """Separate thread to update the color of a strip with."""
+class OutputAdjuster(threading.Thread):
+  """Separate thread to update the color of an output with."""
   def __init__(self, steps, color_changer):
-    super(StripAdjuster, self).__init__()
+    super(OutputAdjuster, self).__init__()
     self.daemon = True
     self.enabled = True
     self.steps = steps
@@ -163,11 +161,11 @@ class StripAdjuster(threading.Thread):
         return
       count += 1
       self.changer(rgb_triplet)
-    # frequency = count / (time.time() - starttime)
-    # print '[#%d] %d steps @ %.2fHz' % (self.strip.strip_id, count, frequency)
+    #frequency = count / (time.time() - starttime)
+    #print '[#%d] %d steps @ %.2fHz' % (self.output.output_id, count, frequency)
 
   def Stop(self):
-    """Interrupts the StripAdjuster, allowing a new transition to start.
+    """Interrupts the OutputAdjuster, allowing a new transition to start.
 
     If a running transition is not stopped, the output will start flickering
     between the values from the two separate transitions.
@@ -176,5 +174,5 @@ class StripAdjuster(threading.Thread):
 
 
 def OutPowerAdjust(power):
-  """Adjusts the output power to the non-linearity of the LED strips."""
+  """Adjusts the output power to the non-linearity of the LED outputs."""
   return pow(power, 1.8) / 99 + .15 * power
