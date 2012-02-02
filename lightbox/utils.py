@@ -29,6 +29,32 @@ def RandomTriplet(darken=False):
 
 
 # ##############################################################################
+# Color blending functions
+#
+def Darken(*colors):
+  """Returns a tuple where each channel is the darkest of the given colors."""
+  return tuple(map(min, zip(*colors)))
+
+
+def Lighten(*colors):
+  """Returns a tuple where each channel is the lightest of the given colors."""
+  return tuple(map(max, zip(*colors)))
+
+
+def RgbAverage(*colors):
+  """Returns a tuple where each channel is the average of the given colors."""
+  return tuple(sum(channels) / len(channels) for channels in zip(*colors))
+
+
+def LabAverage(*colors):
+  """Returns a tuple where each channel is the darkest of the given colors.
+
+  N.B. The average given is the RGB translation of the Lab colors averaged."""
+  colors = map(RgbToLab, colors)
+  return LabToRgb(sum(channels) / len(channels) for channels in zip(*colors))
+
+
+# ##############################################################################
 # Envelope functions
 #
 def CosineEnvelope(steps):
@@ -80,5 +106,5 @@ def LabToRgb(lab_triplet):
 
 def RgbToLab(rgb_triplet):
   """Returns a tuple of LabColor pairs for a given RGB triplet."""
-  rgb_color = colormath.RGBColor(rgb_triplet, illuminant='d65')
+  rgb_color = colormath.RGBColor(*rgb_triplet, illuminant='d65')
   return rgb_color.convert_to('lab').get_value_tuple()
