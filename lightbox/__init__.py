@@ -4,7 +4,7 @@
 This module contains the basic controller interface and output management.
 """
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
-__version__ = '1.0'
+__version__ = '1.1'
 
 # Standard modules
 import random
@@ -69,6 +69,7 @@ class ColorController(list):
 
   def __del__(self):
     """Disables heartbeat upon shutdown."""
+    #XXX(Elmer): This is probably not necessary, since heartbeat is a daemon.
     self.heartbeat.beat = False
 
   @classmethod
@@ -253,24 +254,24 @@ def main():
   print '3) Double-blinking random outputs for 10 seconds ...'
   Pause(controller)
   for _count in range(30):
-    controller.Random().Blink(utils.RandomTriplet(darken=True), 2)
+    controller.Random().Blink(utils.RandomColor(saturate=True), count=2)
     time.sleep(.35)
   print '4) Instantly changing colors on random outputs 1000x ...'
   Pause(controller)
   begin = time.time()
   for _count in range(1000):
-    controller.Random().Instant(utils.RandomTriplet(darken=True))
+    controller.Random().Instant(utils.RandomColor(saturate=True))
     time.sleep(0.01)
   print '   1000 instant color changes took %.1fs.' % (time.time() - begin)
   print '5) Sequentialy fading to random colors at 500ms intervals ...'
   Pause(controller)
   print '\nThis is the last demonstration program, enjoy your blinky lights :-)'
   while True:
-    controller.Next().Fade(utils.RandomTriplet(darken=True))
+    controller.Next().Fade(utils.RandomColor(saturate=True))
     time.sleep(.5)
     if not random.randrange(50):
       time.sleep(1)
-      controller.Fade(utils.RandomTriplet(darken=True), 80)
+      controller.Fade(utils.RandomColor(saturate=True), steps=80)
       time.sleep(4)
 
 

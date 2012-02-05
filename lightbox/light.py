@@ -5,10 +5,9 @@ This module contains the abstraction for the output lights, with various
 methods that cause the lights to change in different manners.
 """
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
-__version__ = '1.0'
+__version__ = '1.2'
 
 # Standard modules
-import itertools
 import operator
 import threading
 import time
@@ -16,109 +15,71 @@ import time
 # Application modules
 import utils
 
+BLACK = 0, 0, 0
+
 
 class Output(object):
   """Abstraction for an RGB output.
 
   Allows color changing using the associated controller.
   """
-  def __init__(self, controller, output_id, color):
-    self.adjust = None
-    self.output_id = output_id
+  def __init__(self, controller, output_id, **kwds):
+    self.color = None
+    self.channels = ChannelController()
     self.controller = controller
-    self.color = color
-    self.Instant(color)
+    self.output_id = output_id
+    # Blender, output power adjuster and default color, optional arguments.
+    self.Constant(kwds.get('color', BLACK))
+    self.blender = kwds.get('blender', utils.RootSumSquare)
+    self.outpower = kwds.get('outpower', utils.SoftQuadraticPower)
+    self.ticker = OutputTicker(self._WriteNextColor)
 
   def __del__(self):
-    """When removing an output from the controller, stop current transitions."""
-    self.StopTransition()
+    self.StopTicker()
 
   # ############################################################################
   # Output color control
   #
-  def Blink(self, rgb_triplet, count=1):
-    """Blinks the output to the given `rgb_triplet` and back, `count` times."""
-    blinks = []
+  def Blink(self, color, count=1, steps=2, channel=0):
+    """Blinks the output to the given `color` and back, `count` times."""
+    current_channel_color = self.channels[channel].color or BLACK
     for _num in range(count):
-      blinks.append(self._TransitionGenerator(self.color, rgb_triplet, 2))
-      blinks.append(self._TransitionGenerator(rgb_triplet, self.color, 2))
-    self._Transition(itertools.chain.from_iterable(blinks))
+      self.channels[channel].Append(Transition(color, steps))
+      self.channels[channel].Append(Transition(current_channel_color, steps))
 
-  def Fade(self, rgb_triplet, steps=40):
-    """Fades the output to the given `rgb_triplet` in `steps` steps."""
-    self._Transition(self._TransitionGenerator(self.color, rgb_triplet, steps))
-
-  def Instant(self, rgb_triplet):
+  def Constant(self, color, channel=0):
     """Instantly cuts the output over to the given RGB values."""
-    self._Transition([rgb_triplet])
+    self.channels[channel].Append(Transition(color, 1))
 
-  def StopTransition(self):
-    """Stops any current color transition (fade or blink)."""
-    if self.adjust:
-      self.adjust.Stop()
+  def Fade(self, color, steps=40, channel=0):
+    """Fades the output to the given `color` in `steps` steps."""
+    self.channels[channel].Append(Transition(color, steps))
+
+  # ############################################################################
+  # Ticker control methods
+  #
+  def StartTicker(self):
+    """(Re)starts the progression ticker."""
+    self.ticker.running = True
+
+  def StopTicker(self):
+    """Temporarily stop the progression ticker."""
+    self.ticker.running = False
 
   # ############################################################################
   # Private methods for acutal color control and transitions
   #
-  def _ActualColorChange(self, rgb_triplet):
-    """Changes the Output color to the given rgb_triplet.
-
-    Additionally, the RGB triplet is stored on teh instance attribute `color`,
-    and the appropiate time is spent sleeping to keep to the desired frequency.
-    """
+  def _WriteNextColor(self):
     begin_time = time.time()
-    self.color = rgb_triplet
-    red, green, blue = map(OutPowerAdjust, rgb_triplet)
-    self.controller.SingleOutput(self.output_id, (red, green, blue))
+    new_color = self._NextBlendedColor()
+    new_color = map(int, map(self.outpower, new_color))
+    if new_color != self.color:
+      self.controller.SingleOutput(self.output_id, new_color)
+      self.color = new_color
     self._WaitForTick(begin_time)
 
-  def _Transition(self, rgb_tuples):
-    """Sets up a separate thread to control the actual transition from.
-
-    This separate thread will cycle the output through the colors provided by
-    the rgb_tuples argument. After each step, a short pause is introduced to
-    keep the output's command frequency stable, independent of actual controller
-    load.
-
-    If a transition is currently running for this output, that one will be
-    interrupted before the new one is started.
-
-    Arguments:
-      @ rgb_tuples: iterable of 3-tuples
-        A list or generator of RGB tuples that the OutputAdjuster will cycle.
-    """
-    self.StopTransition()
-    self.adjust = OutputAdjuster(rgb_tuples, self._ActualColorChange)
-
-  @staticmethod
-  def _TransitionGenerator(from_rgb, to_rgb, steps, envelope=None):
-    """Generator for tuples detailing the transition from one color to the next.
-
-    The received `red`, `green`, and `blue` values are first converted to CIELAB
-    colorspace, from where the difference path is calculated. The difference
-    is then acted upon by a `envelope` function which returns the appropriate
-    multiplication factors for the number of `steps` that the transition should
-    take.
-
-    Arguments:
-      @ from_rgb: 3-tuple of int
-        Red, green and blue values to start the transition from.
-      @ to_rgb: 3-tuple of int
-        Red, green and blue values to end the transition with.
-      @ steps: int
-        The number of steps the transition should be completed in.
-      % envelope: function ~~ utils.CosineEnvelope
-        Envlope function to multiply the Lab difference with. This can be used
-        to smoothen the transition.
-    """
-    if envelope is None:
-      envelope = utils.CosineEnvelope
-    begin_values = utils.RgbToLab(from_rgb)
-    final_values = utils.RgbToLab(to_rgb)
-    lab_diff = [operator.sub(*item) for item in zip(final_values, begin_values)]
-    for factor in envelope(steps):
-      yield utils.LabToRgb(base + diff * factor for base, diff in
-                           zip(begin_values, lab_diff))
+  def _NextBlendedColor(self):
+    return self.blender(*next(self.channels))
 
   # ############################################################################
   # Timing control
@@ -141,38 +102,113 @@ class Output(object):
     return 1.0 / self.controller.frequency * len(self.controller)
 
 
-class OutputAdjuster(threading.Thread):
-  """Separate thread to update the color of an output with."""
-  def __init__(self, steps, color_changer):
-    super(OutputAdjuster, self).__init__()
+class OutputTicker(threading.Thread):
+  """Separate thread that continuously sends commands for the output color."""
+  def __init__(self, function):
+    super(OutputTicker, self).__init__()
     self.daemon = True
-    self.enabled = True
-    self.steps = steps
-    self.changer = color_changer
+    self.function = function
+    self.running = True
     self.start()
 
   def run(self):
-    count = 0
-    # starttime = time.time()
-    for rgb_triplet in self.steps:
-      if not self.enabled:
-        print 'Interrupted after %d steps (%d remained)' % (
-            count, len(list(self.steps)))
-        return
-      count += 1
-      self.changer(rgb_triplet)
-    #frequency = count / (time.time() - starttime)
-    #print '[#%d] %d steps @ %.2fHz' % (self.output.output_id, count, frequency)
+    while self.running:
+      self.function()
 
-  def Stop(self):
-    """Interrupts the OutputAdjuster, allowing a new transition to start.
 
-    If a running transition is not stopped, the output will start flickering
-    between the values from the two separate transitions.
+class Transition(object):
+  """Class for creating a transition to a given color.
+
+  To create an actual transition, call the FromColor method with a color to
+  start the transition with.
+  """
+  def __init__(self, target_color, steps, envelope=None):
+    """Initialized a Transition object.
+
+    The target color is stored after conversion to CIELAB colorspace. The number
+    of steps and the envelope function (which defasults to utils,CosineEnvelope)
+    will be used to generate appropriate output streams.
+
+    Arguments:
+      @ target_color: 3-tuple of int
+        Red, green and blue values that the transition should move to.
+      @ steps: int
+        The number of steps the transition should be completed in.
+      % envelope: function ~~ utils.CosineEnvelope
+        Envlope function to multiply the Lab difference with. This can be used
+        to smoothen the transition.
     """
-    self.enabled = False
+    if steps <= 0:
+      raise ValueError('Steps argument must be at least 1.')
+    self.envelope = envelope or utils.CosineEnvelope
+    self.steps = steps
+    self.target = utils.RgbToLab(target_color)
+
+  def FromColor(self, start_color):
+    """Generator for colortuples from the given color to the pre-set target.
+
+    The starting color is first converted to CIELAB colorspace. Using the start
+    and target colors, the difference is determined and the envelope function
+    together with the number of steps will yield the requested number of steps
+    to reach the preset target color.
+
+    Arguments:
+      @ from_rgb: 3-tuple of int
+        Red, green and blue values to start the transition from.
+    """
+    begin_values = utils.RgbToLab(start_color or BLACK)
+    lab_diff = [operator.sub(*item) for item in zip(self.target, begin_values)]
+    for factor in self.envelope(self.steps):
+      yield utils.LabToRgb(base + diff * factor for base, diff in
+                           zip(begin_values, lab_diff))
 
 
-def OutPowerAdjust(power):
-  """Adjusts the output power to the non-linearity of the LED outputs."""
-  return pow(power, 1.8) / 99 + .15 * power
+class ColorChannel:
+  """A single color channel that goes into a ChannelController to mix colors.
+
+  An iterator that yields colors throughout transitions. When no transition is
+  available, the last yielded color will be yielded indifinitely.
+
+  N.B. Only Transition objects can be appended to this structure.
+  """
+  def __init__(self):
+    """Initliazes a ColorChannel."""
+    self.color = None
+    self.current = None
+    self.transitions = []
+
+  def Append(self, transition):
+    """Adds a new transition to be played after the current one.
+
+    The new transition will be initiated with the then-current color.
+    """
+    if not isinstance(transition, Transition):
+      raise TypeError('Can only append Transition objects.')
+    self.transitions.append(transition)
+
+  def Kill(self):
+    """Resets the ColorChannel, immediately disabling output."""
+    self.color = None
+    self.current = None
+    self.transitions = []
+
+  def next(self):
+    try:
+      self.color = next(self.current)
+      return self.color
+    except (StopIteration, TypeError):
+      if self.transitions:
+        self.current = self.transitions.pop(0).FromColor(self.color)
+        return next(self)
+      return self.color
+
+
+class ChannelController(object):
+  def __init__(self, channels=3):
+    self.channels = [ColorChannel() for _number in range(channels)]
+
+  def __getitem__(self, index):
+    return self.channels[index]
+
+  def next(self):
+    return filter(None, map(next, self.channels))
