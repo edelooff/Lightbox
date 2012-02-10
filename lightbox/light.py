@@ -5,17 +5,14 @@ This module contains the abstraction for the output lights, with various
 methods that cause the lights to change in different manners.
 """
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
-__version__ = '1.2'
+__version__ = '1.3'
 
 # Standard modules
-import operator
 import threading
 import time
 
 # Application modules
 import utils
-
-BLACK = 0, 0, 0
 
 
 class Output(object):
@@ -25,12 +22,10 @@ class Output(object):
   """
   def __init__(self, controller, output_id, **kwds):
     self.color = None
-    self.channels = ChannelController()
+    self.mixer = LayerMixer()
     self.controller = controller
     self.output_id = output_id
     # Blender, output power adjuster and default color, optional arguments.
-    self.Constant(kwds.get('color', BLACK))
-    self.blender = kwds.get('blender', utils.RootSumSquare)
     self.outpower = kwds.get('outpower', utils.SoftQuadraticPower)
     self.ticker = OutputTicker(self._WriteNextColor)
 
@@ -40,20 +35,23 @@ class Output(object):
   # ############################################################################
   # Output color control
   #
-  def Blink(self, color, count=1, steps=2, channel=0):
+  def Blink(self, layer=0, count=1, **options):
     """Blinks the output to the given `color` and back, `count` times."""
-    current_channel_color = self.channels[channel].color or BLACK
+    trans_back = options.copy()
+    trans_back['color'] = self.mixer[layer].color
+    trans_back['opacity'] = self.mixer[layer].opacity
     for _num in range(count):
-      self.channels[channel].Append(Transition(color, steps))
-      self.channels[channel].Append(Transition(current_channel_color, steps))
+      self.mixer[layer].Append(Transition(**options))
+      self.mixer[layer].Append(Transition(**trans_back))
 
-  def Constant(self, color, channel=0):
+  def Constant(self, layer=0, **options):
     """Instantly cuts the output over to the given RGB values."""
-    self.channels[channel].Append(Transition(color, 1))
+    options['steps'] = 1
+    self.mixer[layer].Append(Transition(**options))
 
-  def Fade(self, color, steps=40, channel=0):
+  def Fade(self, layer=0, **options):
     """Fades the output to the given `color` in `steps` steps."""
-    self.channels[channel].Append(Transition(color, steps))
+    self.mixer[layer].Append(Transition(**options))
 
   # ############################################################################
   # Ticker control methods
@@ -71,15 +69,12 @@ class Output(object):
   #
   def _WriteNextColor(self):
     begin_time = time.time()
-    new_color = self._NextBlendedColor()
+    new_color = next(self.mixer)
     new_color = map(int, map(self.outpower, new_color))
     if new_color != self.color:
       self.controller.SingleOutput(self.output_id, new_color)
       self.color = new_color
     self._WaitForTick(begin_time)
-
-  def _NextBlendedColor(self):
-    return self.blender(*next(self.channels))
 
   # ############################################################################
   # Timing control
@@ -122,7 +117,7 @@ class Transition(object):
   To create an actual transition, call the FromColor method with a color to
   start the transition with.
   """
-  def __init__(self, target_color, steps, envelope=None):
+  def __init__(self, **options):
     """Initialized a Transition object.
 
     The target color is stored after conversion to CIELAB colorspace. The number
@@ -138,13 +133,18 @@ class Transition(object):
         Envlope function to multiply the Lab difference with. This can be used
         to smoothen the transition.
     """
-    if steps <= 0:
+    self.steps = options.get('steps', 1)
+    if self.steps <= 0:
       raise ValueError('Steps argument must be at least 1.')
-    self.envelope = envelope or utils.CosineEnvelope
-    self.steps = steps
-    self.target = utils.RgbToLab(target_color)
+    if 'color' in options:
+      self.color = utils.RgbToLab(options['color'])
+    else:
+      self.color = None
+    self.blender = options.get('blender', utils.LabAverage)
+    self.envelope = options.get('envelope', utils.CosineEnvelope)
+    self.opacity = options.get('opacity')
 
-  def FromColor(self, start_color):
+  def FromColor(self, color, opacity):
     """Generator for colortuples from the given color to the pre-set target.
 
     The starting color is first converted to CIELAB colorspace. Using the start
@@ -153,28 +153,43 @@ class Transition(object):
     to reach the preset target color.
 
     Arguments:
-      @ from_rgb: 3-tuple of int
+      @ color: 3-tuple of int
         Red, green and blue values to start the transition from.
+      @ opacity: float
+        Opacity value that the transition should start with.
     """
-    begin_values = utils.RgbToLab(start_color or BLACK)
-    lab_diff = [operator.sub(*item) for item in zip(self.target, begin_values)]
+    lab_begin, lab_diff = self._LabDiff(color)
+    if self.opacity is None:
+      opacity_diff = 0
+    else:
+      opacity_diff = self.opacity - opacity
     for factor in self.envelope(self.steps):
-      yield utils.LabToRgb(base + diff * factor for base, diff in
-                           zip(begin_values, lab_diff))
+      new_color = utils.LabToRgb(base + diff * factor for base, diff
+                                 in zip(lab_begin, lab_diff))
+      new_opacity = opacity + opacity_diff * factor
+      yield new_color, new_opacity
+
+  def _LabDiff(self, color):
+    begin = utils.RgbToLab(color)
+    return begin, utils.ColorDiff(begin, self.color or begin)
 
 
-class ColorChannel:
-  """A single color channel that goes into a ChannelController to mix colors.
+class Layer(object):
+  """A single color layer that goes into a LayerMixer to mix colors.
 
   An iterator that yields colors throughout transitions. When no transition is
   available, the last yielded color will be yielded indifinitely.
 
   N.B. Only Transition objects can be appended to this structure.
   """
-  def __init__(self):
-    """Initliazes a ColorChannel."""
-    self.color = None
-    self.current = None
+  def __init__(self, color=(0, 0, 0), opacity=0, blender=utils.LabAverage):
+    """Initliazes a Layer."""
+    # Layer management
+    self.blender = blender
+    self.color = color
+    self.opacity = opacity
+    # Transition management
+    self.current_transition = None
     self.transitions = []
 
   def Append(self, transition):
@@ -187,28 +202,38 @@ class ColorChannel:
     self.transitions.append(transition)
 
   def Kill(self):
-    """Resets the ColorChannel, immediately disabling output."""
-    self.color = None
-    self.current = None
+    """Resets the Layer, immediately disabling output."""
+    self.color = 0, 0, 0
+    self.opacity = 0
+    self.current_transition = None
     self.transitions = []
+
+  def NextBlendedColor(self, base):
+    overlay, opacity = next(self)
+    return self.blender(base, color, opacity)
 
   def next(self):
     try:
-      self.color = next(self.current)
-      return self.color
+      self.color, self.opacity = next(self.current_transition)
+      return self.color, self.opacity
     except (StopIteration, TypeError):
       if self.transitions:
-        self.current = self.transitions.pop(0).FromColor(self.color)
+        transition = self.transitions.pop(0)
+        self.blender = transition.blender
+        self.current_transition = transition.FromColor(self.color, self.opacity)
         return next(self)
-      return self.color
+      return self.color, self.opacity
 
 
-class ChannelController(object):
-  def __init__(self, channels=3):
-    self.channels = [ColorChannel() for _number in range(channels)]
+class LayerMixer(object):
+  def __init__(self, layers=4):
+    self.layers = [Layer() for _number in range(layers)]
 
   def __getitem__(self, index):
-    return self.channels[index]
+    return self.layers[index]
 
   def next(self):
-    return filter(None, map(next, self.channels))
+    color = 0, 0, 0
+    for layer in self.layers:
+      color = layer.NextBlendedColor(color)
+    return color
