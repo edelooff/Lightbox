@@ -210,7 +210,7 @@ class Layer(object):
 
   def NextBlendedColor(self, base):
     overlay, opacity = next(self)
-    return self.blender(base, color, opacity)
+    return self.blender(base, overlay, opacity)
 
   def next(self):
     try:
