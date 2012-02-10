@@ -22,7 +22,7 @@ class Output(object):
   """
   def __init__(self, controller, output_id, **kwds):
     self.color = None
-    self.mixer = LayerMixer()
+    self.mixer = LayerMixer(layers=kwds.get('layers', 3))
     self.controller = controller
     self.output_id = output_id
     # Blender, output power adjuster and default color, optional arguments.
