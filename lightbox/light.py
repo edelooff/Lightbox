@@ -22,15 +22,13 @@ class Output(object):
   """
   def __init__(self, controller, output_id, **kwds):
     self.color = None
-    self.mixer = LayerMixer(layers=kwds.get('layers', 3))
     self.controller = controller
     self.output_id = output_id
-    # Blender, output power adjuster and default color, optional arguments.
+    # Output power adjuster, layers and ticker updater.
+    layers = max(1, kwds.get('layers', 3))
+    self.layers = [Layer() for _number in range(layers)]
     self.outpower = kwds.get('outpower', utils.SoftQuadraticPower)
     self.ticker = OutputTicker(self._WriteNextColor)
-
-  def __del__(self):
-    self.StopTicker()
 
   # ############################################################################
   # Output color control
@@ -38,24 +36,60 @@ class Output(object):
   def Blink(self, layer=0, count=1, **options):
     """Blinks the output to the given `color` and back, `count` times."""
     trans_back = options.copy()
-    trans_back['color'] = self.mixer[layer].color
-    trans_back['opacity'] = self.mixer[layer].opacity
+    trans_back['color'] = self[layer].color
+    trans_back['opacity'] = self[layer].opacity
     for _num in range(count):
-      self.mixer[layer].Append(Transition(**options))
-      self.mixer[layer].Append(Transition(**trans_back))
+      self[layer].Append(Transition(**options))
+      self[layer].Append(Transition(**trans_back))
 
   def Constant(self, layer=0, **options):
     """Instantly cuts the output over to the given RGB values."""
     options['steps'] = 1
-    self.mixer[layer].Append(Transition(**options))
+    self[layer].Append(Transition(**options))
 
   def Fade(self, layer=0, **options):
     """Fades the output to the given `color` in `steps` steps."""
-    self.mixer[layer].Append(Transition(**options))
+    self[layer].Append(Transition(**options))
 
   # ############################################################################
-  # Ticker control methods
+  # Actual color changing/writing and layer management
   #
+  def __getitem__(self, index):
+    """Retrieves a layer by index."""
+    return self.layers[index]
+
+  def __iter__(self):
+    """Returns an iterator for the Layer objects in the output."""
+    return iter(self.layers)
+
+  def next(self):
+    """Returns the combined next color for the output."""
+    color = 0, 0, 0
+    for layer in self:
+      color = layer.NextBlendedColor(color)
+    return color
+
+  def _WriteNextColor(self):
+    """Writes the next (mixed and adjusted) color to the controller.
+
+    There is no color written if the calculated output color is the same as the
+    current on. After writing the color, the `self.color` attribute is updated
+    to reflect the current output color.
+    """
+    begin_time = time.time()
+    new_color = map(int, map(self.outpower, next(self)))
+    if new_color != self.color:
+      self.controller.SetSingle(self.output_id, new_color)
+      self.color = new_color
+    self._WaitForTick(begin_time)
+
+  # ############################################################################
+  # Ticker control methods and timing
+  #
+  def __del__(self):
+    """When the Output is finalized, ensure the Ticker stops running."""
+    self.StopTicker()
+
   def StartTicker(self):
     """(Re)starts the progression ticker."""
     self.ticker.running = True
@@ -64,21 +98,6 @@ class Output(object):
     """Temporarily stop the progression ticker."""
     self.ticker.running = False
 
-  # ############################################################################
-  # Private methods for acutal color control and transitions
-  #
-  def _WriteNextColor(self):
-    begin_time = time.time()
-    new_color = next(self.mixer)
-    new_color = map(int, map(self.outpower, new_color))
-    if new_color != self.color:
-      self.controller.SingleOutput(self.output_id, new_color)
-      self.color = new_color
-    self._WaitForTick(begin_time)
-
-  # ############################################################################
-  # Timing control
-  #
   def _WaitForTick(self, begin_time):
     """Sleeps for the remainder of the output's cycle time."""
     remainder = begin_time + self.period - time.time()
@@ -223,17 +242,3 @@ class Layer(object):
         self.current_transition = transition.FromColor(self.color, self.opacity)
         return next(self)
       return self.color, self.opacity
-
-
-class LayerMixer(object):
-  def __init__(self, layers=4):
-    self.layers = [Layer() for _number in range(layers)]
-
-  def __getitem__(self, index):
-    return self.layers[index]
-
-  def next(self):
-    color = 0, 0, 0
-    for layer in self.layers:
-      color = layer.NextBlendedColor(color)
-    return color

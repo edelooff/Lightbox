@@ -68,10 +68,12 @@ class ColorController(list):
       self.Add(init_color)
 
   def __del__(self):
-    """Disables heartbeat upon shutdown."""
-    #XXX(Elmer): This is probably not necessary, since heartbeat is a daemon.
+    """When the Output is finalized, ensure the Ticker stops running."""
     self.heartbeat.beat = False
 
+  # ############################################################################
+  # Connecting to the controller, command sending and speed detection
+  #
   @classmethod
   def Connect(cls, device):
     raise NotImplementedError
@@ -94,6 +96,15 @@ class ColorController(list):
       except serial.SerialException:
         raise ConnectionError('Could not send command.')
       verify and self._Verify()
+
+  def _DetectFrequency(self):
+    raise NotImplementedError
+
+  def _Heartbeat(self):
+    raise NotImplementedError
+
+  def _Verify(self):
+    raise NotImplementedError
 
   # ############################################################################
   # Output add/removal
@@ -123,7 +134,6 @@ class ColorController(list):
       raise TypeError('Can only add proper output objects to the controller.')
     super(ColorController, self).append(item)
 
-
   # ############################################################################
   # Output cycling
   #
@@ -143,33 +153,14 @@ class ColorController(list):
     return self[random.choice(options)]
 
   # ############################################################################
-  # Color controls for all connected outputs
+  # Setting colors for outputs
   #
-  def Fade(self, rgb_triplet, steps=40):
-    """Fades all outputs to the given `rgb_triplet` in `steps` steps."""
-    for output in self:
-      output.Fade(rgb_triplet, steps=steps)
-
-  def Instant(self, rgb_triplet):
-    """Immediately changes all connected outputs to the given `rgb_triplet`."""
-    self.AllOutputs(rgb_triplet)
-
-  # ############################################################################
-  # Functions that need to be implemented to complete this abstract class
-  #
-  def SingleOutput(self, ident, color):
+  def SetAll(self, color):
+    """Sets the color for all outputs."""
     raise NotImplementedError
 
-  def AllOutputs(self, color):
-    raise NotImplementedError
-
-  def _DetectFrequency(self):
-    raise NotImplementedError
-
-  def _Heartbeat(self):
-    raise NotImplementedError
-
-  def _Verify(self):
+  def SetSingle(self, ident, color):
+    """Sets the color for a single numbered output."""
     raise NotImplementedError
 
 
@@ -204,10 +195,10 @@ class JTagController(ColorController):
     except serial.SerialException:
       raise ConnectionError('Could not open device %s.' % device)
 
-  def AllOutputs(self, color):
+  def SetAll(self, color):
     self.Command(self.ALL_OUTPUTS % color)
 
-  def SingleOutput(self, output, color):
+  def SetSingle(self, output, color):
     self.Command(self.SINGLE_OUTPUT % ((output,) + color))
 
   def _DetectFrequency(self):
@@ -215,7 +206,7 @@ class JTagController(ColorController):
     begin_time = time.time()
     frequency = 0
     while time.time() - begin_time < 1:
-      self.AllOutputs(BLACK)
+      self.SetAll(BLACK)
       frequency += 1
     print 'Controller frequency set to %dHz' % frequency
     return frequency
@@ -244,34 +235,37 @@ def main():
   controller = JTagController.ConnectFirst()
   print '\n1) Switching all outputs through red, green, blue ...'
   for color in [RED, BLACK, GREEN, BLACK, BLUE, BLACK] * 3:
-    controller.Instant(color)
+    controller.SetAll(color)
     time.sleep(.4)
   print '2) Fading all outputs through pure red, green, and blue ...'
   Pause(controller)
   for color in (RED, GREEN, BLUE, BLACK):
-    controller.Fade(color)
+    for output in controller:
+      output.Fade(color=color, opacity=1)
     time.sleep(2.2)
   print '3) Double-blinking random outputs for 10 seconds ...'
   Pause(controller)
   for _count in range(30):
-    controller.Random().Blink(utils.RandomColor(saturate=True), count=2)
+    controller.Random().Blink(color=utils.RandomColor(saturate=True), count=2)
     time.sleep(.35)
   print '4) Instantly changing colors on random outputs 1000x ...'
   Pause(controller)
   begin = time.time()
   for _count in range(1000):
-    controller.Random().Instant(utils.RandomColor(saturate=True))
+    controller.Random().Instant(color=utils.RandomColor(saturate=True))
     time.sleep(0.01)
   print '   1000 instant color changes took %.1fs.' % (time.time() - begin)
   print '5) Sequentialy fading to random colors at 500ms intervals ...'
   Pause(controller)
   print '\nThis is the last demonstration program, enjoy your blinky lights :-)'
   while True:
-    controller.Next().Fade(utils.RandomColor(saturate=True))
+    controller.Next().Fade(color=utils.RandomColor(saturate=True))
     time.sleep(.5)
     if not random.randrange(50):
       time.sleep(1)
-      controller.Fade(utils.RandomColor(saturate=True), steps=80)
+      color = utils.RandomColor(saturate=True)
+      for output in controller:
+        output.Fade(color=color, opacity=1, steps=80)
       time.sleep(4)
 
 
