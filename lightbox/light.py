@@ -5,7 +5,7 @@ This module contains the abstraction for the output lights, with various
 methods that cause the lights to change in different manners.
 """
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
-__version__ = '1.3'
+__version__ = '1.5'
 
 # Standard modules
 import collections
@@ -36,12 +36,9 @@ class Output(object):
   #
   def Blink(self, layer=0, count=1, **options):
     """Blinks the output to the given `color` and back, `count` times."""
-    trans_back = options.copy()
-    trans_back['color'] = self[layer].color
-    trans_back['opacity'] = self[layer].opacity
+    options['withreverse'] = True
     for _num in range(count):
       self[layer].Append(Transition(**options))
-      self[layer].Append(Transition(**trans_back))
 
   def Constant(self, layer=0, **options):
     """Instantly cuts the output over to the given RGB values."""
@@ -224,21 +221,29 @@ class Transition(object):
     will be used to generate appropriate output streams.
 
     Arguments:
-      @ target_color: 3-tuple of int
-        Red, green and blue values that the transition should move to.
       @ steps: int
         The number of steps the transition should be completed in.
-      % envelope: function ~~ utils.CosineEnvelope
-        Envlope function to multiply the Lab difference with. This can be used
-        to smoothen the transition.
+      % color: 3-tuple of int
+        Red, green and blue values that the transition should move to. If no
+        color is given, it will remain as it was at the start of the transition.
+      % opacity: float
+        Opacity value that the transition should move towards. If no opacity is
+        given, it will remain as it was at the start of the transition.
+      % blender: function
+        The color blender that should be used to blend the color output from
+        this transition. If not given, the blender in use at time of the start
+        of this transition is used.
+      % envelope: function
+        Envlope to apply to the color transition. This is used to provide
+        different smoothings to the transition. If not given, the envelope
+        function in use at time of the start of this transition is used.
     """
-    self.steps = opts.get('steps', 1)
+    self.steps = opts.pop('steps', 1)
     if self.steps <= 0:
       raise ValueError('Steps argument must be at least 1.')
-    self.color = utils.RgbToLab(opts['color']) if 'color' in opts else None
-    self.blender = opts.get('blender')
-    self.envelope = opts.get('envelope')
-    self.opacity = opts.get('opacity')
+    self.color = utils.RgbToLab(opts.pop('color')) if 'color' in opts else None
+    self.blender = opts.pop('blender', None)
+    self.options = opts
 
   def Start(self, color, opacity, envelope):
     """Generator for colortuples from the given color to the pre-set target.
@@ -259,12 +264,16 @@ class Transition(object):
         be used.
     """
     lab_begin, lab_diff = self._LabDiff(color)
-    opacity_diff = 0 if self.opacity is None else self.opacity - opacity
-    for factor in (self.envelope or envelope)(self.steps):
-      new_color = utils.LabToRgb(base + diff * factor for base, diff
-                                 in zip(lab_begin, lab_diff))
-      new_opacity = opacity + opacity_diff * factor
-      yield new_color, new_opacity
+    opacity_diff = self.options.get('opacity', opacity) - opacity
+    for factor in self.options.get('envelope', envelope)(self.steps):
+      yield (utils.LabToRgb(base + diff * factor for base, diff
+                            in zip(lab_begin, lab_diff)),
+             opacity + opacity_diff * factor)
+    if self.options.get('withreverse', False):
+      for factor in self.options.get('envelope', envelope)(self.steps):
+        yield (utils.LabToRgb(base + diff * (1 - factor) for base, diff
+                              in zip(lab_begin, lab_diff)),
+               opacity + opacity_diff * (1 - factor))
 
   def _LabDiff(self, color):
     begin = utils.RgbToLab(color)
