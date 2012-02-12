@@ -47,7 +47,6 @@ class Heartbeat(threading.Thread):
     while self.beat:
       try:
         self.callback()
-        print 'whop whop'
         time.sleep(self.delay)
       except ConnectionError:
         time.sleep(self.fail_delay)
@@ -57,7 +56,7 @@ class ColorController(list):
   """Controller interface for Danny's serial LED controller interface."""
   OUTPUT_CLASS = light.Output
 
-  def __init__(self, connection, outputs=5, init_color=BLACK):
+  def __init__(self, connection, outputs=5):
     super(ColorController, self).__init__()
     self.lock = threading.Lock()
     self.serial = connection
@@ -65,7 +64,7 @@ class ColorController(list):
     self.heartbeat = Heartbeat(self._Heartbeat)
     self.last_output_id = -1
     for _num in range(outputs):
-      self.Add(init_color)
+      self.Add()
 
   def __del__(self):
     """When the Output is finalized, ensure the Ticker stops running."""
@@ -75,18 +74,18 @@ class ColorController(list):
   # Connecting to the controller, command sending and speed detection
   #
   @classmethod
-  def Connect(cls, device):
+  def Connect(cls, device, outputs=5):
     raise NotImplementedError
 
   @classmethod
-  def ConnectFirst(cls):
+  def ConnectFirst(cls, outputs=5):
     """Attempts to connect to first 10 USB serial devices."""
     for usb_index in range(10):
       try:
-        return cls.Connect('/dev/ttyUSB%d' % usb_index)
+        return cls.Connect('/dev/ttyUSB%d' % usb_index, outputs=outputs)
       except ConnectionError:
         pass
-    raise ConnectionError('No suitable found :(')
+    raise ConnectionError('No suitable device found :(')
 
   def Command(self, command, verify=True):
     """Send the command to the serial device and wait for the confirmation."""
@@ -109,9 +108,9 @@ class ColorController(list):
   # ############################################################################
   # Output add/removal
   #
-  def Add(self, rgb_triplet=BLACK):
+  def Add(self):
     """Adds an output to the controller."""
-    self.append(self.OUTPUT_CLASS(self, len(self), rgb_triplet))
+    self.append(self.OUTPUT_CLASS(self, len(self)))
     output_frequency = float(self.frequency) / len(self)
     print 'Individual output frequency now %.1fHz' % output_frequency
 
@@ -166,12 +165,11 @@ class ColorController(list):
 
 class JTagController(ColorController):
   ALL_OUTPUTS = '#%d,%d,%d\r\n'
-  SINGLE_OUTPUT = '$%d,%d,%d,%d\r\n'
   HEARTBEAT = 'H\r\n'
   RESPONSE = 'R\r\n'
 
   @classmethod
-  def Connect(cls, device):
+  def Connect(cls, device, outputs=5):
     """Returns a JTagController instance connected to the given serial device.
 
     We're waiting for a second after opening the device, this is because the
@@ -191,15 +189,16 @@ class JTagController(ColorController):
         raise ConnectionError('Device is not a proper %s.' % cls.__name__)
       print 'Initialization time: %.2f' % (time.time() - begin)
       print 'Connected to %s' % device
-      return cls(conn)
+      return cls(conn, outputs=outputs)
     except serial.SerialException:
       raise ConnectionError('Could not open device %s.' % device)
 
   def SetAll(self, color):
-    self.Command(self.ALL_OUTPUTS % color)
+    self.Command(self.ALL_OUTPUTS % tuple(color))
 
   def SetSingle(self, output, color):
-    self.Command(self.SINGLE_OUTPUT % ((output,) + color))
+    color = ','.join(map(str, color))
+    self.Command('$%d,%s\r\n' % (output, color))
 
   def _DetectFrequency(self):
     """Returns the number of commands the controller handles in one second."""
@@ -228,7 +227,8 @@ def main():
   def Pause(controller):
     """Snaps the outputs to black and allows for a short wait between demos."""
     time.sleep(.2)
-    controller.Instant(BLACK)
+    for output in controller:
+      output.Constant(color=BLACK)
     time.sleep(1)
 
   print 'Demonstration program for the ColorController class and JTAG\'s box.\n'
@@ -241,7 +241,7 @@ def main():
   Pause(controller)
   for color in (RED, GREEN, BLUE, BLACK):
     for output in controller:
-      output.Fade(color=color, opacity=1)
+      output.Fade(color=color, opacity=1, steps=40)
     time.sleep(2.2)
   print '3) Double-blinking random outputs for 10 seconds ...'
   Pause(controller)
@@ -252,14 +252,14 @@ def main():
   Pause(controller)
   begin = time.time()
   for _count in range(1000):
-    controller.Random().Instant(color=utils.RandomColor(saturate=True))
+    controller.Random().Constant(color=utils.RandomColor(saturate=True))
     time.sleep(0.01)
   print '   1000 instant color changes took %.1fs.' % (time.time() - begin)
   print '5) Sequentialy fading to random colors at 500ms intervals ...'
   Pause(controller)
   print '\nThis is the last demonstration program, enjoy your blinky lights :-)'
   while True:
-    controller.Next().Fade(color=utils.RandomColor(saturate=True))
+    controller.Next().Fade(color=utils.RandomColor(saturate=True), steps=40)
     time.sleep(.5)
     if not random.randrange(50):
       time.sleep(1)
