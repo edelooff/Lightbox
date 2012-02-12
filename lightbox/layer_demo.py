@@ -36,7 +36,7 @@ def Primary(controller):
       raw_input('[enter] for quick flash, Control-C to continue ...')
       for output in controller:
         output.Blink(layer=3, color=(255, 255, 255), opacity=1, steps=1)
-        time.sleep(.1)
+      time.sleep(.15)
   except KeyboardInterrupt:
     for output in controller:
       output.DeleteLayer()
@@ -44,6 +44,9 @@ def Primary(controller):
 
 
 def Secondary(controller):
+  for output in controller:
+    for layer in output:
+      layer.Kill()
   for output in controller[::2]:
     # red <-> blue fades happening in channel 1
     output.Fade(0, color=lightbox.RED, steps=100, opacity=1)
@@ -66,7 +69,8 @@ def Secondary(controller):
     output.Fade(color=lightbox.RED, steps=100)
     output.Fade(color=lightbox.BLUE, steps=100)
   try:
-    time.sleep(1)
+    while True:
+      time.sleep(1)
   except KeyboardInterrupt:
     print 'Bye!'
 

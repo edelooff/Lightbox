@@ -80,7 +80,7 @@ class Output(object):
 
     If an attempt is made to remove the last layer, ValueError is raised.
     """
-    if len(self) == 1:
+    if len(self.layers) == 1:
       raise ValueError('May not remove the last layer.')
     index = -1 if index is None else index
     self.layers.pop(index)
@@ -222,7 +222,7 @@ class Layer(object):
     self.color = opts.get('color', (0, 0, 0))
     self.opacity = opts.get('opacity', 0)
     # Transition management
-    self.envelope = kwds.get('envelope', utils.CosineEnvelope)
+    self.envelope = opts.get('envelope', utils.CosineEnvelope)
     self.queue = collections.deque()
     self.transition = None
 
