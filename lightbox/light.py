@@ -146,67 +146,6 @@ class OutputTicker(threading.Thread):
       self.function()
 
 
-class Transition(object):
-  """Class for creating a transition to a given color.
-
-  To create an actual transition, call the FromColor method with a color to
-  start the transition with.
-  """
-  def __init__(self, **opts):
-    """Initialized a Transition object.
-
-    The target color is stored after conversion to CIELAB colorspace. The number
-    of steps and the envelope function (which defasults to utils,CosineEnvelope)
-    will be used to generate appropriate output streams.
-
-    Arguments:
-      @ target_color: 3-tuple of int
-        Red, green and blue values that the transition should move to.
-      @ steps: int
-        The number of steps the transition should be completed in.
-      % envelope: function ~~ utils.CosineEnvelope
-        Envlope function to multiply the Lab difference with. This can be used
-        to smoothen the transition.
-    """
-    self.steps = opts.get('steps', 1)
-    if self.steps <= 0:
-      raise ValueError('Steps argument must be at least 1.')
-    self.color = utils.RgbToLab(opts['color']) if 'color' in opts else None
-    self.blender = opts.get('blender')
-    self.envelope = opts.get('envelope')
-    self.opacity = opts.get('opacity')
-
-  def Start(self, color, opacity, envelope):
-    """Generator for colortuples from the given color to the pre-set target.
-
-    The starting color is first converted to CIELAB colorspace. Using the start
-    and target colors, the difference is determined and the envelope function
-    together with the number of steps will yield the requested number of steps
-    to reach the preset target color.
-
-    Arguments:
-      @ color: 3-tuple of int
-        Red, green and blue values to start the transition from.
-      @ opacity: float
-        Opacity value that the transition should start with.
-      @ envelope: function
-        Envelope function that was used for the previous transition. If there
-        is no explicit envelope set for this transition, the previous one will
-        be used.
-    """
-    lab_begin, lab_diff = self._LabDiff(color)
-    opacity_diff = 0 if self.opacity is None else self.opacity - opacity
-    for factor in (self.envelope or envelope)(self.steps):
-      new_color = utils.LabToRgb(base + diff * factor for base, diff
-                                 in zip(lab_begin, lab_diff))
-      new_opacity = opacity + opacity_diff * factor
-      yield new_color, new_opacity
-
-  def _LabDiff(self, color):
-    begin = utils.RgbToLab(color)
-    return begin, utils.ColorDiff(begin, self.color or begin)
-
-
 class Layer(object):
   """A single color layer that goes into a LayerMixer to mix colors.
 
@@ -269,3 +208,64 @@ class Layer(object):
       self.blender = trans.blender or self.blender
       self.transition = trans.Start(self.color, self.opacity, self.envelope)
       return next(self)
+
+
+class Transition(object):
+  """Class for creating a transition to a given color.
+
+  To create an actual transition, call the FromColor method with a color to
+  start the transition with.
+  """
+  def __init__(self, **opts):
+    """Initialized a Transition object.
+
+    The target color is stored after conversion to CIELAB colorspace. The number
+    of steps and the envelope function (which defasults to utils,CosineEnvelope)
+    will be used to generate appropriate output streams.
+
+    Arguments:
+      @ target_color: 3-tuple of int
+        Red, green and blue values that the transition should move to.
+      @ steps: int
+        The number of steps the transition should be completed in.
+      % envelope: function ~~ utils.CosineEnvelope
+        Envlope function to multiply the Lab difference with. This can be used
+        to smoothen the transition.
+    """
+    self.steps = opts.get('steps', 1)
+    if self.steps <= 0:
+      raise ValueError('Steps argument must be at least 1.')
+    self.color = utils.RgbToLab(opts['color']) if 'color' in opts else None
+    self.blender = opts.get('blender')
+    self.envelope = opts.get('envelope')
+    self.opacity = opts.get('opacity')
+
+  def Start(self, color, opacity, envelope):
+    """Generator for colortuples from the given color to the pre-set target.
+
+    The starting color is first converted to CIELAB colorspace. Using the start
+    and target colors, the difference is determined and the envelope function
+    together with the number of steps will yield the requested number of steps
+    to reach the preset target color.
+
+    Arguments:
+      @ color: 3-tuple of int
+        Red, green and blue values to start the transition from.
+      @ opacity: float
+        Opacity value that the transition should start with.
+      @ envelope: function
+        Envelope function that was used for the previous transition. If there
+        is no explicit envelope set for this transition, the previous one will
+        be used.
+    """
+    lab_begin, lab_diff = self._LabDiff(color)
+    opacity_diff = 0 if self.opacity is None else self.opacity - opacity
+    for factor in (self.envelope or envelope)(self.steps):
+      new_color = utils.LabToRgb(base + diff * factor for base, diff
+                                 in zip(lab_begin, lab_diff))
+      new_opacity = opacity + opacity_diff * factor
+      yield new_color, new_opacity
+
+  def _LabDiff(self, color):
+    begin = utils.RgbToLab(color)
+    return begin, utils.ColorDiff(begin, self.color or begin)
