@@ -8,6 +8,7 @@ __author__ = 'Elmer de Looff <elmer@underdark.nl>'
 __version__ = '1.3'
 
 # Standard modules
+import collections
 import threading
 import time
 
@@ -21,7 +22,7 @@ class Output(object):
   Allows color changing using the associated controller.
   """
   def __init__(self, controller, output_id, **kwds):
-    self.color = None
+    self.color = 0, 0, 0
     self.controller = controller
     self.output_id = output_id
     # Output power adjuster, layers and ticker updater.
@@ -67,7 +68,22 @@ class Output(object):
     color = 0, 0, 0
     for layer in self:
       color = layer.NextBlendedColor(color)
-    return color
+    # Ensure that no channel ever goes over value 255, this would cause errors.
+    return [min(255, channel) for channel in color]
+
+  def AddLayer(self):
+    """Adds an additional layer to this output."""
+    self.layers.append(Layer())
+
+  def DeleteLayer(self, index=None):
+    """Deletes the topmost layer from the output, or layer at `index` if given.
+
+    If an attempt is made to remove the last layer, ValueError is raised.
+    """
+    if len(self) == 1:
+      raise ValueError('May not remove the last layer.')
+    index = -1 if index is None else index
+    self.layers.pop(index)
 
   def _WriteNextColor(self):
     """Writes the next (mixed and adjusted) color to the controller.
@@ -136,7 +152,7 @@ class Transition(object):
   To create an actual transition, call the FromColor method with a color to
   start the transition with.
   """
-  def __init__(self, **options):
+  def __init__(self, **opts):
     """Initialized a Transition object.
 
     The target color is stored after conversion to CIELAB colorspace. The number
@@ -152,18 +168,15 @@ class Transition(object):
         Envlope function to multiply the Lab difference with. This can be used
         to smoothen the transition.
     """
-    self.steps = options.get('steps', 1)
+    self.steps = opts.get('steps', 1)
     if self.steps <= 0:
       raise ValueError('Steps argument must be at least 1.')
-    if 'color' in options:
-      self.color = utils.RgbToLab(options['color'])
-    else:
-      self.color = None
-    self.blender = options.get('blender', utils.LabAverage)
-    self.envelope = options.get('envelope', utils.CosineEnvelope)
-    self.opacity = options.get('opacity')
+    self.color = utils.RgbToLab(opts['color']) if 'color' in opts else None
+    self.blender = opts.get('blender')
+    self.envelope = opts.get('envelope')
+    self.opacity = opts.get('opacity')
 
-  def FromColor(self, color, opacity):
+  def Start(self, color, opacity, envelope):
     """Generator for colortuples from the given color to the pre-set target.
 
     The starting color is first converted to CIELAB colorspace. Using the start
@@ -176,13 +189,14 @@ class Transition(object):
         Red, green and blue values to start the transition from.
       @ opacity: float
         Opacity value that the transition should start with.
+      @ envelope: function
+        Envelope function that was used for the previous transition. If there
+        is no explicit envelope set for this transition, the previous one will
+        be used.
     """
     lab_begin, lab_diff = self._LabDiff(color)
-    if self.opacity is None:
-      opacity_diff = 0
-    else:
-      opacity_diff = self.opacity - opacity
-    for factor in self.envelope(self.steps):
+    opacity_diff = 0 if self.opacity is None else self.opacity - opacity
+    for factor in (self.envelope or envelope)(self.steps):
       new_color = utils.LabToRgb(base + diff * factor for base, diff
                                  in zip(lab_begin, lab_diff))
       new_opacity = opacity + opacity_diff * factor
@@ -201,15 +215,16 @@ class Layer(object):
 
   N.B. Only Transition objects can be appended to this structure.
   """
-  def __init__(self, color=(0, 0, 0), opacity=0, blender=utils.LabAverage):
+  def __init__(self, **opts):
     """Initliazes a Layer."""
     # Layer management
-    self.blender = blender
-    self.color = color
-    self.opacity = opacity
+    self.blender = opts.get('blender', utils.RootSumSquare)
+    self.color = opts.get('color', (0, 0, 0))
+    self.opacity = opts.get('opacity', 0)
     # Transition management
-    self.current_transition = None
-    self.transitions = []
+    self.envelope = kwds.get('envelope', utils.CosineEnvelope)
+    self.queue = collections.deque()
+    self.transition = None
 
   def Append(self, transition):
     """Adds a new transition to be played after the current one.
@@ -218,27 +233,39 @@ class Layer(object):
     """
     if not isinstance(transition, Transition):
       raise TypeError('Can only append Transition objects.')
-    self.transitions.append(transition)
+    self.queue.append(transition)
 
   def Kill(self):
     """Resets the Layer, immediately disabling output."""
     self.color = 0, 0, 0
     self.opacity = 0
-    self.current_transition = None
-    self.transitions = []
+    self.queue = collections.deque()
+    self.transition = None
 
   def NextBlendedColor(self, base):
+    """Returns the next blended color for this Layer.
+
+    The layer's own next color is blended with the given base color,
+    proportional to the layer's opacity.
+    """
     overlay, opacity = next(self)
     return self.blender(base, overlay, opacity)
 
   def next(self):
+    """Steps through the current transition and returns color and opacity.
+
+    If there are no transitions queued up, this will return the current color
+    and opacity instead.
+    """
     try:
-      self.color, self.opacity = next(self.current_transition)
+      self.color, self.opacity = next(self.transition)
       return self.color, self.opacity
     except (StopIteration, TypeError):
-      if self.transitions:
-        transition = self.transitions.pop(0)
-        self.blender = transition.blender
-        self.current_transition = transition.FromColor(self.color, self.opacity)
-        return next(self)
-      return self.color, self.opacity
+      if not self.queue:
+        # No new transitions are queued up; return the current values
+        return self.color, self.opacity
+      # Load a new transition and set transition information
+      trans = self.queue.popleft()
+      self.blender = trans.blender or self.blender
+      self.transition = trans.Start(self.color, self.opacity, self.envelope)
+      return next(self)
