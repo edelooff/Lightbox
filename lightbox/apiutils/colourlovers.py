@@ -1,18 +1,36 @@
-import requests, urllib, json, time
+#!/usr/bin/python
+"""Lightbox JSON API Plugin for the door-state
+
+This module contains the JSON-RPC web-interface for Lightbox
+"""
+__author__ = 'Lijnenspel'
+__version__ = '0.2'
+
+# Standard modules
+import json
+import requests
+import urllib
+import time
+
+# Custom modules
 from frack.projects.lightbox import utils
 
-while True:
-  g = requests.get("http://www.colourlovers.com/api/palettes/top?format=json&numResults=100")
-  colourpallets=json.loads(g.text)
-  for pallet in colourpallets:
-    outputjson = []
-    for color, channel in zip(pallet["colors"] * 2, range(5)):
-      color = utils.HexToRgb(color)
-      outputjson.append(
-          {"channel": channel,"color": color,"opacity": 1,"steps": 40})
-    postdata = {"json":json.dumps(outputjson)}
-    data = urllib.urlencode(postdata)
-    print postdata
-    r  = requests.post("http://192.168.178.201:8000/", data=data)
-    print r
-    time.sleep(60)
+JSON_API = 'http://192.168.178.201:8000/'
+PALETTES = ('http://www.colourlovers.com/api/'
+            'palettes/top?format=json&numResults=100')
+
+
+def main():
+  while True:
+    for palette in json.loads(requests.get(PALETTES).text):
+      outputjson = []
+      for channel, color, channel in zip(range(5), palette['colors'] * 2):
+        outputjson.append({'channel': channel, 'color': utils.HexToRgb(color),
+                           'opacity': 1, 'steps': 50})
+      data = urllib.urlencode({'json':json.dumps(outputjson)})
+      requests.post("http://192.168.178.201:8000/", data=data)
+      time.sleep(60)
+
+
+if __name__ == '__main__':
+  main()
