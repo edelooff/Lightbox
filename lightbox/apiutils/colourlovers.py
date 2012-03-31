@@ -13,6 +13,6 @@ while True:
     postdata = {"json":json.dumps(outputjson)}
     data = urllib.urlencode(postdata)
     print postdata
-    r  = requests.post("http://bugs.local.frack.nl:8000/", data=data)
+    r  = requests.post("http://192.168.178.201:8000/", data=data)
     print r
     time.sleep(60)
