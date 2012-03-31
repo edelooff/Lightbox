@@ -169,7 +169,7 @@ class Layer(object):
     """
     if not isinstance(transition, Transition):
       raise TypeError('Can only append Transition objects.')
-    if not transition.options['queue']:
+    if not transition.options.get('queue', True):
       self.NewTransition(transition)
       self.queue.clear()
     else:
