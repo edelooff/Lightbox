@@ -28,8 +28,11 @@ def main():
         outputjson.append({'channel': channel, 'color': utils.HexToRgb(color),
                            'opacity': 1, 'steps': 50})
       data = urllib.urlencode({'json':json.dumps(outputjson)})
-      requests.post("http://192.168.178.201:8000/", data=data)
-      time.sleep(60)
+      try:
+        requests.post("http://192.168.178.201:8000/", data=data)
+        time.sleep(60)
+      except requests.exceptions.ConnectionError:
+        time.sleep(10)
 
 
 if __name__ == '__main__':

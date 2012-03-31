@@ -21,12 +21,10 @@ def SpaceClosed():
   acts = []
   for chan in range(5):
     acts.append({'channel': chan, 'layer': 2, 'opacity': 0,
-                 'color': (255, 0, 0), 'steps': 1})
-    acts.append({'channel': chan, 'layer': 2, 'opacity': 1, 'steps': 50})
-    acts.append({'channel': chan, 'layer': 2, 'color': (0, 0, 0), 'steps': 50})
+                 'color': (255, 0, 0), 'steps': 1, 'blender': 'LabAverage'})
+    acts.append({'channel': chan, 'layer': 2, 'opacity': 1, 'steps': 60})
+    acts.append({'channel': chan, 'layer': 2, 'color': (0, 0, 0), 'steps': 60})
   json = simplejson.dumps(acts)
-  import pprint
-  pprint.pprint(acts)
   urllib2.urlopen(JSON_API, data=urllib.urlencode({'json': json}))
 
 
@@ -34,17 +32,17 @@ def SpaceOpened():
   acts = []
   for chan in range(5):
     acts.append({'channel': chan, 'layer': 2, 'color': (0, 0, 0), 'steps': 1})
-    acts.append({'channel': chan, 'layer': 2, 'color': (0, 255, 0), 'steps': 50})
-    acts.append({'channel': chan, 'layer': 2, 'opacity': 0, 'steps': 50})
+    acts.append({'channel': chan, 'layer': 2, 'color': (0, 255, 0), 'steps': 60})
+    acts.append({'channel': chan, 'layer': 2, 'opacity': 0, 'steps': 60})
   json = simplejson.dumps(acts)
   urllib2.urlopen(JSON_API, data=urllib.urlencode({'json': json}))
 
 
 def main():
   for announce in transponder.Receiver():
-    if announce['domain'] == 0 and announce['subdomain'] == 0:
+    if announce['domain_global'] == 0 and announce['domain_local'] == 0:
       try:
-        if announce['message'] == 'opened':
+        if announce['message'][0] == 'opened':
           SpaceOpened()
         else:
           SpaceClosed()
