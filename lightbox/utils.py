@@ -5,7 +5,7 @@ This module contains various utility functions to convert between RGB and LAB
 space, as well as envelope generators.
 """
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
-__version__ = '1.3'
+__version__ = '2.0'
 
 # Standard modules
 import math

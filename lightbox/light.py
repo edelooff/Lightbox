@@ -5,7 +5,7 @@ This module contains the abstraction for the output lights, with various
 methods that cause the lights to change in different manners.
 """
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
-__version__ = '1.5'
+__version__ = '2.0'
 
 # Standard modules
 import collections
@@ -169,7 +169,11 @@ class Layer(object):
     """
     if not isinstance(transition, Transition):
       raise TypeError('Can only append Transition objects.')
-    self.queue.append(transition)
+    if not transition.opts['queue']:
+      self.NewTransition(transition)
+      self.queue.clear()
+    else:
+      self.queue.append(transition)
 
   def Kill(self):
     """Resets the Layer, immediately disabling output."""
@@ -177,6 +181,12 @@ class Layer(object):
     self.opacity = 0
     self.queue = collections.deque()
     self.transition = None
+
+  def NewTransition(self, transition):
+    """Installs the new transition and blender."""
+    self.blender = transition.blender or self.blender
+    self.transition = transition.Start(self.color, self.opacity, self.envelope)
+
 
   def NextBlendedColor(self, base):
     """Returns the next blended color for this Layer.
@@ -201,9 +211,7 @@ class Layer(object):
         # No new transitions are queued up; return the current values
         return self.color, self.opacity
       # Load a new transition and set transition information
-      trans = self.queue.popleft()
-      self.blender = trans.blender or self.blender
-      self.transition = trans.Start(self.color, self.opacity, self.envelope)
+      self.NewTransition(self.queue.popleft())
       return next(self)
 
 

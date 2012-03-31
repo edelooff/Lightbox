@@ -12,6 +12,9 @@ import BaseHTTPServer
 import cgi
 import simplejson
 
+# Package modules
+from . import utils
+
 
 class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   def do_GET(self):
@@ -30,28 +33,33 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       json = simplejson.loads(form.getfirst('json'))
     except Exception, error:
       self.send_response(400)
+      self.end_headers()
       self.wfile.write(str(error))
     else:
       try:
         if isinstance(json, list):
-          for command in json:
-            channel = self.server.box[command.pop('channel', 0)]
-            action_name = command.pop('action', 'fade').capitalize()
-            action = getattr(channel, action_name)
-            action(**command)
-        elif isinstance(json, dict):
-          channel = self.server.box[json.pop('channel', 0)]
-          action = getattr(channel, json.pop('action', 'fade').capitalize())
-          action(**json)
+          map(self.ProcessCommand, json)
         else:
-          self.send_response(400)
-          self.wfile.write('Request should be an object or list of objects.')
+          self.ProcessCommand(json)
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(json)
       except Exception, error:
         self.send_response(400)
+        self.end_headers()
         self.wfile.write(str(error))
+
+  def ProcessCommand(self, command):
+    if 'blender' in command:
+      command['blender'] = getattr(utils, command['blender'])
+    if 'envelope' in command:
+      command['envelope'] = getattr(utils, command['envelope'])
+    channel = self.server.box[command.pop('channel', 0)]
+    action = getattr(channel, command.pop('action', 'fade').capitalize())
+    action(**command)
 
 
 def ApiServer(box, port=8000):
-  server = BaseHTTPServer.HTTPServer(('localhost', port), ApiHandler)
+  server = BaseHTTPServer.HTTPServer(('0.0.0.0', port), ApiHandler)
   server.box = box
   server.serve_forever()
