@@ -154,7 +154,7 @@ class Layer(object):
   def __init__(self, **opts):
     """Initliazes a Layer."""
     # Layer management
-    self.blender = opts.get('blender', utils.RootSumSquare)
+    self.blender = opts.get('blender', utils.LabAverage)
     self.color = opts.get('color', (0, 0, 0))
     self.opacity = opts.get('opacity', 0)
     # Transition management
