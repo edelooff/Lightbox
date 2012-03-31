@@ -24,7 +24,7 @@ def main():
   while True:
     for palette in json.loads(requests.get(PALETTES).text):
       outputjson = []
-      for channel, color, channel in zip(range(5), palette['colors'] * 2):
+      for channel, color in zip(range(5), palette['colors'] * 2):
         outputjson.append({'channel': channel, 'color': utils.HexToRgb(color),
                            'opacity': 1, 'steps': 50})
       data = urllib.urlencode({'json':json.dumps(outputjson)})
