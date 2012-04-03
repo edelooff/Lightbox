@@ -46,7 +46,7 @@ def main():
           SpaceOpened()
         else:
           SpaceClosed()
-      except urllib2.error:
+      except urllib2.HTTPError:
         pass
 
 
