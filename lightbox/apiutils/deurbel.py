@@ -10,12 +10,12 @@ __version__ = '0.1'
 import urllib
 import urllib2
 import simplejson
+import sys
 
 # Custom modules
 from frack.libs.announce import transponder
 
 JSON_API = 'http://192.168.178.201:8000/'
-
 
 def SpaceClosed():
   acts = []
@@ -38,8 +38,12 @@ def SpaceOpened():
   urllib2.urlopen(JSON_API, data=urllib.urlencode({'json': json}))
 
 
-def main():
-  for announce in transponder.Receiver():
+def main(proxy=False):
+  if proxy:
+    receiver = transponder.ProxyReceiver()
+  else:
+    receiver = transponder.Receiver()
+  for announce in receiver:
     if announce['domain_global'] == 0 and announce['domain_local'] == 0:
       try:
         if announce['message'][0] == 'opened':
@@ -51,4 +55,10 @@ def main():
 
 
 if __name__ == '__main__':
-  main()
+  if len(sys.argv) > 1:
+    if sys.argv[1] == "proxy":
+      main(proxy=True)
+    else:
+      print "Usage: %s [proxy]" % sys.argv[0]
+  else:
+    main()
