@@ -22,8 +22,8 @@ def SpaceClosed():
   for chan in range(5):
     acts.append({'channel': chan, 'layer': 2, 'opacity': 0,
                  'color': (255, 0, 0), 'steps': 1, 'blender': 'LabAverage'})
-    acts.append({'channel': chan, 'layer': 2, 'opacity': 1, 'steps': 60})
-    acts.append({'channel': chan, 'layer': 2, 'color': (0, 0, 0), 'steps': 60})
+    acts.append({'channel': chan, 'layer': 2, 'opacity': 1, 'steps': 120})
+    acts.append({'channel': chan, 'layer': 2, 'color': (0, 0, 0), 'steps': 120})
   json = simplejson.dumps(acts)
   urllib2.urlopen(JSON_API, data=urllib.urlencode({'json': json}))
 
@@ -32,8 +32,8 @@ def SpaceOpened():
   acts = []
   for chan in range(5):
     acts.append({'channel': chan, 'layer': 2, 'color': (0, 0, 0), 'steps': 1})
-    acts.append({'channel': chan, 'layer': 2, 'color': (0, 255, 0), 'steps': 60})
-    acts.append({'channel': chan, 'layer': 2, 'opacity': 0, 'steps': 60})
+    acts.append({'channel': chan, 'layer': 2, 'color': (0, 255, 0), 'steps': 120})
+    acts.append({'channel': chan, 'layer': 2, 'opacity': 0, 'steps': 120})
   json = simplejson.dumps(acts)
   urllib2.urlopen(JSON_API, data=urllib.urlencode({'json': json}))
 
