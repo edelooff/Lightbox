@@ -4,15 +4,13 @@
 This module contains the JSON-RPC web-interface for Lightbox
 """
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
-__version__ = '0.1'
+__version__ = '0.2'
 
 # Standard modules
-import urllib
-import urllib2
-import simplejson
 import sys
 
 # Custom modules
+from frack.projects.lightbox import utils
 from frack.libs.announce import transponder
 
 JSON_API = 'http://192.168.178.201:8000/'
@@ -24,8 +22,7 @@ def SpaceClosed():
                  'color': (255, 0, 0), 'steps': 1, 'blender': 'LabAverage'})
     acts.append({'channel': chan, 'layer': 2, 'opacity': 1, 'steps': 120})
     acts.append({'channel': chan, 'layer': 2, 'color': (0, 0, 0), 'steps': 120})
-  json = simplejson.dumps(acts)
-  urllib2.urlopen(JSON_API, data=urllib.urlencode({'json': json}))
+  utils.SendApiCommand(JSON_API, acts)
 
 
 def SpaceOpened():
@@ -34,8 +31,7 @@ def SpaceOpened():
     acts.append({'channel': chan, 'layer': 2, 'color': (0, 0, 0), 'steps': 1})
     acts.append({'channel': chan, 'layer': 2, 'color': (0, 255, 0), 'steps': 120})
     acts.append({'channel': chan, 'layer': 2, 'opacity': 0, 'steps': 120})
-  json = simplejson.dumps(acts)
-  urllib2.urlopen(JSON_API, data=urllib.urlencode({'json': json}))
+  utils.SendApiCommand(JSON_API, acts)
 
 
 def main(proxy=False):
@@ -45,13 +41,10 @@ def main(proxy=False):
     receiver = transponder.Receiver()
   for announce in receiver:
     if announce['domain_global'] == 0 and announce['domain_local'] == 0:
-      try:
-        if announce['message'][0] == 'opened':
-          SpaceOpened()
-        else:
-          SpaceClosed()
-      except urllib2.HTTPError:
-        pass
+      if announce['message'][0] == 'opened':
+        SpaceOpened()
+      else:
+        SpaceClosed()
 
 
 if __name__ == '__main__':

@@ -5,12 +5,16 @@ This module contains various utility functions to convert between RGB and LAB
 space, as well as envelope generators.
 """
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
-__version__ = '2.0'
+__version__ = '2.1'
 
 # Standard modules
 import math
 import operator
 import random
+import simplejson
+import urllib
+import urllib2
+
 
 # Colormath module
 from colormath import color_objects as colormath
@@ -27,6 +31,15 @@ def RandomColor(saturate=False):
   if saturate and min(color) > 50:
     color[random.randrange(3)] = 0
   return tuple(color)
+
+
+def SendApiCommand(api_url, commands):
+  """Takes an API command and sends it to the server in the proper format."""
+  try:
+    return urllib2.urlopen(
+        api_url, data=urllib.urlencode({'json': simplejson.dumps(commands)}))
+  except urllib2.HTTPError:
+    print 'Something went wrong when sending your command'
 
 
 # ##############################################################################

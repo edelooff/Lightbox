@@ -11,7 +11,6 @@ __version__ = '1.0'
 import itertools
 import simplejson
 import operator
-import pprint
 import Queue
 import random
 import re
@@ -84,9 +83,9 @@ def RandomColors():
   """Generates a large amount of random colors to fade through initially."""
   colors = []
   for step in range(200):
-    colors.append({'color': utils.RandomColor(saturate=True),
+    colors.append({'color': utils.RandomColor(),
                    'channel': step % 5, 'steps': 5, 'opacity': 1})
-  return simplejson.dumps(colors)
+  return colors
 
 def TwitterSearch(since_id):
   """Returns the result of our Twitter search query for the hash tags."""
@@ -99,18 +98,19 @@ def TwitterSearch(since_id):
 def main():
   """Starts the Twitter search plugin for Lightbox API."""
   print 'Cycling some colors to draw attention ...'
-  urllib2.urlopen(JSON_API, data=urllib.urlencode({'json': RandomColors()}))
+  utils.SendApiCommand(JSON_API, RandomColors())
   time.sleep(5)
   print 'Running Twitter search plugin for Lightbox API ...'
+  print 'Hashtags we\'re searching: %s' % ', '.join(HASHTAGS)
   tweet_queue = Queue.Queue()
   TwitterSearcher(tweet_queue)
   for iteration in itertools.count():
     tweet, color, source = tweet_queue.get()
     print '\nNew color: [%s] (based on %s) (%d remaining)\nTWEET: %s' % (
         color, source, tweet_queue.qsize(), tweet)
-    command = simplejson.dumps({
-        'color': utils.HexToRgb(color), 'channel': iteration % 5, 'steps': 50})
-    urllib2.urlopen(JSON_API, data=urllib.urlencode({'json': command}))
+    command = {'color': utils.HexToRgb(color),
+               'channel': iteration % 5, 'steps': 50}
+    utils.SendApiCommand(JSON_API, command)
     time.sleep(2)
 
 
