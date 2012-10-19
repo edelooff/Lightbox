@@ -16,20 +16,20 @@ import time
 from frack.projects.lightbox import utils
 
 JSON_API = 'http://192.168.178.201:8000/'
-PALETTES = ('http://www.colourlovers.com/api/'
-            'palettes/top?format=json&numResults=100')
+PALETTE_URL = ('http://www.colourlovers.com/api/'
+               'palettes/top?format=json&numResults=100')
 
 
 def main():
   while True:
-    for palette in json.loads(requests.get(PALETTES).text):
+    for palette in json.loads(requests.get(PALETTE_URL).text):
       outputjson = []
       for channel, color in zip(range(5), palette['colors'] * 2):
         outputjson.append({'channel': channel, 'color': utils.HexToRgb(color),
                            'opacity': 1, 'steps': 50})
       data = urllib.urlencode({'json':json.dumps(outputjson)})
       try:
-        requests.post("http://192.168.178.201:8000/", data=data)
+        requests.post(JSON_API, data=data)
         time.sleep(60)
       except requests.exceptions.ConnectionError:
         time.sleep(10)
