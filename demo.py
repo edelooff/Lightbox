@@ -1,27 +1,45 @@
 #!/usr/bin/python
-"""Starts a demo on the strip, or sets up a JSON API for it."""
+"""Performs a lightbox demonstration run.
+
+First, all ouputs cycle through their primary color channels, without any fading
+or other smooth transitions. This is a simple step to verify the hardware works.
+
+After that, the same primary colors are cycled again, but this time faded from
+red to green to blue, demonstrating fading abilities.
+
+Thirdly, random outputs blink random colors for a short while. This does not
+serve any particular goal.
+
+After that, a thousand random color cuts are performed. A strip is chosen at
+random and its color output changed to another without delay. This does not
+demonstrate the speed of the system though as there is still a configured 10ms
+delay between color changes.
+
+The last demonstration runs indefinitely and consist of random strips fading
+to a new random color every half second. At a one in fifty chance, all strips on
+the controller are changed to the same color, from where new individual
+transitions continue to happen.
+"""
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
 __version__ = '2.0'
 
 # Standard modules
 import random
-import sys
 import time
 
 # Custom modules
 from lightbox import controller
-from lightbox import json_api
 from lightbox import utils
 
 # Controller and LED color init values
 BLACK = 0, 0, 0
-BLUE = 0, 0, 255
-GREEN = 0, 255, 0
 RED = 255, 0, 0
+GREEN = 0, 255, 0
+BLUE = 0, 0, 255
 WHITE = 255, 255, 255
 
 
-def Demo(box):
+def Demo(name):
   """Quick example demo that cycles colors for strip 0."""
   def Pause(box):
     """Snaps the outputs to black and allows for a short wait between demos."""
@@ -30,7 +48,10 @@ def Demo(box):
       output.Constant(color=BLACK)
     time.sleep(1)
 
-  print 'Demonstration program for the ColorController class and JTAG\'s box.\n'
+  print 'Demonstration program for Lightbox.\n'
+  print 'Initiating controller %r ...\n' % name
+  box = getattr(controller, name).ConnectFirst()
+
   print '\n1) Switching all outputs through red, green, blue ...'
   for color in [RED, BLACK, GREEN, BLACK, BLUE, BLACK] * 3:
     box.SetAll(color)
@@ -67,16 +88,18 @@ def Demo(box):
       time.sleep(4)
 
 
+def main():
+  """Processes commandline input to setup the demo."""
+  import optparse
+  parser = optparse.OptionParser()
+  parser.add_option('-c', '--controller', dest='name',
+                    default='JTagController',
+                    help='Controller class to instantiate.')
+  options, _arguments = parser.parse_args()
+  Demo(options.name)
+
 if __name__ == '__main__':
-  USAGE_ERROR = '%%s:\n  Usage: %s [ demo | api ]' % sys.argv[0]
-  if len(sys.argv) < 2:
-    sys.exit(USAGE_ERROR % 'No action provided')
   try:
-    if sys.argv[1] == 'demo':
-      Demo(controller.JTagController.ConnectFirst())
-    elif sys.argv[1] == 'api':
-      json_api.ApiServer(controller.JTagController.ConnectFirst())
-    else:
-      sys.exit(USAGE_ERROR % 'Bad command')
+    main()
   except KeyboardInterrupt:
-    print '\nBye :-)'
+    print '\nEnd of demonstration.'
