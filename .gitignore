@@ -1,0 +1,3 @@
+# Ignore temporary files from gEdit and .pyc files
+*~
+*.pyc
