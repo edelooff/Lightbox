@@ -15,7 +15,6 @@ import simplejson
 import urllib
 import urllib2
 
-
 # Colormath module
 from colormath import color_objects as colormath
 
@@ -23,8 +22,8 @@ from colormath import color_objects as colormath
 def RandomColor(saturate=False):
   """Generates a random RGB color tuple.
 
-  If `darken` is set to True, it will be ensured that at least one of the three
-  channels will have a value of under 50. This helps for LEDs that do not
+  If `saturate` is set to True, it will be ensured that at least one of the
+  three channels will have a value of under 50. This helps for LEDs that do not
   differentiate colors well on color outputs nearer the white.
   """
   color = map(random.randrange, [256] * 3)

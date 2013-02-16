@@ -87,7 +87,8 @@ class ColorController(list):
         self.serial.write(command)
       except serial.SerialException:
         raise ConnectionError('Could not send command.')
-      verify and self._Verify()
+      if verify:
+        self._Verify()
 
   def _DetectFrequency(self):
     raise NotImplementedError

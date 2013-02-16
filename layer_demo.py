@@ -1,6 +1,5 @@
 #!/usr/bin/python
-"""Layer mixing demonstration of Lightbox
-"""
+"""Layer mixing demonstration of Lightbox"""
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
 __version__ = '2.0'
 
@@ -8,16 +7,16 @@ __version__ = '2.0'
 import time
 
 # Custom modules
-from frack.projects.lightbox import controller
+from lightbox import controller
 
-# Named primary colors
-BLUE = 0, 0, 255
-GREEN = 0, 255, 0
-ORANGE = 25, 128, 0
+# Named colors
 RED = 255, 0, 0
-WHITE = 255, 255, 255
+ORANGE = 25, 128, 0
 YELLOW = 255, 255, 0
+GREEN = 0, 255, 0
 PURPLE = 255, 0, 255
+BLUE = 0, 0, 255
+WHITE = 255, 255, 255
 
 
 def Statics(box):

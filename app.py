@@ -1,9 +1,5 @@
 #!/usr/bin/python
-"""Lightbox library for JTAG's RGBController
-
-This module shows off the funcionality of the JTagController, or runs an API
-server on that same controller.
-"""
+"""Starts a demo on the strip, or sets up a JSON API for it."""
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
 __version__ = '2.0'
 
@@ -13,10 +9,9 @@ import sys
 import time
 
 # Custom modules
-from frack.projects.lightbox import controller
-from frack.projects.lightbox import json_api
-from frack.projects.lightbox import utils
-#from frack.projects.lightbox import json_api
+from lightbox import controller
+from lightbox import json_api
+from lightbox import utils
 
 # Controller and LED color init values
 BLACK = 0, 0, 0

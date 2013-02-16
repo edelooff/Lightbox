@@ -54,12 +54,12 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       command['blender'] = getattr(utils, command['blender'])
     if 'envelope' in command:
       command['envelope'] = getattr(utils, command['envelope'])
-    channel = self.server.box[command.pop('channel', 0)]
+    channel = self.server.controller[command.pop('channel', 0)]
     action = getattr(channel, command.pop('action', 'fade').capitalize())
     action(**command)
 
 
-def ApiServer(box, port=8000):
+def ApiServer(controller, port=8000):
   server = BaseHTTPServer.HTTPServer(('0.0.0.0', port), ApiHandler)
-  server.box = box
+  server.controller = controller
   server.serve_forever()
