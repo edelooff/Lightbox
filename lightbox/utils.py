@@ -32,15 +32,6 @@ def RandomColor(saturate=False):
   return tuple(color)
 
 
-def SendApiCommand(api_url, commands):
-  """Takes an API command and sends it to the server in the proper format."""
-  try:
-    return urllib2.urlopen(
-        api_url, data=urllib.urlencode({'json': simplejson.dumps(commands)}))
-  except urllib2.HTTPError:
-    print 'Something went wrong when sending your command'
-
-
 # ##############################################################################
 # Color blending functions
 #

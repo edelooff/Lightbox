@@ -7,26 +7,29 @@ __author__ = 'Lijnenspel'
 __version__ = '0.3'
 
 # Standard modules
+import requests
 import simplejson
 import time
-import urllib2
-
-# Custom modules
-from frack.projects.lightbox import utils
 
 JSON_API = 'http://192.168.178.201:8000/'
 PALETTE_URL = ('http://www.colourlovers.com/api/'
                'palettes/top?format=json&numResults=100')
 
+def HexToRgb(hex_color):
+  colors = hex_color[:2], hex_color[2:4], hex_color[4:]
+  return tuple(int(color, 16) for color in colors)
+
 
 def main():
   while True:
-    for palette in simplejson.loads(urllib2.urlopen(PALETTE_URL).read()):
+    for palette in requests.get(PALETTE_URL).json:
       commands = []
       for channel, color in zip(range(5), palette['colors'] * 2):
-        commands.append({'channel': channel, 'color': utils.HexToRgb(color),
-                         'opacity': 1, 'steps': 50})
-      utils.SendApiCommand(JSON_API, commands)
+        commands.append({'channel': channel,
+                         'color': HexToRgb(color),
+                         'opacity': 1,
+                         'steps': 50})
+      requests.post(JSON_API, data={'json': commands})
       time.sleep(60)
 
 

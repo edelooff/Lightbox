@@ -7,10 +7,10 @@ __author__ = 'Elmer de Looff <elmer@underdark.nl>'
 __version__ = '0.2'
 
 # Standard modules
+import requests
 import sys
 
 # Custom modules
-from frack.projects.lightbox import utils
 from frack.libs.announce import transponder
 
 JSON_API = 'http://192.168.178.201:8000/'
@@ -22,7 +22,7 @@ def SpaceClosed():
                  'color': (255, 0, 0), 'steps': 1, 'blender': 'LabAverage'})
     acts.append({'channel': chan, 'layer': 2, 'opacity': 1, 'steps': 120})
     acts.append({'channel': chan, 'layer': 2, 'color': (0, 0, 0), 'steps': 120})
-  utils.SendApiCommand(JSON_API, acts)
+  requests.post(JSON_API, data={'json': acts})
 
 
 def SpaceOpened():
@@ -31,7 +31,7 @@ def SpaceOpened():
     acts.append({'channel': chan, 'layer': 2, 'color': (0, 0, 0), 'steps': 1})
     acts.append({'channel': chan, 'layer': 2, 'color': (0, 255, 0), 'steps': 120})
     acts.append({'channel': chan, 'layer': 2, 'opacity': 0, 'steps': 120})
-  utils.SendApiCommand(JSON_API, acts)
+  requests.post(JSON_API, data={'json': acts})
 
 
 def main(proxy=False):

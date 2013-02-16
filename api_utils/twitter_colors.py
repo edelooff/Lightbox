@@ -9,13 +9,10 @@ __version__ = '1.0'
 
 # Standard modules
 import itertools
-import simplejson
-import operator
 import Queue
 import random
 import re
-import urllib
-import urllib2
+import requests
 import threading
 import time
 
@@ -41,13 +38,13 @@ class TwitterSearcher(threading.Thread):
   def run(self):
     """Run this until we die."""
     while True:
+      # Checl for tweets, then wait a short while so Twitter doesn't ban us :)
       self.CheckNewTweets()
-      time.sleep(6)  # Wait a short while to not piss off Twitter's API
+      time.sleep(6)
 
   def CheckNewTweets(self):
     """Checks for new tweets and dumps colors on the queue."""
-    results = simplejson.loads(TwitterSearch(self.last_tweet))
-    for tweet in sorted(results['results'], key=operator.itemgetter('id')):
+    for tweet in TwitterSearch(self.last_tweet):
       self.last_tweet = tweet['id']
       color, source = ColorFromMessage(tweet['text'])
       self.tweets.put((tweet['text'], color, source))
@@ -76,30 +73,29 @@ def ColorFromMessage(string, color_mapping=None):
   if color_words:
     return color_mapping[random.choice(list(color_words))], 'word'
   # Return a hash-based color
-  return '#%06x' % (hash(string) % 2**24), 'hash'
+  return '#%06x' % (hash(string) % 2 ** 24), 'hash'
 
 
 def RandomColors():
   """Generates a large amount of random colors to fade through initially."""
   colors = []
   for step in range(200):
-    colors.append({'color': utils.RandomColor(),
+    colors.append({'color': utils.RandomColor(saturate=True),
                    'channel': step % 5, 'steps': 5, 'opacity': 1})
   return colors
 
 def TwitterSearch(since_id):
   """Returns the result of our Twitter search query for the hash tags."""
-  search_base = 'http://search.twitter.com/search.json?q=%s&since_id=%s'
-  query = '(%s)' % ' OR '.join('#%s' % tag for tag in HASHTAGS)
-  search_url = search_base % (urllib.quote_plus(query), since_id)
-  return urllib2.urlopen(search_url).read()
+  response = requests.get('http://search.twitter.com/search.json', params={
+      'q': ' OR '.join('#%s' % tag for tag in HASHTAGS),
+      'since_id': since_id})
+  return reversed(response.json['results'])
 
 
 def main():
   """Starts the Twitter search plugin for Lightbox API."""
   print 'Cycling some colors to draw attention ...'
-  utils.SendApiCommand(JSON_API, RandomColors())
-  time.sleep(5)
+  requests.post(JSON_API, data={'json': RandomColors()})
   print 'Running Twitter search plugin for Lightbox API ...'
   print 'Hashtags we\'re searching: %s' % ', '.join(HASHTAGS)
   tweet_queue = Queue.Queue()
@@ -108,9 +104,10 @@ def main():
     tweet, color, source = tweet_queue.get()
     print '\nNew color: [%s] (based on %s) (%d remaining)\nTWEET: %s' % (
         color, source, tweet_queue.qsize(), tweet)
-    command = {'color': utils.HexToRgb(color),
-               'channel': iteration % 5, 'steps': 50}
-    utils.SendApiCommand(JSON_API, command)
+    requests.post(JSON_API, data={'json': {
+        'color': utils.HexToRgb(color),
+        'channel': iteration % 5,
+        'steps': 50}})
     time.sleep(2)
 
 
