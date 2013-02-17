@@ -4,14 +4,14 @@
 This module contains the JSON-RPC web-interface for Lightbox
 """
 __author__ = 'Lijnenspel'
-__version__ = '0.3'
+__version__ = '0.4'
 
 # Standard modules
 import requests
 import simplejson
 import time
 
-JSON_API = 'http://192.168.178.201:8000/'
+JSON_API = 'http://localhost:8000/'
 PALETTE_URL = ('http://www.colourlovers.com/api/'
                'palettes/top?format=json&numResults=100')
 
@@ -29,7 +29,7 @@ def main():
                          'color': HexToRgb(color),
                          'opacity': 1,
                          'steps': 50})
-      requests.post(JSON_API, data={'json': commands})
+      requests.post(JSON_API, data={'json': simplejson.dumps(commands)})
       time.sleep(60)
 
 

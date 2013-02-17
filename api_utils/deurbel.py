@@ -4,16 +4,17 @@
 This module contains the JSON-RPC web-interface for Lightbox
 """
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
-__version__ = '0.2'
+__version__ = '0.3'
 
 # Standard modules
 import requests
+import simplejson
 import sys
 
 # Custom modules
 from frack.libs.announce import transponder
 
-JSON_API = 'http://192.168.178.201:8000/'
+JSON_API = 'http://localhost:8000/'
 
 def SpaceClosed():
   acts = []
@@ -22,7 +23,7 @@ def SpaceClosed():
                  'color': (255, 0, 0), 'steps': 1, 'blender': 'LabAverage'})
     acts.append({'channel': chan, 'layer': 2, 'opacity': 1, 'steps': 120})
     acts.append({'channel': chan, 'layer': 2, 'color': (0, 0, 0), 'steps': 120})
-  requests.post(JSON_API, data={'json': acts})
+  requests.post(JSON_API, data={'json': simplejson.dumps(acts)})
 
 
 def SpaceOpened():
@@ -31,7 +32,7 @@ def SpaceOpened():
     acts.append({'channel': chan, 'layer': 2, 'color': (0, 0, 0), 'steps': 1})
     acts.append({'channel': chan, 'layer': 2, 'color': (0, 255, 0), 'steps': 120})
     acts.append({'channel': chan, 'layer': 2, 'opacity': 0, 'steps': 120})
-  requests.post(JSON_API, data={'json': acts})
+  requests.post(JSON_API, data={'json': simplejson.dumps(acts)})
 
 
 def main(proxy=False):

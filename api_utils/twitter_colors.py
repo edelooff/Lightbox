@@ -5,7 +5,7 @@ in Tweets that contain a certain hash tag.
 This module uses the JSON-RPC web-interface for Lightbox
 """
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
-__version__ = '1.0'
+__version__ = '1.1'
 
 # Standard modules
 import itertools
@@ -13,6 +13,7 @@ import Queue
 import random
 import re
 import requests
+import simplejson
 import threading
 import time
 
@@ -95,7 +96,7 @@ def TwitterSearch(since_id):
 def main():
   """Starts the Twitter search plugin for Lightbox API."""
   print 'Cycling some colors to draw attention ...'
-  requests.post(JSON_API, data={'json': RandomColors()})
+  requests.post(JSON_API, data={'json': simplejson.dumps(RandomColors())})
   print 'Running Twitter search plugin for Lightbox API ...'
   print 'Hashtags we\'re searching: %s' % ', '.join(HASHTAGS)
   tweet_queue = Queue.Queue()
@@ -104,10 +105,10 @@ def main():
     tweet, color, source = tweet_queue.get()
     print '\nNew color: [%s] (based on %s) (%d remaining)\nTWEET: %s' % (
         color, source, tweet_queue.qsize(), tweet)
-    requests.post(JSON_API, data={'json': {
+    requests.post(JSON_API, data={'json': simplejson.dumps({
         'color': utils.HexToRgb(color),
         'channel': iteration % 5,
-        'steps': 50}})
+        'steps': 50})})
     time.sleep(2)
 
 
