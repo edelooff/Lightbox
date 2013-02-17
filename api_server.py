@@ -28,7 +28,7 @@ def main():
   parser.add_option('-c', '--controller', dest='name',
                     default='JTagController',
                     help='Controller class to instantiate.')
-  parser.add_option('-p', '--port', type='int', dest='port', default=8080,
+  parser.add_option('-p', '--port', type='int', dest='port', default=8000,
                     help='Port to run the Lightbox API on.')
   options, _arguments = parser.parse_args()
   StartLightboxApi(**vars(options))
