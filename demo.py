@@ -39,7 +39,7 @@ BLUE = 0, 0, 255
 WHITE = 255, 255, 255
 
 
-def Demo(name):
+def Demo(controller_name):
   """Quick example demo that cycles colors for strip 0."""
   def Pause(box):
     """Snaps the outputs to black and allows for a short wait between demos."""
@@ -49,8 +49,8 @@ def Demo(name):
     time.sleep(1)
 
   print 'Demonstration program for Lightbox.\n'
-  print 'Initiating controller %r ...\n' % name
-  box = getattr(controller, name).ConnectFirst()
+  print 'Initiating controller %r ...\n' % controller_name
+  box = getattr(controller, controller_name).ConnectFirst()
 
   print '\n1) Switching all outputs through red, green, blue ...'
   for color in [RED, BLACK, GREEN, BLACK, BLUE, BLACK] * 3:
@@ -92,11 +92,10 @@ def main():
   """Processes commandline input to setup the demo."""
   import optparse
   parser = optparse.OptionParser()
-  parser.add_option('-c', '--controller', dest='name',
-                    default='JTagController',
+  parser.add_option('-c', '--controller', default='JTagController',
                     help='Controller class to instantiate.')
   options, _arguments = parser.parse_args()
-  Demo(options.name)
+  Demo(options.controller)
 
 
 if __name__ == '__main__':
