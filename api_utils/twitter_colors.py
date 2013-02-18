@@ -2,10 +2,10 @@
 """Lightbox JSON API Plugin which updates colors based on color name found
 in Tweets that contain a certain hash tag.
 
-This module uses the JSON-RPC web-interface for Lightbox
+This application interacts with the JSON API for Lightbox.
 """
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
-__version__ = '1.1'
+__version__ = '1.2'
 
 # Standard modules
 import itertools
@@ -21,16 +21,14 @@ import time
 from frack.projects.lightbox import utils
 import color_names
 
-JSON_API = 'http://localhost:8000/'
-HASHTAGS = 'mf050', 'maker', 'makerfaire', 'frack'
-
 
 class TwitterSearcher(threading.Thread):
-  """Searches for tweets matching HASHTAGS and dumps them on a queue."""
-  def __init__(self, tweet_queue):
+  """Searches for tweets matching hashtags and dumps them on a queue."""
+  def __init__(self, tweet_queue, hashtags):
     """Initializes the TwitterSearcher."""
     super(TwitterSearcher, self).__init__(name='TwitterSearcher')
     self.tweets = tweet_queue
+    self.hashtags = hashtags
     self.last_tweet = 0
     # Daemonize and GO!
     self.daemon = True
@@ -45,10 +43,17 @@ class TwitterSearcher(threading.Thread):
 
   def CheckNewTweets(self):
     """Checks for new tweets and dumps colors on the queue."""
-    for tweet in TwitterSearch(self.last_tweet):
+    for tweet in self.SearchResults():
       self.last_tweet = tweet['id']
       color, source = ColorFromMessage(tweet['text'])
       self.tweets.put((tweet['text'], color, source))
+
+  def SearchResults(self):
+    """Returns the result of our Twitter search query for the hash tags."""
+    response = requests.get('http://search.twitter.com/search.json', params={
+        'q': ' OR '.join('#%s' % tag for tag in self.hashtags),
+        'since_id': self.last_tweet})
+    return reversed(response.json['results'])
 
 
 def ColorFromMessage(string, color_mapping=None):
@@ -85,31 +90,41 @@ def RandomColors():
                    'channel': step % 5, 'steps': 5, 'opacity': 1})
   return colors
 
-def TwitterSearch(since_id):
-  """Returns the result of our Twitter search query for the hash tags."""
-  response = requests.get('http://search.twitter.com/search.json', params={
-      'q': ' OR '.join('#%s' % tag for tag in HASHTAGS),
-      'since_id': since_id})
-  return reversed(response.json['results'])
 
-
-def main():
-  """Starts the Twitter search plugin for Lightbox API."""
+def TwitterColors(host, port, hashtags, delay):
+  """Updated Lightbox outputs based on tweets posted on configured hashtags."""
+  api_address = 'http://%s:%d' % (host, port)
   print 'Cycling some colors to draw attention ...'
-  requests.post(JSON_API, data={'json': simplejson.dumps(RandomColors())})
+  requests.post(api_address, data={'json': simplejson.dumps(RandomColors())})
   print 'Running Twitter search plugin for Lightbox API ...'
-  print 'Hashtags we\'re searching: %s' % ', '.join(HASHTAGS)
+  print 'Hashtags we\'re searching: %s' % ', '.join(hashtags)
   tweet_queue = Queue.Queue()
-  TwitterSearcher(tweet_queue)
+  TwitterSearcher(tweet_queue, hashtags)
   for iteration in itertools.count():
     tweet, color, source = tweet_queue.get()
     print '\nNew color: [%s] (based on %s) (%d remaining)\nTWEET: %s' % (
         color, source, tweet_queue.qsize(), tweet)
-    requests.post(JSON_API, data={'json': simplejson.dumps({
+    requests.post(api_address, data={'json': simplejson.dumps({
         'color': utils.HexToRgb(color),
         'channel': iteration % 5,
         'steps': 50})})
-    time.sleep(2)
+    time.sleep(delay)
+
+
+def main():
+  """Processes commandline input to setup the API server."""
+  import optparse
+  parser = optparse.OptionParser()
+  parser.add_option('--host', default='localhost',
+                    help='Lightbox API server address (default localhost).')
+  parser.add_option('--port', type='int', default=8000,
+                    help='Lightbox API server port (default 8000).')
+  parser.add_option('-t', '--tag', action='append', dest='tags',
+                    help='Hashtag to search for. Can be defined more than once')
+  parser.add_option('-d', '--delay', type='int', default=5,
+                    help='Minimum time between successive strip updates.')
+  options, _arguments = parser.parse_args()
+  TwitterColors(options.host, options.port, options.tags, options.delay)
 
 
 if __name__ == '__main__':

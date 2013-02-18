@@ -33,5 +33,6 @@ def main():
   options, _arguments = parser.parse_args()
   StartLightboxApi(**vars(options))
 
+
 if __name__ == '__main__':
   main()
