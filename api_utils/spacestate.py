@@ -18,16 +18,16 @@ def SpaceClosed(channels):
   """Animation to play when the space closes."""
   for chan in range(channels):
     yield {'channel': chan, 'layer': 2, 'opacity': 0,
-           'color': (255, 0, 0), 'steps': 1, 'blender': 'LabAverage'}
+           'color': '#F00', 'steps': 1, 'blender': 'LabAverage'}
     yield {'channel': chan, 'layer': 2, 'opacity': 1, 'steps': 120}
-    yield {'channel': chan, 'layer': 2, 'color': (0, 0, 0), 'steps': 120}
+    yield {'channel': chan, 'layer': 2, 'color': '#000', 'steps': 120}
 
 
 def SpaceOpened(channels):
   """Animation to play when the space opens."""
   for chan in range(channels):
-    yield {'channel': chan, 'layer': 2, 'color': (0, 0, 0), 'steps': 1}
-    yield {'channel': chan, 'layer': 2, 'color': (0, 255, 0), 'steps': 120}
+    yield {'channel': chan, 'layer': 2, 'color': '#000', 'steps': 1}
+    yield {'channel': chan, 'layer': 2, 'color': '#0F0', 'steps': 120}
     yield {'channel': chan, 'layer': 2, 'opacity': 0, 'steps': 120}
 
 

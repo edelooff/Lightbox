@@ -14,11 +14,6 @@ import time
 PALETTE_FEED = ('http://www.colourlovers.com/api/'
                 'palettes/top?format=json&numResults=100')
 
-def HexToRgb(hex_color):
-  """Converts a hex-color string to an RGB tuple."""
-  colors = hex_color[:2], hex_color[2:4], hex_color[4:]
-  return tuple(int(color, 16) for color in colors)
-
 
 def ColourLovers(host, port, interval):
   api_address = 'http://%s:%d' % (host, port)
@@ -26,10 +21,8 @@ def ColourLovers(host, port, interval):
     for palette in requests.get(PALETTE_FEED).json:
       commands = []
       for channel, color in zip(range(5), palette['colors'] * 2):
-        commands.append({'channel': channel,
-                         'color': HexToRgb(color),
-                         'opacity': 1,
-                         'steps': 50})
+        commands.append(
+            {'channel': channel, 'color': color, 'opacity': 1, 'steps': 50})
       requests.post(api_address, data={'json': simplejson.dumps(commands)})
       time.sleep(interval)
 

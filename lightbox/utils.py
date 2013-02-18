@@ -133,6 +133,12 @@ def LabToRgb(lab_color):
 
 
 def RgbToLab(rgb_color):
-  """Returns a tuple of LabColor pairs for a given RGB color."""
+  """Returns a tuple of LabColor pairs for a given RGB color.
+
+  The provided RGB color should either be a tuple (red, green, blue) or a hex
+  string of 3 or 6 characters (with optional preceeding octothorpe)
+  """
+  if isinstance(rgb_color, basestring):
+    rgb_color = HexToRgb(rgb_color)
   rgb_color = colormath.RGBColor(*rgb_color, illuminant='d65')
   return rgb_color.convert_to('lab').get_value_tuple()
