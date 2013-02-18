@@ -18,7 +18,6 @@ import threading
 import time
 
 # Custom modules
-from frack.projects.lightbox import utils
 import color_names
 
 
@@ -82,20 +81,9 @@ def ColorFromMessage(string, color_mapping=None):
   return '#%06x' % (hash(string) % 2 ** 24), 'hash'
 
 
-def RandomColors():
-  """Generates a large amount of random colors to fade through initially."""
-  colors = []
-  for step in range(200):
-    colors.append({'color': utils.RandomColor(saturate=True),
-                   'channel': step % 5, 'steps': 5, 'opacity': 1})
-  return colors
-
-
 def TwitterColors(host, port, hashtags, delay):
   """Updated Lightbox outputs based on tweets posted on configured hashtags."""
   api_address = 'http://%s:%d' % (host, port)
-  print 'Cycling some colors to draw attention ...'
-  requests.post(api_address, data={'json': simplejson.dumps(RandomColors())})
   print 'Running Twitter search plugin for Lightbox API ...'
   print 'Hashtags we\'re searching: %s' % ', '.join(hashtags)
   tweet_queue = Queue.Queue()
