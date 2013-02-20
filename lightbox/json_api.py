@@ -40,8 +40,8 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     box = self.server.box
     box_info = {
         'controller': type(box).__name__,
-        'device': box.port,
-        'baudrate': box.baudrate,
+        'device': box.serial.port,
+        'baudrate': box.serial.baudrate,
         'commandrate': box.frequency,
         'outputs': len(box),
         'outputrate': float(box.frequency) / len(box)}
