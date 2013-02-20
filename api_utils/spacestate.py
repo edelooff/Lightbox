@@ -37,10 +37,11 @@ def SpaceStateIndicator(host, port, proxy=False):
   receiver = transponder.ProxyReceiver() if proxy else transponder.Receiver()
   for announce in receiver:
     if announce['domain_global'] == 0 and announce['domain_local'] == 0:
+      outputs = requests.get(api_address + '/info').json['outputs']
       if announce['message'][0] == 'opened':
-        commands = list(SpaceOpened(5))
+        commands = list(SpaceOpened(outputs))
       else:
-        commands = list(SpaceClosed(5))
+        commands = list(SpaceClosed(outputs))
       requests.post(api_address, data={'json': simplejson.dumps(commands)})
 
 
@@ -52,7 +53,7 @@ def main():
                     help='Lightbox API server address (default localhost).')
   parser.add_option('--port', type='int', default=8000,
                     help='Lightbox API server port (default 8000).')
-  parser.add_option('--proxy', actin='store_true', default=False,
+  parser.add_option('--proxy', action='store_true', default=False,
                     help=('Connects through an Announce proxy instead of '
                           'setting up a UDP listener directly.'))
   options, _arguments = parser.parse_args()

@@ -18,9 +18,14 @@ PALETTE_FEED = ('http://www.colourlovers.com/api/'
 def ColourLovers(host, port, interval):
   api_address = 'http://%s:%d' % (host, port)
   while True:
+    info = requests.get(api_address + '/info').json
+    outputs = info['outputs']
     for palette in requests.get(PALETTE_FEED).json:
+      # Make sure we have enough palette colors to colorize all outputs
+      while len(palette['colors']) < outputs:
+        palette['colors'].extend(reversed(palette['colors']))
       commands = []
-      for channel, color in zip(range(5), palette['colors'] * 2):
+      for channel, color in zip(range(outputs), palette['colors']):
         commands.append(
             {'channel': channel, 'color': color, 'opacity': 1, 'steps': 50})
       requests.post(api_address, data={'json': simplejson.dumps(commands)})
