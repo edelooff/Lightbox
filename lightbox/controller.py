@@ -157,6 +157,32 @@ class ColorController(list):
     raise NotImplementedError
 
 
+class Dummy(ColorController):
+  """A dummy controller that doesn't connect to any device.
+
+  This is useful for testing all the other parts of Lightbox when the required
+  hardware is not available.
+  """
+  @classmethod
+  def Connect(cls, device, outputs=5):
+    return cls(serial.Serial(device), outputs)
+
+  def _DetectFrequency(self):
+    return 100
+
+  def _Heartbeat(self):
+    pass
+
+  def _Verify(self):
+    pass
+
+  def SetAll(self, color):
+    pass
+
+  def SetSingle(self, ident, color):
+    pass
+
+
 class JTagController(ColorController):
   ALL_OUTPUTS = '#%d,%d,%d\r\n'
   HEARTBEAT = 'H\r\n'
