@@ -10,6 +10,7 @@ __version__ = '2.0'
 # Standard modules
 import BaseHTTPServer
 import cgi
+import os
 import simplejson
 
 # Package modules
@@ -24,9 +25,9 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     params = dict(cgi.parse_qsl(query))
     if path == '/':
       return self.FormRender()
-    elif path == '/info':
+    elif path == '/api':
       return self.ControllerInfo()
-    elif path == '/output':
+    elif path == '/api/output':
       return self.OutputInfo(params)
     return self.ErrorResponse('No path %r. Try the root please.' % path)
 
@@ -81,13 +82,14 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
   def FormRender(self, prefill=''):
     """Returns a page with a simple HTML form for manual Lightbox controls."""
-    self.HtmlResponse("""<html><body><form method="post">
-                      <textarea name="json" cols="80" rows="30">%s</textarea>
-                      <br><input type="submit" value="push!" />
-                      </form></body></html>""" % HtmlEscape(prefill))
+    form_path = os.path.join(os.path.dirname(__file__), 'api.html')
+    with file(form_path) as form_page:
+      return self.HtmlResponse(form_page.read() % HtmlEscape(prefill))
 
   def do_POST(self):
     """Processes Lightbox controls via JSON."""
+    if self.path not in ('/', '/api'):
+      return self.ErrorResponse('No path %r. Try the root please.' % path)
     form = cgi.FieldStorage(
         self.rfile, self.headers, environ={'REQUEST_METHOD': 'POST'})
     try:
@@ -96,7 +98,9 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         map(self.ProcessCommand, json)
       else:
         self.ProcessCommand(json)
-      return self.FormRender(form.getfirst('json'))
+      if self.path == '/':
+        form_content = simplejson.dumps(json, sort_keys=True, indent='  ')
+        return self.FormRender(form_content)
     except Exception, error:
       return self.ErrorResponse(str(error))
 
