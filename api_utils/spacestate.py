@@ -14,21 +14,21 @@ import simplejson
 from frack.libs.announce import transponder
 
 
-def SpaceClosed(channels):
+def SpaceClosed(outputs):
   """Animation to play when the space closes."""
-  for chan in range(channels):
-    yield {'channel': chan, 'layer': 2, 'opacity': 0,
+  for output in range(outputs):
+    yield {'output': output, 'layer': 2, 'opacity': 0,
            'color': '#F00', 'steps': 1, 'blender': 'LabAverage'}
-    yield {'channel': chan, 'layer': 2, 'opacity': 1, 'steps': 120}
-    yield {'channel': chan, 'layer': 2, 'color': '#000', 'steps': 120}
+    yield {'output': output, 'layer': 2, 'opacity': 1, 'steps': 120}
+    yield {'output': output, 'layer': 2, 'color': '#000', 'steps': 120}
 
 
-def SpaceOpened(channels):
+def SpaceOpened(outputs):
   """Animation to play when the space opens."""
-  for chan in range(channels):
-    yield {'channel': chan, 'layer': 2, 'color': '#000', 'steps': 1}
-    yield {'channel': chan, 'layer': 2, 'color': '#0F0', 'steps': 120}
-    yield {'channel': chan, 'layer': 2, 'opacity': 0, 'steps': 120}
+  for output in range(outputs):
+    yield {'output': output, 'layer': 2, 'color': '#000', 'steps': 1}
+    yield {'output': output, 'layer': 2, 'color': '#0F0', 'steps': 120}
+    yield {'output': output, 'layer': 2, 'opacity': 0, 'steps': 120}
 
 
 def SpaceStateIndicator(host, port, proxy=False):

@@ -25,9 +25,9 @@ def ColourLovers(host, port, interval):
       while len(palette['colors']) < outputs:
         palette['colors'].extend(reversed(palette['colors']))
       commands = []
-      for channel, color in zip(range(outputs), palette['colors']):
+      for output, color in zip(range(outputs), palette['colors']):
         commands.append(
-            {'channel': channel, 'color': color, 'opacity': 1, 'steps': 50})
+            {'output': output, 'color': color, 'opacity': 1, 'steps': 50})
       requests.post(api_address, data={'json': simplejson.dumps(commands)})
       time.sleep(interval)
 

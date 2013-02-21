@@ -93,7 +93,7 @@ def TwitterColors(host, port, hashtags, delay):
     print '\nNew color: [%s] (based on %s) (%d remaining)\nTWEET: %s' % (
         color, source, tweet_queue.qsize(), tweet)
     outputs = requests.get(api_address + '/info').json['outputs']
-    command = {'color': color, 'channel': iteration % outputs, 'steps': 50}
+    command = {'color': color, 'output': iteration % outputs, 'steps': 50}
     requests.post(api_address, data={'json': simplejson.dumps(command)})
     time.sleep(delay)
 
