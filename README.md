@@ -18,3 +18,73 @@ The default envelope here is a cosine, which has a slow start and end, giving a 
 As mentioned, all color transitions are performed in LAB colorspace. When a transition begint, the current color of the layer is converted to LAB space, as well as the target color. The differences for _l_, _a_ and _b_ are determined and using the given envelope, all the intermediate colors between start and finish are determined as they're written to the controller.
 
 The benefit of this is that a transition from red to blue will not dip in lightness (such as with linear RGB color conversions), or have a noticeable peak in lightness (such as with linear HSV conversions), while remaining essentially a linear transition that can be calculated individually for each step.
+
+## JSON API Documentation
+
+There is a basic JSON API available for Lightbox. This can be started using the `api_server.py` script in the main repo directory. The controller used can be chosen with the `--controller` option (this defaults to `JTagController`), as well as the port that the http server binds to (`--port`, default 8000).
+
+### Controller status
+
+Some basic information about the controller, most notably the commandrate and the number of connected outputs, can be requested from this API server. Clients should request `/api` and they will get a JSON object with the requested information:
+
+```json
+{
+    "baudrate": 9600,
+    "commandrate": 100,
+    "controller": "Dummy",
+    "device": "/dev/ttyUSB0",
+    "outputrate": 20,
+    "outputs": 5
+}
+```
+
+### Output status
+
+The current color information for each of the outputs can be requested. This will return an object with the current mixed color of the output (as RGB array and hex string) and the number of layers on the strip. In the output object also lives an array with all layer information. For each layer, the color, opacity, transition envelope and blend method are listed:
+
+```json
+{
+  "mixedColorHex": "#3eb4ce",
+  "layers": [
+    {
+      "colorHex": "#6acfe3",
+      "opacity": 1,
+      "colorRgb": [106, 207, 227],
+      "envelope": "CosineEnvelope",
+      "blender": "LabAverage"
+    },
+    {
+      "colorHex": "#000000",
+      "opacity": 0,
+      "colorRgb": [0, 0, 0],
+      "envelope": "CosineEnvelope",
+      "blender": "LabAverage"
+    },
+    {
+      "colorHex": "#000000",
+      "opacity": 0,
+      "colorRgb": [0, 0, 0],
+      "envelope": "CosineEnvelope",
+      "blender": "LabAverage"
+    }
+  ],
+  "outputNumber": 0,
+  "layerCount": 3,
+  "mixedColorRgb": [62, 180, 206]
+}
+```
+
+### Sending commands
+
+Send commands to `/api` using HTTP POST. The `json` parameter should contain a single JSON object, or an array of objects. Each object targets an output and layer and defines a new color and/or opacity. Envelope and blend method may optionally be provided. Any optional argument that is not provided defaults to the currently existing (that is, not defining a color, only an opacity leaves the color unchanged). The `steps` key on the transition object indicates how fast or smooth the transition should happen.
+
+Example to set the second output to teal:
+
+```json
+{
+    "output": 1,
+    "color": [0, 200, 200],
+    "opacity": 1,
+    "steps": 40
+}
+```
