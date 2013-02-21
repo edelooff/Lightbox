@@ -246,11 +246,11 @@ class Transition(object):
         different smoothings to the transition. If not given, the envelope
         function in use at time of the start of this transition is used.
     """
-    self.steps = opts.pop('steps', 1)
+    self.steps = opts.get('steps', 1)
     if self.steps <= 0:
       raise ValueError('Steps argument must be at least 1.')
-    self.color = utils.RgbToLab(opts.pop('color')) if 'color' in opts else None
-    self.blender = opts.pop('blender', None)
+    self.color = utils.RgbToLab(opts.get('color')) if 'color' in opts else None
+    self.blender = opts.get('blender', None)
     self.options = opts
 
   def Start(self, color, opacity, envelope):
