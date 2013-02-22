@@ -18,9 +18,9 @@ PALETTE_FEED = ('http://www.colourlovers.com/api/'
 def ColourLovers(host, port, interval):
   api_address = 'http://%s:%d' % (host, port)
   while True:
-    info = requests.get(api_address + '/info').json
+    info = requests.get(api_address + '/info').json()
     outputs = info['outputs']
-    for palette in requests.get(PALETTE_FEED).json:
+    for palette in requests.get(PALETTE_FEED).json():
       # Make sure we have enough palette colors to colorize all outputs
       while len(palette['colors']) < outputs:
         palette['colors'].extend(reversed(palette['colors']))
