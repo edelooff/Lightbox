@@ -37,7 +37,7 @@ def SpaceStateIndicator(host, port, proxy=False):
   receiver = transponder.ProxyReceiver() if proxy else transponder.Receiver()
   for announce in receiver:
     if announce['domain_global'] == 0 and announce['domain_local'] == 0:
-      outputs = requests.get(api_address + '/info').json()['outputs']
+      outputs = requests.get(api_address + '/api').json['outputs']
       if announce['message'][0] == 'opened':
         commands = list(SpaceOpened(outputs))
       else:

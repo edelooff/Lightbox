@@ -52,7 +52,7 @@ class TwitterSearcher(threading.Thread):
     response = requests.get('http://search.twitter.com/search.json', params={
         'q': ' OR '.join('#%s' % tag for tag in self.hashtags),
         'since_id': self.last_tweet})
-    return reversed(response.json()['results'])
+    return reversed(response.json['results'])
 
 
 def ColorFromMessage(string, color_mapping=None):
@@ -92,7 +92,7 @@ def TwitterColors(host, port, hashtags, delay):
     tweet, color, source = tweet_queue.get()
     print '\nNew color: [%s] (based on %s) (%d remaining)\nTWEET: %s' % (
         color, source, tweet_queue.qsize(), tweet)
-    outputs = requests.get(api_address + '/info').json()['outputs']
+    outputs = requests.get(api_address + '/api').json['outputs']
     command = {'color': color, 'output': iteration % outputs, 'steps': 50}
     requests.post(api_address, data={'json': simplejson.dumps(command)})
     time.sleep(delay)

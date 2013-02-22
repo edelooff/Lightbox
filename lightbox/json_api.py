@@ -115,8 +115,8 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       command['blender'] = getattr(utils, command['blender'])
     if 'envelope' in command:
       command['envelope'] = getattr(utils, command['envelope'])
-    channel = self.server.box[command.pop('output', 0)]
-    action = getattr(channel, command.pop('action', 'fade').capitalize())
+    channel = self.server.box[command.get('output', 0)]
+    action = getattr(channel, command.get('action', 'fade').capitalize())
     action(**command)
 
 
