@@ -25,13 +25,13 @@
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
     <script>
       $(document).ready(function() {
-        $.getJSON('http://localhost:8000/api', function(json) {
+        $.getJSON('/api', function(json) {
           // Get the number of lights and add divs for it
           var preview = $('#preview');
           for (i = 0; i < json.outputs; i++) {
             var node = $('<div class="output"><strong>' + i + '</strong></div>');
             // node.append($());
-            $.ajax({url: 'http://localhost:8000/api/output?id=' + i,
+            $.ajax({url: '/api/output?id=' + i,
                     dataType: 'json',
                     async: false,
                     // data: myData,
