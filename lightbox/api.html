@@ -4,20 +4,50 @@
     <title>Lightbox JSON API</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <style type='text/css'>
+    ul, ol {
+      margin: 0;
+      padding: 0;
+    }
     .output {
+      position: relative;
       float: left;
-      margin: 0 20px;
+      width: 190px;
+      height: 180px;
+      margin-right: 20px;
+      overflow: auto;
     }
     .output .mixed {
-      width: 140px;
-      height: 140px;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 45px;
+      height: 159px;
       border: 1px solid #000;
     }
+    .ouptut .wrapper {
+      position: relative;
+      overflow: auto;
+    }
+    .output .layers {
+      position: absolute;
+      bottom: 0;
+      width: 133px;
+      list-style: none;
+    }
     .output .layer {
-      margin: 10px 20px;
-      width: 40px;
-      height: 40px;
+      margin-top: 10px;
+      overflow: auto;
+    }
+    .output .layer .color {
+      float: right;
+      width: 45px;
+      height: 45px;
       border: 1px solid #000;
+    }
+    .output .layer ul {
+      margin-top: 4px;
+      list-style: none;
+      font: 10px "Arial", sans-serif;
     }
     </style>
   </head>
@@ -25,28 +55,26 @@
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
     <script>
       $(document).ready(function() {
-        function updateBackground(output, box) {
+        function updateBackground(output, node) {
           $.getJSON('/api/output?id=' + output, function(json) {
-            box.css('background-color', json.mixedColorHex);
+            node.find('.mixed').css('background-color', json.mixedColorHex);
           });
         }
 
         $.getJSON('/api', function(json) {
           // Get the number of lights and add divs for it
           var preview = $('#preview');
+          var struct = $('.output')
+          struct.detach();
           for (i = 0; i < json.outputs; i++) {
-            // node.append($());
             var j = i;
             $.getJSON('/api/output?id=' + j, function(output) {
-                var node = $('<div class="output"><strong>' + output.outputNumber + '</strong></div>');
-                var box = $('<div class="mixed"></div>');
-                box.css('background-color', output.mixedColorHex);
-                node.append(box);
-                setInterval(function (){updateBackground(output.outputNumber, box)}, 50);
+                var node = struct.clone();
+                node.find('.mixed').css('background-color', output.mixedColorHex);
+                setInterval(function (){updateBackground(output.outputNumber, node)}, 200);
                 preview.append(node);
             });
           }
-          console.log(json.outputs);
         });
       });
     </script>
@@ -70,6 +98,37 @@
     <h2>Current strip colors</h2>
     <p>Basic jQuery/JavaScript retrieval for the current colors on the strip.</p>
     <div id="preview">
+      <div class="output">
+        <strong>Output 42</strong>
+        <div class="mixed"></div>
+        <ol class="layers">
+          <li class="layer">
+            <div class="color"></div>
+            <ul>
+              <li>Opacity: <span class="opacity">50%%</span></li>
+              <li class="blender">LabAverage</li>
+              <li class="envelope">CosineEnvelope</li>
+            </ul>
+          </li>
+          <li class="layer">
+            <div class="color"></div>
+            <ul>
+              <li>Opacity: <span class="opacity">50%%</span></li>
+              <li class="blender">LabAverage</li>
+              <li class="envelope">CosineEnvelope</li>
+            </ul>
+          </li>
+          <li class="layer">
+            <div class="color"></div>
+            <ul>
+              <li>Opacity: <span class="opacity">50%%</span></li>
+              <li class="blender">LabAverage</li>
+              <li class="envelope">CosineEnvelope</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
     </div>
+    <br clear="both">
   </body>
 </html>
