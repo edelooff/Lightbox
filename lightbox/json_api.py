@@ -119,6 +119,17 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     action = getattr(channel, command.get('action', 'fade').capitalize())
     action(**command)
 
+  def log_message(self, format, *args):
+    """Logs the messages from the RequestHandler
+
+    This logs the requesting host (without reverse dns lookup), the time
+    as ISO-8601 time string and the provided format and args.
+    """
+    sys.stderr.write("%s - [%s] %s\n" % (
+        self.client_address[0],
+        datetime.datetime.now().strftime('%F %T.%f'),
+        format % args))
+
 
 def ApiServer(box, port=8000):
   """Starts and runs a JSON API server for the given Lightbox controller."""
