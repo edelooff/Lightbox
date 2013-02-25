@@ -14,24 +14,24 @@ import simplejson
 from frack.libs.announce import transponder
 
 
-def SpaceClosed(outputs):
+def SpaceClosed(outputs, layer):
   """Animation to play when the space closes."""
   for output in range(outputs):
-    yield {'output': output, 'layer': 2, 'opacity': 0,
+    yield {'output': output, 'layer': layer, 'opacity': 0,
            'color': '#F00', 'steps': 1, 'blender': 'LabAverage'}
-    yield {'output': output, 'layer': 2, 'opacity': 1, 'steps': 120}
-    yield {'output': output, 'layer': 2, 'color': '#000', 'steps': 120}
+    yield {'output': output, 'layer': layer, 'opacity': 1, 'steps': 120}
+    yield {'output': output, 'layer': layer, 'color': '#000', 'steps': 120}
 
 
-def SpaceOpened(outputs):
+def SpaceOpened(outputs, layer):
   """Animation to play when the space opens."""
   for output in range(outputs):
-    yield {'output': output, 'layer': 2, 'color': '#000', 'steps': 1}
-    yield {'output': output, 'layer': 2, 'color': '#0F0', 'steps': 120}
-    yield {'output': output, 'layer': 2, 'opacity': 0, 'steps': 120}
+    yield {'output': output, 'layer': layer, 'color': '#000', 'steps': 1}
+    yield {'output': output, 'layer': layer, 'color': '#0F0', 'steps': 120}
+    yield {'output': output, 'layer': layer, 'opacity': 0, 'steps': 120}
 
 
-def SpaceStateIndicator(host, port, proxy=False):
+def SpaceStateIndicator(host, port, layer, proxy=False):
   """Listens for SpaceAnnounces and plays animations on space-state changes."""
   api_address = 'http://%s:%d' % (host, port)
   receiver = transponder.ProxyReceiver() if proxy else transponder.Receiver()
@@ -39,9 +39,9 @@ def SpaceStateIndicator(host, port, proxy=False):
     if announce['domain_global'] == 0 and announce['domain_local'] == 0:
       outputs = requests.get(api_address + '/api').json['outputs']
       if announce['message'][0] == 'opened':
-        commands = list(SpaceOpened(outputs))
+        commands = list(SpaceOpened(outputs, layer))
       else:
-        commands = list(SpaceClosed(outputs))
+        commands = list(SpaceClosed(outputs, layer))
       requests.post(api_address, data={'json': simplejson.dumps(commands)})
 
 
@@ -53,11 +53,13 @@ def main():
                     help='Lightbox API server address (default localhost).')
   parser.add_option('--port', type='int', default=8000,
                     help='Lightbox API server port (default 8000).')
+  parser.add_option('-l', '--layer', type='int', default=2,
+                    help='Layer to target with color commands.')
   parser.add_option('--proxy', action='store_true', default=False,
                     help=('Connects through an Announce proxy instead of '
                           'setting up a UDP listener directly.'))
   options, _arguments = parser.parse_args()
-  SpaceStateIndicator(options.host, options.port, options.proxy)
+  SpaceStateIndicator(options.host, options.port, options.layer, options.proxy)
 
 
 if __name__ == '__main__':

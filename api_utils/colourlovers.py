@@ -15,7 +15,8 @@ PALETTE_FEED = ('http://www.colourlovers.com/api/'
                 'palettes/top?format=json&numResults=100')
 
 
-def ColourLovers(host, port, interval):
+def ColourLovers(host, port, interval, layer):
+  """Downloads color palettes from the web and displays them on the Lightbox."""
   api_address = 'http://%s:%d' % (host, port)
   while True:
     info = requests.get(api_address + '/api').json
@@ -26,8 +27,11 @@ def ColourLovers(host, port, interval):
         palette['colors'].extend(reversed(palette['colors']))
       commands = []
       for output, color in zip(range(outputs), palette['colors']):
-        commands.append(
-            {'output': output, 'color': color, 'opacity': 1, 'steps': 50})
+        commands.append({'output': output,
+                         'layer': layer,
+                         'color': color,
+                         'opacity': 1,
+                         'steps': 50})
       requests.post(api_address, data={'json': simplejson.dumps(commands)})
       time.sleep(interval)
 
@@ -40,10 +44,12 @@ def main():
                     help='Lightbox API server address (default localhost).')
   parser.add_option('--port', type='int', default=8000,
                     help='Lightbox API server port (default 8000).')
+  parser.add_option('-l', '--layer', type='int', default=0,
+                    help='Layer to target with color commands.')
   parser.add_option('-i', '--interval', type='int', default=60,
                     help='Time each colour swatch should be displayed.')
   options, _arguments = parser.parse_args()
-  ColourLovers(options.host, options.port, options.interval)
+  ColourLovers(options.host, options.port, options.interval, options.layer)
 
 
 if __name__ == '__main__':

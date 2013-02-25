@@ -81,7 +81,7 @@ def ColorFromMessage(string, color_mapping=None):
   return '#%06x' % (hash(string) % 2 ** 24), 'hash'
 
 
-def TwitterColors(host, port, hashtags, delay):
+def TwitterColors(host, port, hashtags, delay, layer):
   """Updated Lightbox outputs based on tweets posted on configured hashtags."""
   api_address = 'http://%s:%d' % (host, port)
   print 'Running Twitter search plugin for Lightbox API ...'
@@ -93,7 +93,10 @@ def TwitterColors(host, port, hashtags, delay):
     print '\nNew color: [%s] (based on %s) (%d remaining)\nTWEET: %s' % (
         color, source, tweet_queue.qsize(), tweet)
     outputs = requests.get(api_address + '/api').json['outputs']
-    command = {'color': color, 'output': iteration % outputs, 'steps': 50}
+    command = {'output': iteration % outputs,
+               'layer': layer,
+               'color': color,
+               'steps': 50}
     requests.post(api_address, data={'json': simplejson.dumps(command)})
     time.sleep(delay)
 
@@ -106,12 +109,15 @@ def main():
                     help='Lightbox API server address (default localhost).')
   parser.add_option('--port', type='int', default=8000,
                     help='Lightbox API server port (default 8000).')
+  parser.add_option('-l', '--layer', type='int', default=0,
+                    help='Layer to target with color commands.')
   parser.add_option('-t', '--tag', action='append', dest='tags',
                     help='Hashtag to search for. Can be defined more than once')
   parser.add_option('-d', '--delay', type='int', default=5,
                     help='Minimum time between successive strip updates.')
   options, _arguments = parser.parse_args()
-  TwitterColors(options.host, options.port, options.tags, options.delay)
+  TwitterColors(options.host, options.port,
+                options.tags, options.delay, options.layer)
 
 
 if __name__ == '__main__':
