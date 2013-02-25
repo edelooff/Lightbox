@@ -55,28 +55,35 @@
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
     <script>
       $(document).ready(function() {
-        function updateBackground(output, node) {
-          $.getJSON('/api/output?id=' + output, function(json) {
-            node.find('.mixed').css('background-color', json.mixedColorHex);
-          });
-        }
-
-        $.getJSON('/api', function(json) {
-          // Get the number of lights and add divs for it
-          var preview = $('#preview');
-          var struct = $('.output')
-          struct.detach();
-          for (i = 0; i < json.outputs; i++) {
-            var j = i;
-            $.getJSON('/api/output?id=' + j, function(output) {
-                var node = struct.clone();
-                node.find('.mixed').css('background-color', output.mixedColorHex);
-                setInterval(function (){updateBackground(output.outputNumber, node)}, 200);
-                preview.append(node);
-            });
-          }
-        });
+        $.getJSON('/api', getLights);
       });
+
+      function getLights(json) {
+        var preview = $('#preview'),
+            struct = $('.output').detach();
+
+        // Get the number of lights
+        for(var output = 0; output < json.outputs; output++) {
+          showLight(struct, preview, output);
+        }
+      }
+
+      function showLight(struct, preview, output) {
+        // Add div for the light
+        var node = struct.clone();
+        preview.append(node);
+
+        // Update periodically
+        setInterval(function () {
+          $.getJSON('/api/output?id=' + output, updateColors(node));
+        }, 100);
+      }
+
+      function updateColors(node) {
+        return function(json) {
+          node.find('.mixed').css('background-color', json.mixedColorHex);
+        }
+      }
     </script>
     <h1>Lightbox JSON API</h1>
     <p>Lightbox was originally developed for the <a href="http://twitterboom.nl">Twitterboom</a>, which was demonstrated to the public during the Christmas season of 2011 in the public library of Leeuwarden, the hometown of <a href="http://frack.nl/wiki/">Frack</a>.</p>
