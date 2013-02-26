@@ -19,9 +19,9 @@ def ColourLovers(host, port, interval, layer):
   """Downloads color palettes from the web and displays them on the Lightbox."""
   api_address = 'http://%s:%d' % (host, port)
   while True:
-    info = requests.get(api_address + '/api').json
+    info = requests.get(api_address + '/api').json()
     outputs = info['outputs']
-    for palette in requests.get(PALETTE_FEED).json:
+    for palette in requests.get(PALETTE_FEED).json():
       # Make sure we have enough palette colors to colorize all outputs
       while len(palette['colors']) < outputs:
         palette['colors'].extend(reversed(palette['colors']))
