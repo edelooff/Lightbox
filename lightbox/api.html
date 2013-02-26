@@ -4,6 +4,9 @@
     <title>Lightbox JSON API</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <style type='text/css'>
+    html, body {
+      font-family: Arial, sans-serif;
+    }
     ul, ol {
       margin: 0;
       padding: 0;
@@ -11,15 +14,21 @@
     .output {
       position: relative;
       float: left;
-      width: 190px;
-      height: 180px;
+      width: 195px;
+      height: 190px;
       margin-right: 20px;
+      padding: 5px;
+      border: 2px solid #777;
+      border-radius: 10px;
       overflow: auto;
+    }
+    .output strong {
+      margin-left: 20px;
     }
     .output .mixed {
       position: absolute;
-      right: 0;
-      bottom: 0;
+      right: 10px;
+      bottom: 10px;
       width: 45px;
       height: 159px;
       border: 1px solid #000;
@@ -30,7 +39,8 @@
     }
     .output .layers {
       position: absolute;
-      bottom: 0;
+      bottom: 10px;
+      left: 5px;
       width: 133px;
       list-style: none;
     }
@@ -47,7 +57,7 @@
     .output .layer ul {
       margin-top: 4px;
       list-style: none;
-      font: 10px "Arial", sans-serif;
+      font-size: 10px;
     }
     </style>
   </head>
@@ -76,12 +86,24 @@
         // Update periodically
         setInterval(function () {
           $.getJSON('/api/output?id=' + output, updateColors(node));
-        }, 100);
+        }, 200);
       }
 
       function updateColors(node) {
         return function(json) {
           node.find('.mixed').css('background-color', json.mixedColorHex);
+          node.find('.layer').each(updateLayerInfo(json));
+        }
+      }
+
+      function updateLayerInfo(output) {
+        return function(listIndex) {
+          var layerData = output.layers[output.layerCount - 1 - listIndex];
+          var layer = $(this);
+          layer.find('.color').css('background-color', layerData.colorHex);
+          layer.find('.blender').text(layerData.blender);
+          layer.find('.envelope').text(layerData.envelope);
+          layer.find('.opacity').text(Math.round(layerData.opacity * 100));
         }
       }
     </script>
@@ -112,25 +134,25 @@
           <li class="layer">
             <div class="color"></div>
             <ul>
-              <li>Opacity: <span class="opacity">50%%</span></li>
-              <li class="blender">LabAverage</li>
-              <li class="envelope">CosineEnvelope</li>
+              <li>Opacity: <span class="opacity"></span>%%</li>
+              <li class="blender"></li>
+              <li class="envelope"></li>
             </ul>
           </li>
           <li class="layer">
             <div class="color"></div>
             <ul>
-              <li>Opacity: <span class="opacity">50%%</span></li>
-              <li class="blender">LabAverage</li>
-              <li class="envelope">CosineEnvelope</li>
+              <li>Opacity: <span class="opacity"></span>%%</li>
+              <li class="blender"></li>
+              <li class="envelope"></li>
             </ul>
           </li>
           <li class="layer">
             <div class="color"></div>
             <ul>
-              <li>Opacity: <span class="opacity">50%%</span></li>
-              <li class="blender">LabAverage</li>
-              <li class="envelope">CosineEnvelope</li>
+              <li>Opacity: <span class="opacity"></span>%%</li>
+              <li class="blender"></li>
+              <li class="envelope"></li>
             </ul>
           </li>
         </ol>
