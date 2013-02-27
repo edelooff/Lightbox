@@ -50,7 +50,7 @@ def Demo(controller_name):
 
   print 'Demonstration program for Lightbox.\n'
   print 'Initiating controller %r ...\n' % controller_name
-  box = getattr(controller, controller_name).ConnectFirst()
+  box = getattr(controller, controller_name).FirstDevice()
 
   print '\n1) Switching all outputs through red, green, blue ...'
   for color in [RED, BLACK, GREEN, BLACK, BLUE, BLACK] * 3:

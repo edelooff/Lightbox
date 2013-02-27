@@ -56,14 +56,7 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
   def ControllerInfo(self):
     """Returns a JSON object with controller information."""
-    box = self.server.box
-    self.JsonResponse({
-        'controller': type(box).__name__,
-        'device': box.serial.port,
-        'baudrate': box.serial.baudrate,
-        'commandrate': box.frequency,
-        'outputs': len(box),
-        'outputrate': float(box.frequency) / len(box)})
+    self.JsonResponse(self.server.box.Info())
 
   def OutputInfo(self, params):
     """Returns a JSON object with Lightbox output information."""
