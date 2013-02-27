@@ -14,6 +14,7 @@ import time
 
 # Application modules
 from . import light
+from . import utils
 
 BLACK = 0, 0, 0
 
@@ -67,8 +68,10 @@ class BaseController(list):
     return {'controller': type(self).__name__,
             'device': self._DeviceInfo(),
             'commandrate': self.frequency,
+            'layerBlenders': utils.BLENDERS,
             'outputs': len(self),
-            'outputrate': float(self.frequency) / len(self)}
+            'outputrate': float(self.frequency) / len(self),
+            'transitionEnvelopes': utils.ENVELOPES}
 
   def _DeviceInfo(self):
     """Returns a batch of hardware-specific info."""

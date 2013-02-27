@@ -18,6 +18,9 @@ import urllib2
 # Colormath module
 from colormath import color_objects as colormath
 
+BLENDERS = 'RgbAverage', 'LabAverage', 'Darken', 'Lighten', 'RootSumSquare'
+ENVELOPES = 'CosineEnvelope', 'LinearEnvelope'
+
 
 def RandomColor(saturate=False):
   """Generates a random RGB color tuple.
