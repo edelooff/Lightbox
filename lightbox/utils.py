@@ -5,15 +5,12 @@ This module contains various utility functions to convert between RGB and LAB
 space, as well as envelope generators.
 """
 __author__ = 'Elmer de Looff <elmer@underdark.nl>'
-__version__ = '2.1'
+__version__ = '2.2'
 
 # Standard modules
 import math
 import operator
 import random
-import simplejson
-import urllib
-import urllib2
 
 # Colormath module
 from colormath import color_objects as colormath
@@ -40,41 +37,55 @@ def RandomColor(saturate=False):
 #
 def ColorDiff(begin, target, factor=1):
   """Returns a color difference, multiplied by an effective factor."""
-  color = [operator.sub(*item) * factor for item in zip(target, begin)]
-  return tuple(map(int, color))
+  return [operator.sub(*item) * factor for item in zip(target, begin)]
 
 
 def Darken(base, overlay, opacity):
   """Returns a tuple where each channel is the darkest of the given colors."""
+  if opacity == 0:
+    return base
   diffs = ColorDiff(base, overlay, opacity)
-  return tuple(chan + min(0, diff) for chan, diff in zip(base, diffs))
+  return [chan + min(0, diff) for chan, diff in zip(base, diffs)]
 
 
 def Lighten(base, overlay, opacity):
   """Returns a tuple where each channel is the lightest of the given colors."""
+  if opacity == 0:
+    return base
   diffs = ColorDiff(base, overlay, opacity)
-  return tuple(chan + max(0, diff) for chan, diff in zip(base, diffs))
+  return [chan + max(0, diff) for chan, diff in zip(base, diffs)]
 
 
 def RootSumSquare(base, overlay, opacity):
   """Returns the root of the base squared plus the difference squared."""
+  if opacity == 0:
+    return base
   diffs = ColorDiff(base, overlay, opacity)
-  return tuple(sum(p ** 2 for p in pair) ** .5 for pair in zip(base, diffs))
+  new_color = [sum(p ** 2 for p in pair) ** .5 for pair in zip(base, diffs)]
+  # Ensure that no channel ever goes over value 255, this causes errors.
+  return [min(255, chan) for chan in new_color]
 
 
 def RgbAverage(base, overlay, opacity):
   """Returns a tuple where each channel is the average of the given colors."""
-  diffs = ColorDiff(base, overlay, opacity)
-  return tuple(sum(pair)  for pair in zip(base, diffs))
+  if opacity == 0:
+    return base
+  elif opacity == 1:
+    return overlay
+  return map(sum, zip(base, ColorDiff(base, overlay, opacity)))
 
 
 def LabAverage(base, overlay, opacity):
-  """Returns a tuple where each channel is the darkest of the given colors.
+  """Returns a tuple where each channel is the average of the given colors.
 
   N.B. The average given is the RGB translation of the Lab colors averaged."""
+  if opacity == 0:
+    return base
+  elif opacity == 1:
+    return overlay
   base = RgbToLab(base)
   diffs = ColorDiff(base, RgbToLab(overlay), opacity)
-  return LabToRgb(sum(pair) for pair in zip(base, diffs))
+  return LabToRgb(map(sum, zip(base, diffs)))
 
 
 # ##############################################################################
