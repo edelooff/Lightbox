@@ -65,8 +65,7 @@ class Output(object):
     color = 0, 0, 0
     for layer in self:
       color = layer.NextBlendedColor(color)
-    # Ensure that no channel ever goes over value 255, this would cause errors.
-    return [min(255, channel) for channel in color]
+    return color
 
   def AddLayer(self):
     """Adds an additional layer to this output."""
@@ -90,10 +89,11 @@ class Output(object):
     to reflect the current output color.
     """
     begin_time = time.time()
-    new_color = map(int, map(self.outpower, next(self)))
+    new_color = next(self)
     if new_color != self.color:
-      self.controller.SetSingle(self.output_id, new_color)
       self.color = new_color
+      adjusted_color = map(int, map(self.outpower, new_color))
+      self.controller.SetSingle(self.output_id, adjusted_color)
     self._WaitForTick(begin_time)
 
   # ############################################################################
@@ -186,7 +186,6 @@ class Layer(object):
     """Installs the new transition and blender."""
     self.blender = transition.blender or self.blender
     self.transition = transition.Start(self.color, self.opacity, self.envelope)
-
 
   def NextBlendedColor(self, base):
     """Returns the next blended color for this Layer.
