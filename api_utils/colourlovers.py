@@ -33,6 +33,7 @@ def ColourLovers(host, port, interval, layer):
                          'opacity': 1,
                          'steps': 50})
       requests.post(api_address, data={'json': simplejson.dumps(commands)})
+      print '%s: New color palette applied' % time.ctime()
       time.sleep(interval)
 
 
