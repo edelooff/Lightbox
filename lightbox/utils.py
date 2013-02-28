@@ -15,6 +15,9 @@ import random
 # Colormath module
 from colormath import color_objects as colormath
 
+# These define the blenders and envelope functions that may be used by the
+# JSON API to control blending and transitions. If additional blenders and/or
+# envelope functions are added, these tuples should be extended as well.
 BLENDERS = 'RgbAverage', 'LabAverage', 'Darken', 'Lighten', 'RootSumSquare'
 ENVELOPES = 'CosineEnvelope', 'LinearEnvelope'
 

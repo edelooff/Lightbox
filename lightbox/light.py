@@ -32,7 +32,7 @@ class Output(object):
     self.ticker = OutputTicker(self._WriteNextColor)
 
   # ############################################################################
-  # Output color control
+  # Output control actions
   #
   def Blink(self, layer=0, count=1, **options):
     """Blinks the output to the given `color` and back, `count` times."""
@@ -48,6 +48,9 @@ class Output(object):
   def Fade(self, layer=0, **options):
     """Fades the output to the given `color` in `steps` steps."""
     self[layer].Append(Transition(**options))
+
+  # ACTIONS defines the methods that the JSON API may use to control colors
+  ACTIONS = 'Blink', 'Constant', 'Fade'
 
   # ############################################################################
   # Actual color changing/writing and layer management

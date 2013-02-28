@@ -67,10 +67,12 @@ class BaseController(list):
     """Returns a dictionary of Lightbox controller info."""
     return {'controller': type(self).__name__,
             'device': self._DeviceInfo(),
-            'commandrate': self.frequency,
+            'commandRate': {
+                'combined': self.frequency,
+                'perOutput': float(self.frequency) / len(self)},
             'layerBlenders': utils.BLENDERS,
             'outputs': len(self),
-            'outputrate': float(self.frequency) / len(self),
+            'outputActions': self.output_cls.ACTIONS,
             'transitionEnvelopes': utils.ENVELOPES}
 
   def _DeviceInfo(self):

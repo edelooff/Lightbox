@@ -99,20 +99,30 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     except Exception, error:
       return self.ErrorResponse(str(error))
 
-  def ProcessCommand(self, command):
+  def ProcessCommand(self, api_command):
     """Performs the given command on the Lightbox instance.
 
     Envelope and blend method are loaded by name from the utils module. The
     handling method is selected from a string as well, defaulting to 'Fade' if
     none is provided.
     """
+    command = api_command.copy()
     if 'blender' in command:
+      if command['blender'] not in utils.BLENDERS:
+        raise ValueError('Provided blender %r is not a known blender.' % (
+            command['blender']))
       command['blender'] = getattr(utils, command['blender'])
     if 'envelope' in command:
+      if command['envelope'] not in utils.ENVELOPES:
+        raise ValueError('Provided envelope %r is not a known envelope.' % (
+            command['envelope']))
       command['envelope'] = getattr(utils, command['envelope'])
     channel = self.server.box[command.get('output', 0)]
-    action = getattr(channel, command.get('action', 'fade').capitalize())
-    action(**command)
+    api_command['action'] = action = command.get('action', 'fade').capitalize()
+    if action not in channel.ACTIONS:
+      raise ValueError(
+          'Chosen action %r is not an action for this channel.' %  action)
+    getattr(channel, action)(**command)
 
   def log_message(self, format, *args):
     """Logs the messages from the RequestHandler
