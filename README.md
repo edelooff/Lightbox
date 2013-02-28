@@ -25,16 +25,41 @@ There is a basic JSON API available for Lightbox. This can be started using the 
 
 ### Controller status
 
-Some basic information about the controller, most notably the commandrate and the number of connected outputs, can be requested from this API server. Clients should request `/api` and they will get a JSON object with the requested information:
+Information about the controller and commands that can be sent. The name for the controller is present under the key `controller`, the number of outputs is given as an integer under the key `outputs`. Command rates are specified on the key `commandRate`, this object has entries for both the `combined` and `perOutput` rates.
+
+The physical device information is provided, the `type` of this is always provided, other keys for this are present dependant on the type of the attached hardware.
+
+For transitions, the action, layer blending method, and transition envelope can be configured. The available values for these can be gathered from the API output. The keys `layerBlenders`, `outputActions` and `transitionEnvelopes` have the information for this.
 
 ```json
 {
-    "baudrate": 9600,
-    "commandrate": 100,
-    "controller": "Dummy",
-    "device": "/dev/ttyUSB0",
-    "outputrate": 20,
-    "outputs": 5
+    "commandRate": {
+        "combined": 200,
+        "perOutput": 40
+    },
+    "controller": "JTagController",
+    "device": {
+        "baudrate": 57600,
+        "port": "/dev/ttyUSB1"
+        "type": "serial",
+    },
+    "layerBlenders": [
+        "Darken",
+        "Lighten",
+        "LabAverage",
+        "RgbAverage",
+        "RootSumSquare"
+    ],
+    "outputActions": [
+        "Blink",
+        "Constant",
+        "Fade"
+    ],
+    "outputs": 5,
+    "transitionEnvelopes": [
+        "CosineEnvelope",
+        "LinearEnvelope"
+    ]
 }
 ```
 
