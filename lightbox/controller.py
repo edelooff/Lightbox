@@ -51,11 +51,11 @@ class BaseController(list):
   def __init__(self, conn_info, outputs=5, output_cls=light.Output):
     """Initializes the BaseController for Lightbox."""
     super(BaseController, self).__init__()
-    self.connection = self._Connect(conn_info)
-    self.frequency = self._DetectFrequency()
     self.last_output_id = -1
     self.lock = threading.Lock()
     self.output_cls = output_cls
+    self.connection = self._Connect(conn_info)
+    self.frequency = self._DetectFrequency()
     Heartbeat(self._Heartbeat)
     for _num in range(outputs):
       self.Add()
@@ -98,9 +98,9 @@ class BaseController(list):
     try:
       conn = serial.Serial(port=conn_info['device'],
                            baudrate=conn_info.get('baudrate', 9600),
-                           timeout=conn_info.get('timeout', 1))
+                           timeout=conn_info.get('timeout', .5))
       conn.flushInput()
-      print 'Connected to %s' % conn_info['device']
+      print 'Connecting to %s' % conn_info['device']
       return conn
     except serial.SerialException:
       raise ConnectionError('Could not open device %s.' % conn_info['device'])
@@ -262,8 +262,7 @@ class JTagController(BaseController):
     LED controller needs some time before it behaves properly.
     """
     conn_info['baudrate'] = 57600
-    conn_info['timeout'] = 0.1
-    conn = super(JTagController, self).Connect(conn_info)
+    conn = super(JTagController, self)._Connect(conn_info)
     for _attempt in range(5):
       conn.write(self.ALL_OUTPUTS % BLACK)
       if conn.read(3) == self.RESPONSE:

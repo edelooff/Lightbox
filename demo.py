@@ -91,11 +91,15 @@ def Demo(controller_name):
 def main():
   """Processes commandline input to setup the demo."""
   import optparse
+  import sys
   parser = optparse.OptionParser()
   parser.add_option('-c', '--controller', default='JTagController',
                     help='Controller class to instantiate.')
   options, _arguments = parser.parse_args()
-  Demo(options.controller)
+  try:
+    Demo(options.controller)
+  except controller.ConnectionError:
+    sys.exit('ABORT: Could not find a suitable device.')
 
 
 if __name__ == '__main__':

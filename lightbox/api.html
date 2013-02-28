@@ -87,7 +87,7 @@
         // Update periodically
         setInterval(function () {
           $.getJSON('/api/output?id=' + output, updateColors(node));
-        }, 200);
+        }, 100);
       }
 
       function updateColors(node) {

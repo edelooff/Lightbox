@@ -24,13 +24,17 @@ def StartLightboxApi(controller_name, port):
 def main():
   """Processes commandline input to setup the API server."""
   import optparse
+  import sys
   parser = optparse.OptionParser()
   parser.add_option('-c', '--controller', default='JTagController',
                     help='Controller class to instantiate.')
   parser.add_option('-p', '--port', type='int', default=8000,
                     help='Port to run the Lightbox API on.')
   options, _arguments = parser.parse_args()
-  StartLightboxApi(options.controller, options.port)
+  try:
+    StartLightboxApi(options.controller, options.port)
+  except controller.ConnectionError:
+    sys.exit('ABORT: Could not find a suitable device.')
 
 
 if __name__ == '__main__':
