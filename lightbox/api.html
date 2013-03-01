@@ -73,7 +73,7 @@
             outputStruct = $('.output').detach();
 
         // Create a number ouf live view outputs corresponding to the hardware
-        for(var index = 0; index < controller.outputs; index++) {
+        for(var index = 0; index < controller.outputCount; index++) {
           createOutput(outputStruct, previewNode, index);
         }
         // Update periodically

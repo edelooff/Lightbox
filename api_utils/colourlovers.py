@@ -20,7 +20,7 @@ def ColourLovers(host, port, interval, layer):
   api_address = 'http://%s:%d' % (host, port)
   while True:
     info = requests.get(api_address + '/api').json()
-    outputs = info['outputs']
+    outputs = info['outputCount']
     for palette in requests.get(PALETTE_FEED).json():
       # Make sure we have enough palette colors to colorize all outputs
       while len(palette['colors']) < outputs:

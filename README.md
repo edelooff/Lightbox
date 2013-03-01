@@ -55,7 +55,7 @@ For transitions, the action, layer blending method, and transition envelope can 
         "Constant",
         "Fade"
     ],
-    "outputs": 5,
+    "outputCount": 5,
     "transitionEnvelopes": [
         "CosineEnvelope",
         "LinearEnvelope"

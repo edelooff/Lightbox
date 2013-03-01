@@ -25,7 +25,7 @@ def RandomColorSender(host, port, interval, layer):
   """Updates the Lightbox outputs sequentially with random colors."""
   api_address = 'http://%s:%d' % (host, port)
   while True:
-    outputs = requests.get(api_address + '/api').json()['outputs']
+    outputs = requests.get(api_address + '/api').json()['outputCount']
     for output in range(outputs):
       command = {'output': output,
                  'layer': layer,

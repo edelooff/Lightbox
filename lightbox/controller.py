@@ -71,8 +71,8 @@ class BaseController(list):
                 'combined': self.frequency,
                 'perOutput': float(self.frequency) / len(self)},
             'layerBlenders': utils.BLENDERS,
-            'outputs': len(self),
             'outputActions': self.output_cls.ACTIONS,
+            'outputCount': len(self),
             'transitionEnvelopes': utils.ENVELOPES}
 
   def _DeviceInfo(self):
