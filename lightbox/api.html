@@ -65,46 +65,59 @@
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
     <script>
       $(document).ready(function() {
-        $.getJSON('/api', getLights);
+        $.getJSON('/api', createLightbox);
       });
 
-      function getLights(json) {
-        var preview = $('#preview'),
-            struct = $('.output').detach();
+      function createLightbox(controller) {
+        var previewNode = $('#preview'),
+            outputStruct = $('.output').detach();
 
-        // Get the number of lights
-        for(var output = 0; output < json.outputs; output++) {
-          showLight(struct, preview, output);
+        // Create a number ouf live view outputs corresponding to the hardware
+        for(var index = 0; index < controller.outputs; index++) {
+          createOutput(outputStruct, previewNode, index);
         }
-      }
-
-      function showLight(struct, preview, output) {
-        // Add div for the light
-        var node = struct.clone();
-        node.find('strong').text('Output ' + output);
-        preview.append(node);
-
         // Update periodically
-        setInterval(function () {
-          $.getJSON('/api/output?id=' + output, updateColors(node));
-        }, 100);
+        setInterval(updateLightbox(), 100);
       }
 
-      function updateColors(node) {
-        return function(json) {
-          node.find('.mixed').css('background-color', json.mixedColorHex);
-          node.find('.layer').each(updateLayerInfo(json));
+      function createOutput(outputStruct, previewNode, outputIndex) {
+        // Adds an output to the previewNode
+        var outputNode = outputStruct.clone();
+        outputNode.find('strong').text('Output ' + outputIndex);
+        previewNode.append(outputNode);
+      }
+
+      function updateLightbox() {
+        outputNodes = $('#preview .output');
+        return function() {
+          // Updates the complete live view with current data from the API
+          $.getJSON('/api/outputs', function (outputs) {
+            outputNodes.each(updateOutput(outputs));
+          });
         }
       }
 
-      function updateLayerInfo(output) {
+      function updateOutput(outputs) {
+        // Updates the mixed color and layer information for a single output
+        return function(outputIndex) {
+          var outputJson = outputs[outputIndex],
+              outputNode = $(this);
+          outputNode.find('.mixed').css('background-color',
+                                        outputJson.mixedColorHex);
+          outputNode.find('.layer').each(updateLayerInfo(outputJson));
+        }
+      }
+
+      function updateLayerInfo(outputJson) {
+        // Updates the color and assorted information for a single output layer
         return function(listIndex) {
-          var layerData = output.layers[output.layerCount - 1 - listIndex];
-          var layer = $(this);
-          layer.find('.color').css('background-color', layerData.colorHex);
-          layer.find('.blender').text(layerData.blender);
-          layer.find('.envelope').text(layerData.envelope);
-          layer.find('.opacity').text(Math.round(layerData.opacity * 100));
+          var currentLayer = outputJson.layerCount - 1 - listIndex,
+              layerJson = outputJson.layers[currentLayer],
+              layerNode = $(this);
+          layerNode.find('.color').css('background-color', layerJson.colorHex);
+          layerNode.find('.blender').text(layerJson.blender);
+          layerNode.find('.envelope').text(layerJson.envelope);
+          layerNode.find('.opacity').text(Math.round(layerJson.opacity * 100));
         }
       }
     </script>
@@ -123,7 +136,7 @@
     <ul>
       <li>API commands should be sent to <code>/api</code> (HTTP POST, argument <code>json</code>);</li>
       <li>Controller information can be retrieved from <a href="/api"><code>/api</code></a>;</li>
-      <li>Output information (mixed and layer colors, opacity etc) can be retrieved from <a href="/api/output?id=0"><code>/api/output?id=OUTPUT_ID</code></a>.</li>
+      <li>Output information (mixed and layer colors, opacity etc) can be retrieved from <a href="/api/outputs"><code>/api/outputs</code></a>.</li>
     </ul>
     <h2>Current strip colors</h2>
     <p>Basic jQuery/JavaScript retrieval for the current colors on the strip.</p>

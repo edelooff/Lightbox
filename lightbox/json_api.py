@@ -23,14 +23,13 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   """Ligtbox JSON API Handler."""
   def do_GET(self):
     """Very basic request router."""
-    path, _sep, query = self.path.partition('?')
-    params = dict(cgi.parse_qsl(query))
+    path = self.path
     if path == '/':
       return self.FormRender()
     elif path == '/api':
       return self.ControllerInfo()
-    elif path == '/api/output':
-      return self.OutputInfo(params)
+    elif path == '/api/outputs':
+      return self.OutputInfo()
     return self.ErrorResponse('No path %r. Try the root please.' % path)
 
   def ErrorResponse(self, error):
@@ -58,22 +57,17 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """Returns a JSON object with controller information."""
     self.JsonResponse(self.server.box.Info())
 
-  def OutputInfo(self, params):
+  def OutputInfo(self):
     """Returns a JSON object with Lightbox output information."""
-    if 'id' not in params:
-      return self.ErrorResponse('An argument "id" should be provided')
-    if not params['id'].isdigit():
-      return self.ErrorResponse('Output id should be a number.')
-    output_id = int(params['id'])
-    if not 0 <= output_id < len(self.server.box):
-      return self.ErrorResponse('Output id out of bounds')
-    output = self.server.box[output_id]
-    self.JsonResponse({
-        'outputNumber': output.output_id,
-        'mixedColorRgb': output.color,
-        'mixedColorHex': '#%02x%02x%02x' % tuple(output.color),
-        'layerCount': len(output.layers),
-        'layers': list(LayerReport(output))})
+    outputs = []
+    for output in self.server.box:
+      outputs.append({
+          'outputNumber': output.output_id,
+          'mixedColorRgb': output.color,
+          'mixedColorHex': '#%02x%02x%02x' % tuple(output.color),
+          'layerCount': len(output.layers),
+          'layers': list(LayerReport(output))})
+    self.JsonResponse(outputs)
 
   def FormRender(self, prefill=''):
     """Returns a page with a simple HTML form for manual Lightbox controls."""
