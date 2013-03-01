@@ -8,7 +8,7 @@ from lightbox import controller
 from lightbox import json_api
 
 
-def StartLightboxApi(controller_name, port):
+def StartLightboxApi(controller_name, port, quiet):
   """Starts a Lightbox API service.
 
   The provided controller name should be a class of the controller module. An
@@ -18,7 +18,7 @@ def StartLightboxApi(controller_name, port):
   print 'Initiating controller %r ...' % controller_name
   ctrl_obj = getattr(controller, controller_name).FirstDevice()
   print 'Starting API server on port %d ...' % port
-  json_api.ApiServer(ctrl_obj, port=port)
+  json_api.ApiServer(ctrl_obj, port=port, quiet=quiet)
 
 
 def main():
@@ -30,9 +30,11 @@ def main():
                     help='Controller class to instantiate.')
   parser.add_option('-p', '--port', type='int', default=8000,
                     help='Port to run the Lightbox API on.')
+  parser.add_option('-q', '--quiet', action='store_true', default=False,
+                    help='Disables request logging to stderr.')
   options, _arguments = parser.parse_args()
   try:
-    StartLightboxApi(options.controller, options.port)
+    StartLightboxApi(options.controller, options.port, options.quiet)
   except controller.ConnectionError:
     sys.exit('ABORT: Could not find a suitable device.')
 
