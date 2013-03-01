@@ -7,9 +7,13 @@
     html, body {
       font-family: Arial, sans-serif;
     }
-    ul, ol {
+    #preview ul,
+    #preview ol {
       margin: 0;
       padding: 0;
+    }
+    #preview {
+      overflow: auto;
     }
     .output {
       position: relative;
@@ -32,10 +36,6 @@
       width: 45px;
       height: 159px;
       border: 1px solid #000;
-    }
-    .ouptut .wrapper {
-      position: relative;
-      overflow: auto;
     }
     .output .layers {
       position: absolute;
@@ -124,21 +124,7 @@
     <h1>Lightbox JSON API</h1>
     <p>Lightbox was originally developed for the <a href="http://twitterboom.nl">Twitterboom</a>, which was demonstrated to the public during the Christmas season of 2011 in the public library of Leeuwarden, the hometown of <a href="http://frack.nl/wiki/">Frack</a>.</p>
     <p>All code and documentation is <a href="https://github.com/frack/Lightbox">available on GitHub</a>.</p>
-    <h2>Send API commands</h2>
-    <p>API commands can be one object that describes a transition for a single output+layer, or an array of these.</p>
-    <p>Multiple transitions for a single output will be executed in series, multiple transitions for different outputs will be excecuted in unison.</p>
-    <form method="post">
-      <textarea name="json" cols="80" rows="20">%s</textarea>
-      <br>
-      <input type="submit" value="push!" />
-    </form>
-    <h2>API Information</h2>
-    <ul>
-      <li>API commands should be sent to <code>/api</code> (HTTP POST, argument <code>json</code>);</li>
-      <li>Controller information can be retrieved from <a href="/api"><code>/api</code></a>;</li>
-      <li>Output information (mixed and layer colors, opacity etc) can be retrieved from <a href="/api/outputs"><code>/api/outputs</code></a>.</li>
-    </ul>
-    <h2>Current strip colors</h2>
+    <h2>Lightbox live view</h2>
     <p>Basic jQuery/JavaScript retrieval for the current colors on the strip.</p>
     <div id="preview">
       <div class="output">
@@ -172,6 +158,19 @@
         </ol>
       </div>
     </div>
-    <br clear="both">
+    <h2>API Information</h2>
+    <ul>
+      <li>API commands should be sent to <code>/api</code> (HTTP POST, argument <code>json</code>);</li>
+      <li>Controller information can be retrieved from <a href="/api"><code>/api</code></a>;</li>
+      <li>Output information (mixed and layer colors, opacity etc) can be retrieved from <a href="/api/outputs"><code>/api/outputs</code></a>.</li>
+    </ul>
+    <h2>Send API commands</h2>
+    <p>API commands can be one object that describes a transition for a single output+layer, or an array of these.</p>
+    <p>Multiple transitions for a single output will be executed in series, multiple transitions for different outputs will be excecuted in unison.</p>
+    <form method="post">
+      <textarea name="json" cols="80" rows="20">%s</textarea>
+      <br>
+      <input type="submit" value="push!" />
+    </form>
   </body>
 </html>
