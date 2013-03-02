@@ -23,13 +23,15 @@ The benefit of this is that a transition from red to blue will not dip in lightn
 
 There is a basic JSON API available for Lightbox. This can be started using the `api_server.py` script in the main repo directory. The controller used can be chosen with the `--controller` option (this defaults to `JTagController`), as well as the port that the http server binds to (`--port`, default 8000).
 
-### Controller status
+### Controller information
 
 Information about the controller and commands that can be sent. The name for the controller is present under the key `controller`, the number of outputs is given as an integer under the key `outputs`. Command rates are specified on the key `commandRate`, this object has entries for both the `combined` and `perOutput` rates.
 
 The physical device information is provided, the `type` of this is always provided, other keys for this are present dependant on the type of the attached hardware.
 
 For transitions, the action, layer blending method, and transition envelope can be configured. The available values for these can be gathered from the API output. The keys `layerBlenders`, `outputActions` and `transitionEnvelopes` have the information for this.
+
+The controller information can be retrieved from `/api`.
 
 ```json
 {
@@ -63,40 +65,55 @@ For transitions, the action, layer blending method, and transition envelope can 
 }
 ```
 
-### Output status
+### Output information
 
-The current color information for each of the outputs can be requested. This will return an object with the current mixed color of the output (as RGB array and hex string) and the number of layers on the strip. In the output object also lives an array with all layer information. For each layer, the color, opacity, transition envelope and blend method are listed:
+The current color information for each of the outputs can be requested. This will return an array of all outputs on the controller. For each of the outputs the following information will be provided:
+
+* `layerCount`: The number of layers in this output, slightly easier than getting the length of `layers`
+* `layers`: Detailed information for each of the layers in this output, looks like this:
+ * `colorHex`: Current color of the layer as hex string
+ * `colorRgb`: As above, but as array of red, green and blue intensity (0-255)
+ * `opacity`: Opacity of the layer, the fraction with which it blends over the layer under it
+ * `blender`: Blend function that is used
+ * `envelope`: Transition envelope function; Determines how the color/opacity transition eases in
+* `mixedColorHex`: Resulting color after blending all layers, as hex string
+* `mixedColorRgb`: As above, but as array of red, green and blue intensity (0-255)
+* `outputNumber`: The output index (0-based)
+
+Output information can be retrieved from `/api/outputs` and would look like this for a single output with three layers:
 
 ```json
-{
-  "mixedColorHex": "#3eb4ce",
-  "layers": [
-    {
-      "colorHex": "#6acfe3",
-      "opacity": 1,
-      "colorRgb": [106, 207, 227],
-      "envelope": "CosineEnvelope",
-      "blender": "LabAverage"
-    },
-    {
-      "colorHex": "#000000",
-      "opacity": 0,
-      "colorRgb": [0, 0, 0],
-      "envelope": "CosineEnvelope",
-      "blender": "LabAverage"
-    },
-    {
-      "colorHex": "#000000",
-      "opacity": 0,
-      "colorRgb": [0, 0, 0],
-      "envelope": "CosineEnvelope",
-      "blender": "LabAverage"
-    }
-  ],
-  "outputNumber": 0,
-  "layerCount": 3,
-  "mixedColorRgb": [62, 180, 206]
-}
+[
+  {
+    "layerCount": 3,
+    "layers": [
+      {
+        "colorHex": "#6acfe3",
+        "colorRgb": [106, 207, 227],
+        "opacity": 1,
+        "blender": "LabAverage",
+        "envelope": "CosineEnvelope"
+      },
+      {
+        "colorHex": "#000000",
+        "colorRgb": [0, 0, 0],
+        "opacity": 0,
+        "blender": "LabAverage",
+        "envelope": "CosineEnvelope"
+      },
+      {
+        "colorHex": "#000000",
+        "colorRgb": [0, 0, 0],
+        "opacity": 0,
+        "blender": "LabAverage",
+        "envelope": "CosineEnvelope"
+      }
+    ],
+    "mixedColorHex": "#6acfe3",
+    "mixedColorRgb": [106, 207, 227],
+    "outputNumber": 0
+  }
+]
 ```
 
 ### Sending commands
