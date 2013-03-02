@@ -36,6 +36,8 @@
       width: 45px;
       height: 159px;
       border: 1px solid #000;
+      transition: background-color 150ms linear;
+      -webkit-transition: background-color 150ms linear;
     }
     .output .layers {
       position: absolute;
@@ -53,6 +55,8 @@
       width: 45px;
       height: 45px;
       border: 1px solid #000;
+      transition: background-color 150ms linear;
+      -webkit-transition: background-color 150ms linear;
     }
     .output .layer ul {
       margin-top: 4px;
@@ -77,7 +81,7 @@
           createOutput(outputStruct, previewNode, index);
         }
         // Update periodically
-        setInterval(updateLightbox(), 100);
+        setInterval(updateLightbox(), 150);
       }
 
       function createOutput(outputStruct, previewNode, outputIndex) {
