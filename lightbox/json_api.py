@@ -11,6 +11,7 @@ __version__ = '2.0'
 import BaseHTTPServer
 import cgi
 import datetime
+import mimetypes
 import os
 import simplejson
 import sys
@@ -30,32 +31,48 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       return self.ControllerInfo()
     elif path == '/api/outputs':
       return self.OutputInfo()
-    return self.ErrorResponse('No path %r. Try the root please.' % path)
+    elif path.startswith('/static/'):
+      return self.ServeStatic()
+    return self._ErrorResponse('No path %r. Try the root please.' % path)
 
-  def ErrorResponse(self, error):
+  def _ErrorResponse(self, error):
     """Something didn't quite go as planned, let's tell the client something."""
     self.send_response(400)
     self.send_header('content-type', 'text/plain')
     self.end_headers()
     self.wfile.write(error)
 
-  def HtmlResponse(self, data):
-    """Successful request, send a response to the client as HTML."""
+  def _JsonResponse(self, data):
+    """Successful request, send response to client as JSON."""
+    return self._SuccessResponse(simplejson.dumps(data), 'application/json')
+
+  def _SuccessResponse(self, data, content_type):
+    """Returns a 200 OK with the given data and content-type."""
     self.send_response(200)
-    self.send_header('content-type', 'text/html')
+    self.send_header('content-type', content_type)
     self.end_headers()
     self.wfile.write(data)
 
-  def JsonResponse(self, data):
-    """Successful request, send response to client as JSON."""
-    self.send_response(200)
-    self.send_header('content-type', 'application/json')
-    self.end_headers()
-    self.wfile.write(simplejson.dumps(data))
-
   def ControllerInfo(self):
     """Returns a JSON object with controller information."""
-    self.JsonResponse(self.server.box.Info())
+    self._JsonResponse(self.server.box.Info())
+
+  def ServeStatic(self):
+    """Returns files from the 'static' directory."""
+    requested = os.path.abspath(self.path)
+    print '** REQUESTED: %r' % requested
+    if not requested.startswith('/static'):
+      return self._ErrorResponse('Request not permitted: %r' % self.path)
+    static_path = os.path.join(os.path.dirname(__file__), requested[1:])
+    print '** STATIC PATH: %r' % static_path
+    try:
+      with file(static_path) as static_file:
+        content_type, _encoding = mimetypes.guess_type(static_path)
+        if not content_type:
+          content_type = 'text/plain'
+        return self._SuccessResponse(static_file.read(), content_type)
+    except IOError:
+      return self._ErrorResponse('File not found: %r' % self.path)
 
   def OutputInfo(self):
     """Returns a JSON object with Lightbox output information."""
@@ -67,18 +84,19 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           'mixedColorHex': '#%02x%02x%02x' % tuple(output.color),
           'layerCount': len(output.layers),
           'layers': list(LayerReport(output))})
-    self.JsonResponse(outputs)
+    self._JsonResponse(outputs)
 
   def FormRender(self, prefill=''):
     """Returns a page with a simple HTML form for manual Lightbox controls."""
     form_path = os.path.join(os.path.dirname(__file__), 'api.html')
     with file(form_path) as form_page:
-      return self.HtmlResponse(form_page.read() % HtmlEscape(prefill))
+      return self._SuccessResponse(
+          form_page.read() % HtmlEscape(prefill), 'text/html')
 
   def do_POST(self):
     """Processes Lightbox controls via JSON."""
     if self.path not in ('/', '/api'):
-      return self.ErrorResponse('No path %r. Try the root please.' % path)
+      return self._ErrorResponse('No path %r. Try the root please.' % self.path)
     form = cgi.FieldStorage(
         self.rfile, self.headers, environ={'REQUEST_METHOD': 'POST'})
     try:
@@ -91,7 +109,7 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         form_content = simplejson.dumps(json, sort_keys=True, indent='  ')
         return self.FormRender(form_content)
     except Exception, error:
-      return self.ErrorResponse(str(error))
+      return self._ErrorResponse(str(error))
 
   def ProcessCommand(self, api_command):
     """Performs the given command on the Lightbox instance.

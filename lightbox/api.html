@@ -3,127 +3,15 @@
   <head>
     <title>Lightbox JSON API</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <style type='text/css'>
-    html, body {
-      font-family: Arial, sans-serif;
-    }
-    #preview ul,
-    #preview ol {
-      margin: 0;
-      padding: 0;
-    }
-    #preview {
-      overflow: auto;
-    }
-    .output {
-      position: relative;
-      float: left;
-      width: 195px;
-      height: 190px;
-      margin-right: 20px;
-      padding: 5px;
-      border: 2px solid #777;
-      border-radius: 10px;
-      overflow: auto;
-    }
-    .output strong {
-      margin-left: 20px;
-    }
-    .output .mixed {
-      position: absolute;
-      right: 10px;
-      bottom: 10px;
-      width: 45px;
-      height: 159px;
-      border: 1px solid #000;
-      transition: background-color 150ms linear;
-      -webkit-transition: background-color 150ms linear;
-    }
-    .output .layers {
-      position: absolute;
-      bottom: 10px;
-      left: 5px;
-      width: 133px;
-      list-style: none;
-    }
-    .output .layer {
-      margin-top: 10px;
-      overflow: auto;
-    }
-    .output .layer .color {
-      float: right;
-      width: 45px;
-      height: 45px;
-      border: 1px solid #000;
-      transition: background-color 150ms linear;
-      -webkit-transition: background-color 150ms linear;
-    }
-    .output .layer ul {
-      margin-top: 4px;
-      list-style: none;
-      font-size: 10px;
-    }
-    </style>
+    <link type="text/css" rel="stylesheet" media="screen" href="/static/lightbox.css" />
   </head>
   <body>
-    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="/static/jquery-1.9.1.min.js"></script>
+    <script src="/static/lightbox.js"></script>
     <script>
       $(document).ready(function() {
         $.getJSON('/api', createLightbox);
       });
-
-      function createLightbox(controller) {
-        var previewNode = $('#preview'),
-            outputStruct = $('.output').detach();
-
-        // Create a number ouf live view outputs corresponding to the hardware
-        for(var index = 0; index < controller.outputCount; index++) {
-          createOutput(outputStruct, previewNode, index);
-        }
-        // Update periodically
-        setInterval(updateLightbox(), 150);
-      }
-
-      function createOutput(outputStruct, previewNode, outputIndex) {
-        // Adds an output to the previewNode
-        var outputNode = outputStruct.clone();
-        outputNode.find('strong').text('Output ' + outputIndex);
-        previewNode.append(outputNode);
-      }
-
-      function updateLightbox() {
-        outputNodes = $('#preview .output');
-        return function() {
-          // Updates the complete live view with current data from the API
-          $.getJSON('/api/outputs', function (outputs) {
-            outputNodes.each(updateOutput(outputs));
-          });
-        }
-      }
-
-      function updateOutput(outputs) {
-        // Updates the mixed color and layer information for a single output
-        return function(outputIndex) {
-          var outputJson = outputs[outputIndex],
-              outputNode = $(this);
-          outputNode.find('.mixed').css('background-color',
-                                        outputJson.mixedColorHex);
-          outputNode.find('.layer').each(updateLayerInfo(outputJson));
-        }
-      }
-
-      function updateLayerInfo(outputJson) {
-        // Updates the color and assorted information for a single output layer
-        return function(listIndex) {
-          var currentLayer = outputJson.layerCount - 1 - listIndex,
-              layerJson = outputJson.layers[currentLayer],
-              layerNode = $(this);
-          layerNode.find('.color').css('background-color', layerJson.colorHex);
-          layerNode.find('.blender').text(layerJson.blender);
-          layerNode.find('.envelope').text(layerJson.envelope);
-          layerNode.find('.opacity').text(Math.round(layerJson.opacity * 100));
-        }
-      }
     </script>
     <h1>Lightbox JSON API</h1>
     <p>Lightbox was originally developed for the <a href="http://twitterboom.nl">Twitterboom</a>, which was demonstrated to the public during the Christmas season of 2011 in the public library of Leeuwarden, the hometown of <a href="http://frack.nl/wiki/">Frack</a>.</p>

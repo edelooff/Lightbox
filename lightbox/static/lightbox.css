@@ -1,0 +1,60 @@
+html,
+body {
+  font-family: Arial, sans-serif;
+}
+#preview ul,
+#preview ol {
+  margin: 0;
+  padding: 0;
+}
+#preview {
+  overflow: auto;
+}
+.output {
+  position: relative;
+  float: left;
+  width: 195px;
+  height: 190px;
+  margin: 0 20px 20px 0;
+  padding: 5px;
+  border: 2px solid #777;
+  border-radius: 10px;
+  overflow: auto;
+}
+.output strong {
+  margin-left: 20px;
+}
+.output .mixed {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 45px;
+  height: 159px;
+  border: 1px solid #000;
+  transition: background-color 150ms linear;
+  -webkit-transition: background-color 150ms linear;
+}
+.output .layers {
+  position: absolute;
+  bottom: 10px;
+  left: 5px;
+  width: 133px;
+  list-style: none;
+}
+.output .layer {
+  margin-top: 10px;
+  overflow: auto;
+}
+.output .layer .color {
+  float: right;
+  width: 45px;
+  height: 45px;
+  border: 1px solid #000;
+  transition: background-color 150ms linear;
+  -webkit-transition: background-color 150ms linear;
+}
+.output .layer ul {
+  margin-top: 4px;
+  list-style: none;
+  font-size: 10px;
+}
