@@ -26,7 +26,7 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """Very basic request router."""
     path = self.path
     if path == '/':
-      return self.FormRender()
+      return self._Redirect('/static/api.html')
     elif path == '/api':
       return self.ControllerInfo()
     elif path == '/api/outputs':
@@ -52,6 +52,13 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     self.send_header('content-type', content_type)
     self.end_headers()
     self.wfile.write(data)
+
+  def _Redirect(self, location, code=301):
+    """Redirects the client to the new location."""
+    self.send_response(code)
+    self.send_header('location', location)
+    self.end_headers()
+    self.wfile.write(location)
 
   def ControllerInfo(self):
     """Returns a JSON object with controller information."""
@@ -86,13 +93,6 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           'layers': list(LayerReport(output))})
     self._JsonResponse(outputs)
 
-  def FormRender(self, prefill=''):
-    """Returns a page with a simple HTML form for manual Lightbox controls."""
-    form_path = os.path.join(os.path.dirname(__file__), 'api.html')
-    with file(form_path) as form_page:
-      return self._SuccessResponse(
-          form_page.read() % HtmlEscape(prefill), 'text/html')
-
   def do_POST(self):
     """Processes Lightbox controls via JSON."""
     if self.path not in ('/', '/api'):
@@ -105,9 +105,7 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         map(self.ProcessCommand, json)
       else:
         self.ProcessCommand(json)
-      if self.path == '/':
-        form_content = simplejson.dumps(json, sort_keys=True, indent='  ')
-        return self.FormRender(form_content)
+      self._Redirect(self.path, code=303)  # Redirect after successful POST
     except Exception, error:
       return self._ErrorResponse(str(error))
 
