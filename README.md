@@ -118,7 +118,7 @@ Output information can be retrieved from `/api/outputs` and would look like this
 
 ### Sending commands
 
-Send commands to `/api` using HTTP POST. The `json` parameter should contain a single JSON object, or an array of objects. Each object targets an output and layer and defines a new color and/or opacity. Envelope and blend method may optionally be provided. Any optional argument that is not provided defaults to the currently existing (that is, not defining a color, only an opacity leaves the color unchanged). The `steps` key on the transition object indicates how fast or smooth the transition should happen.
+Send commands to `/api` using HTTP POST. The `json` parameter should contain a single JSON object, or an array of objects. Each object describes a single transition for an `output` + `layer` combination. Transitions should generally specify a `color` and/or an `opacity` to transition to. Additionally, a number of `steps` should be defined, unless an immediate (single-step) transition is desired.
 
 Example to set the second output to teal:
 
@@ -126,7 +126,50 @@ Example to set the second output to teal:
 {
     "output": 1,
     "color": [0, 200, 200],
-    "opacity": 1,
     "steps": 40
 }
 ```
+
+#### `output`
+
+An integer to select the output for the transition. If none is provided, this defaults to the first output (`0`).
+
+#### `layer`
+
+An integer to select the layer for the transition. Layers are stacked on top of each other, with zero being the bottom layer. Additional layers are added on top of this and the resulting mixed color is based on the opacity and blend function. This defaults to the bottom layer (`0`).
+
+#### `color`
+
+An array of 3 integers (0-255) or a hex color string. This is the target color for the transition. Both the colo and the lightness will smoothly over the course of the transition. If the `color` argument is not provided, the color of the layer will remain the same.
+
+#### `opacity`
+
+A number (`float` or `int`) that should be the opacity at the end of the transition. The opacity change is performed smoothly over the course of the transition. If the `opacity` argument is not provided, the opacity of the layer will remain the same.
+
+#### `steps`
+
+This specifies the number of steps in which the transition will take place. The actual duration of the transition cannot be specified, but the per-output command rate can be gotten from the controller information API. Using this, animations can be carefully timed. If no `steps` argument is provided, the transition will occur in a single step.
+
+#### `action`
+
+The type of transition that should be performed. A list of actions can be retrieved using the controller information API.
+
+* The default action is `Fade`, which fades from the current color and opacity to the given.
+* The second action is `Blink` which causes a fade towards the given color and opacity, and then back to the original color and opacity. The steps argument is used as the number of steps for each fade in the action. A complete blink with `steps=10` takes 20 steps in total.
+* A third action `Constant` immediately changes the color and opacity to the given values, the number of steps then indicates the minimum amount of time that the layer stays like that.
+
+##### `count`
+
+For `Blink` actions, this sets the number of blinks, defaulting to one. When the number of blinks is increased with the same number of steps, the transition will take longer. A `Blink` transition with `steps=10` and `count=3` will take 60 steps (10 * 3 * 2).
+
+#### `envelope`
+
+Selects an envelope function to use for the transition. These are also known as "easings", and a list of available options can be gotten from the controller information API. When not provided, the last selected transition for the layer is used, the initial envelope function is `CosineEnvelope`.
+
+#### `blender`
+
+Selects a blender function with which to blend this layer over the one below it. The opacity of the layer determines how much this layer affects the one below it. A list of available blend functions can be gotten from the controller information API.
+
+**N.B.**: Changing blenders should generally not be done at opacities above zero, as they will result in immediate blended color changes. The exception here are the `average` blend methods, which can be changed between at full opacity without sudden shifts.
+
+When not provided, the blend function remains the same, and the initial blender is `LabAverage`.
