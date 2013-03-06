@@ -67,11 +67,9 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   def ServeStatic(self):
     """Returns files from the 'static' directory."""
     requested = os.path.abspath(self.path)
-    print '** REQUESTED: %r' % requested
     if not requested.startswith('/static'):
       return self._ErrorResponse('Request not permitted: %r' % self.path)
     static_path = os.path.join(os.path.dirname(__file__), requested[1:])
-    print '** STATIC PATH: %r' % static_path
     try:
       with file(static_path) as static_file:
         content_type, _encoding = mimetypes.guess_type(static_path)
@@ -105,9 +103,12 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         map(self.ProcessCommand, json)
       else:
         self.ProcessCommand(json)
-      self._Redirect(self.path, code=303)  # Redirect after successful POST
     except Exception, error:
       return self._ErrorResponse(str(error))
+    if self.path == '/':
+      return self._Redirect('/', code=303)  # Redirect after successful POST
+    self.send_response(200)
+    self.end_headers()
 
   def ProcessCommand(self, api_command):
     """Performs the given command on the Lightbox instance.

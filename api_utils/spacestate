@@ -33,11 +33,11 @@ def SpaceOpened(outputs, layer):
 
 def SpaceStateIndicator(host, port, layer, proxy=False):
   """Listens for SpaceAnnounces and plays animations on space-state changes."""
-  api_address = 'http://%s:%d' % (host, port)
+  api_address = 'http://%s:%d/api' % (host, port)
   receiver = transponder.ProxyReceiver() if proxy else transponder.Receiver()
   for announce in receiver:
     if announce['domain_global'] == 0 and announce['domain_local'] == 0:
-      outputs = requests.get(api_address + '/api').json()['outputCount']
+      outputs = requests.get(api_address).json()['outputCount']
       if announce['message'][0] == 'opened':
         commands = list(SpaceOpened(outputs, layer))
       else:

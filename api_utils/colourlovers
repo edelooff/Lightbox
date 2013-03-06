@@ -17,9 +17,9 @@ PALETTE_FEED = ('http://www.colourlovers.com/api/'
 
 def ColourLovers(host, port, interval, layer):
   """Downloads color palettes from the web and displays them on the Lightbox."""
-  api_address = 'http://%s:%d' % (host, port)
+  api_address = 'http://%s:%d/api' % (host, port)
   while True:
-    info = requests.get(api_address + '/api').json()
+    info = requests.get(api_address).json()
     outputs = info['outputCount']
     for palette in requests.get(PALETTE_FEED).json():
       # Make sure we have enough palette colors to colorize all outputs

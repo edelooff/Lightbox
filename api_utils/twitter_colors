@@ -83,7 +83,7 @@ def ColorFromMessage(string, color_mapping=None):
 
 def TwitterColors(host, port, hashtags, delay, layer):
   """Updated Lightbox outputs based on tweets posted on configured hashtags."""
-  api_address = 'http://%s:%d' % (host, port)
+  api_address = 'http://%s:%d/api' % (host, port)
   print 'Running Twitter search plugin for Lightbox API ...'
   print 'Hashtags we\'re searching: %s' % ', '.join(hashtags)
   tweet_queue = Queue.Queue()
@@ -92,7 +92,7 @@ def TwitterColors(host, port, hashtags, delay, layer):
     tweet, color, source = tweet_queue.get()
     print '\nNew color: [%s] (based on %s) (%d remaining)\nTWEET: %s' % (
         color, source, tweet_queue.qsize(), tweet)
-    outputs = requests.get(api_address + '/api').json()['outputCount']
+    outputs = requests.get(api_address).json()['outputCount']
     command = {'output': iteration % outputs,
                'layer': layer,
                'color': color,
