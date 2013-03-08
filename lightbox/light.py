@@ -62,8 +62,8 @@ class Output(object):
 
   def next(self):
     """Returns the combined next color for the output."""
-    color = 0, 0, 0
-    for layer in self:
+    color, _opacity = next(self[0])
+    for layer in self[1:]:
       color = layer.NextBlendedColor(color)
     return color
 
