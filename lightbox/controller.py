@@ -54,7 +54,6 @@ class BaseController(list):
     """Initializes the BaseController for Lightbox."""
     super(BaseController, self).__init__()
     self.gamma_table = utils.GammaCorrectionList(gamma)
-    print self.gamma_table
     self.last_output_id = -1
     self.lock = threading.Lock()
     self.output_cls = output_cls
@@ -267,9 +266,9 @@ class JTagController(BaseController):
   * Every five seconds (though actual timeout occurs after ten), a 'heartbeat'
     should be sent. This consists of a capital 'H' followed by a CR-LF.
   """
-  ALL_OUTPUTS = '#%d,%d,%d\r\n'
-  ONE_OUTPUT = '$%d,%d,%d,%d\r\n'
-  HEARTBEAT = 'H\r\n'
+  ALL_OUTPUTS = '#%d,%d,%d\n'
+  ONE_OUTPUT = '$%d,%d,%d,%d\n'
+  HEARTBEAT = 'H\n'
   RESPONSE = 'R\r\n'
 
   def _CommandSetAll(self, *colors):

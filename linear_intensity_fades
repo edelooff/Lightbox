@@ -1,0 +1,57 @@
+#!/usr/bin/python
+"""Slowly fades all outputs between black and white continuously.
+
+This is a simple script to test whether the non-linear response to luminance
+ by the human eye is properly corrected for.
+"""
+__author__ = 'Elmer de Looff <elmer@underdark.nl>'
+__version__ = '1.0'
+
+# Standard modules
+import random
+import time
+
+# Custom modules
+from lightbox import controller
+from lightbox import utils
+
+# Controller and LED color init values
+DARK = 0, 0, 0
+BRIGHT = 255, 255, 255
+
+
+def Demo(controller_name):
+  """Sweeping from low to high brightness and back, continuously."""
+  print 'Black and white sweeps.\n'
+  print 'Initiating controller %r ...\n' % controller_name
+  box = getattr(controller, controller_name).FirstDevice()
+  for output in box:
+    output.outpower = int
+  while True:
+    for output in box:
+      output.Fade(color=BRIGHT, opacity=1, steps=50)
+    time.sleep(1)
+    for output in box:
+      output.Fade(color=DARK, opacity=1, steps=50)
+    time.sleep(1)
+
+
+def main():
+  """Processes commandline input to setup the demo."""
+  import optparse
+  import sys
+  parser = optparse.OptionParser()
+  parser.add_option('-c', '--controller', default='JTagController',
+                    help='Controller class to instantiate.')
+  options, _arguments = parser.parse_args()
+  try:
+    Demo(options.controller)
+  except controller.ConnectionError:
+    sys.exit('ABORT: Could not find a suitable device.')
+
+
+if __name__ == '__main__':
+  try:
+    main()
+  except KeyboardInterrupt:
+    print '\nEnd of demonstration.'
