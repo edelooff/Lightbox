@@ -207,7 +207,6 @@ class BaseController(list):
 
   def _Verify(self):
     """Verifies the repsonse received from the hardware is correct."""
-    raise NotImplementedError
 
 
 class Dummy(BaseController):
@@ -216,6 +215,8 @@ class Dummy(BaseController):
   This is useful for testing all the other parts of Lightbox when the required
   hardware is not available.
   """
+  VERIFY_COMMAND = False
+
   @classmethod
   def FirstDevice(cls, outputs=5):
     """Returns a functional Dummy controller."""
@@ -224,10 +225,10 @@ class Dummy(BaseController):
   def _Command(self, _command):
     """Dummy controller doesn't perform commands."""
 
-  def _CommandSetAll(self, color):
+  def _CommandSetAll(self, *color):
     """Dummy controller doesn't perform commands."""
 
-  def _CommandSetSingle(self, ident, color):
+  def _CommandSetSingle(self, *args):
     """Dummy controller doesn't perform commands."""
 
   def _Connect(self, conn_info):
@@ -243,9 +244,6 @@ class Dummy(BaseController):
 
   def _Heartbeat(self):
     """Dummy controller has no heartbeat."""
-
-  def _Verify(self):
-    """Dummy controller doesn't verify."""
 
 
 class JTagController(BaseController):
