@@ -21,14 +21,11 @@ class Output(object):
 
   Allows color changing using the associated controller.
   """
-  def __init__(self, controller, output_id, **kwds):
+  def __init__(self, controller, output_id, layers=3):
     self.color = 0, 0, 0
     self.controller = controller
     self.output_id = output_id
-    # Output power adjuster, layers and ticker updater.
-    layers = max(1, kwds.get('layers', 3))
-    self.layers = [Layer() for _number in range(layers)]
-    self.outpower = kwds.get('outpower', utils.SoftQuadraticPower)
+    self.layers = [Layer() for _number in range(max(1, layers))]
     self.ticker = OutputTicker(self._WriteNextColor)
 
   # ############################################################################
@@ -95,8 +92,7 @@ class Output(object):
     new_color = next(self)
     if new_color != self.color:
       self.color = new_color
-      adjusted_color = map(int, map(self.outpower, new_color))
-      self.controller.SetSingle(self.output_id, adjusted_color)
+      self.controller.SetSingle(self.output_id, new_color)
     self._WaitForTick(begin_time)
 
   # ############################################################################

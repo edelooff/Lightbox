@@ -48,9 +48,13 @@ class Heartbeat(threading.Thread):
 
 class BaseController(list):
   """Base class for a Lightbox controller."""
-  def __init__(self, conn_info, outputs=5, output_cls=light.Output):
+  VERIFY_COMMAND = True
+
+  def __init__(self, conn_info, outputs=5, output_cls=light.Output, gamma=1):
     """Initializes the BaseController for Lightbox."""
     super(BaseController, self).__init__()
+    self.gamma_table = utils.GammaCorrectionList(gamma)
+    print self.gamma_table
     self.last_output_id = -1
     self.lock = threading.Lock()
     self.output_cls = output_cls
@@ -95,7 +99,8 @@ class BaseController(list):
         pass
     raise ConnectionError('No suitable device found :(')
 
-  def _Connect(self, conn_info):
+  @staticmethod
+  def _Connect(conn_info):
     """Connects to the given serial device."""
     try:
       conn = serial.Serial(port=conn_info['device'],
@@ -156,7 +161,7 @@ class BaseController(list):
   # ############################################################################
   # Command options for the hardware
   #
-  def Command(self, command, verify=True):
+  def Command(self, command, verify=VERIFY_COMMAND):
     """Send the command to the serial device and wait for the confirmation."""
     with self.lock:
       self._Command(command)
@@ -165,11 +170,12 @@ class BaseController(list):
 
   def SetAll(self, color):
     """Sets the color for all outputs."""
-    raise NotImplementedError
+    self.Command(self._CommandSetAll(*[self.gamma_table[i] for i in color]))
 
-  def SetSingle(self, ident, color):
+  def SetSingle(self, output, color):
     """Sets the color for a single numbered output."""
-    raise NotImplementedError
+    self.Command(self._CommandSetSingle(
+        output, *[self.gamma_table[i] for i in color]))
 
   # ############################################################################
   # Methods to be implemented or overridden by subclasses
@@ -180,6 +186,14 @@ class BaseController(list):
       self.connection.write(command)
     except serial.SerialException:
       raise ConnectionError('Could not send command.')
+
+  def _CommandSetAll(self, red, green, blue):
+    """Returns the command that sets all outputs to the same color."""
+    raise NotImplementedError
+
+  def _CommandSetSingle(self, output, red, green, blue):
+    """Returns the command that sets a single output to a given color."""
+    raise NotImplementedError
 
   def _DetectFrequency(self):
     """Routine to auto-detect the frequency of the attached controller.
@@ -211,6 +225,12 @@ class Dummy(BaseController):
   def _Command(self, _command):
     """Dummy controller doesn't perform commands."""
 
+  def _CommandSetAll(self, color):
+    """Dummy controller doesn't perform commands."""
+
+  def _CommandSetSingle(self, ident, color):
+    """Dummy controller doesn't perform commands."""
+
   def _Connect(self, conn_info):
     """Connecting to a Dummy controller never fails to connect."""
 
@@ -227,12 +247,6 @@ class Dummy(BaseController):
 
   def _Verify(self):
     """Dummy controller doesn't verify."""
-
-  def SetAll(self, color):
-    """Dummy controller doesn't perform commands."""
-
-  def SetSingle(self, ident, color):
-    """Dummy controller doesn't perform commands."""
 
 
 class JTagController(BaseController):
@@ -254,8 +268,17 @@ class JTagController(BaseController):
     should be sent. This consists of a capital 'H' followed by a CR-LF.
   """
   ALL_OUTPUTS = '#%d,%d,%d\r\n'
+  ONE_OUTPUT = '$%d,%d,%d,%d\r\n'
   HEARTBEAT = 'H\r\n'
   RESPONSE = 'R\r\n'
+
+  def _CommandSetAll(self, *colors):
+    """Sets all outputs to the same color."""
+    return self.ALL_OUTPUTS % colors
+
+  def _CommandSetSingle(self, *args):
+    """Sets a single output to a given color."""
+    return self.ONE_OUTPUT % args
 
   def _Connect(self, conn_info):
     """Returns a tested and confirmed serial connection to the hardware.
@@ -293,11 +316,3 @@ class JTagController(BaseController):
     if response != self.RESPONSE:
       raise ConnectionError('Incorrect acknowledgment: expected %r got: %r.' % (
           self.RESPONSE, response))
-
-  def SetAll(self, color):
-    """Sets all outputs to the same color."""
-    self.Command(self.ALL_OUTPUTS % tuple(color))
-
-  def SetSingle(self, output, color):
-    """Sets a single output to a given color."""
-    self.Command('$%d,%s\r\n' % (output, ','.join(map(str, color))))

@@ -114,11 +114,28 @@ def LinearEnvelope(steps):
 
 
 # ##############################################################################
-# Output power adjustment functions
+# Gamma correction table creation
 #
-def SoftQuadraticPower(power):
-  """Adjusts the output power to the non-linearity of the LED outputs."""
-  return pow(power, 1.8) / 99 + .15 * power
+def GammaCorrectionList(gamma, in_bits=8, out_bits=8):
+  """Returns a gamma-corrected list of level -> intensity
+
+  The human eye reacts to changes in luminance in a non-linear fashion. To make
+  each level change appear similar, we need to correct for this. A typical gamma
+  factor that works for human eyes is 2.2.
+
+  Arguments:
+    @ gamma: float
+      The gamma factor to calculate the list with. This would typically be 2.2.
+    % in_bits: int ~~ 8
+      The number of level bits, which determines the size of the output list
+    % out_bits: int ~~ 8
+      The number out intensity bits that are available on the hardware that
+      the instructions are sent to.
+  """
+  scale_in = float(2 ** in_bits)
+  scale_out = 2 ** out_bits
+  gamma_func = lambda level: math.ceil(pow(level / scale_in, gamma) * scale_out)
+  return map(int, map(gamma_func, range(2 ** in_bits)))
 
 
 # ##############################################################################
