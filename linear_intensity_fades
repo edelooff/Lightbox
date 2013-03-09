@@ -29,11 +29,11 @@ def Demo(controller_name):
     FadeOutputs(box, '#000')
 
 
-def FadeOutputs(box, color):
+def FadeOutputs(box, color, steps=50):
   """Fades all outputs to the given color and waits for it to complete."""
   for output in box:
-    output.Fade(color=color, steps=50)
-  time.sleep(50 / (float(box.frequency) / len(box)))
+    output.Fade(color=color, steps=steps)
+  time.sleep(steps / (float(box.frequency) / len(box)))
 
 
 def main():
