@@ -84,7 +84,7 @@ void messageAllOutputs(void) {
 void messageSingleOutput(void) {
   byte receivedByte, red, green, blue, output;
   if (readByte(receivedByte, characterTimeout) && receivedByte == '\x04')
-    if (readByte(output, characterTimeout) && output < 6 &&
+    if (readByte(output, characterTimeout) && output < 5 &&
         readByte(red, characterTimeout) &&
         readByte(green, characterTimeout) &&
         readByte(blue, characterTimeout))
