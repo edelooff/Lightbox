@@ -48,19 +48,21 @@ class Heartbeat(threading.Thread):
 
 class BaseController(list):
   """Base class for a Lightbox controller."""
+  FREQUENCY = 100
+  GAMMA = 1
+  OUTPUTS = 5
   VERIFY_COMMAND = True
 
-  def __init__(self, conn_info, outputs=5, output_cls=light.Output, gamma=1):
+  def __init__(self, conn_info, **kwds):
     """Initializes the BaseController for Lightbox."""
     super(BaseController, self).__init__()
-    self.gamma_table = utils.GammaCorrectionList(gamma)
+    self.gamma_table = utils.GammaCorrectionList(kwds.get('gamma', self.GAMMA))
     self.last_output_id = -1
     self.lock = threading.Lock()
-    self.output_cls = output_cls
+    self.output_cls = kwds.get('output_cls', light.Output)
     self.connection = self._Connect(conn_info)
-    self.frequency = self._DetectFrequency()
-    Heartbeat(self._Heartbeat)
-    for _num in range(outputs):
+    self.frequency = kwds.get('frequency', self.FREQUENCY)
+    for _num in range(kwds.get('outputs', self.OUTPUTS)):
       self.Add()
 
   # ############################################################################
@@ -194,17 +196,6 @@ class BaseController(list):
     """Returns the command that sets a single output to a given color."""
     raise NotImplementedError
 
-  def _DetectFrequency(self):
-    """Routine to auto-detect the frequency of the attached controller.
-
-    This works for devices that give an acknowledgment of the given command.
-    """
-    raise NotImplementedError
-
-  def _Heartbeat(self):
-    """Command that is executed by the heartbeat thread if it operates."""
-    raise NotImplementedError
-
   def _Verify(self):
     """Verifies the repsonse received from the hardware is correct."""
 
@@ -234,16 +225,9 @@ class Dummy(BaseController):
   def _Connect(self, conn_info):
     """Connecting to a Dummy controller never fails to connect."""
 
-  def _DetectFrequency(self):
-    """Dummy controller has a set frequency."""
-    return 100
-
   def _DeviceInfo(self):
     """Device info for the dummy is short and sweet."""
     return {'type': 'dummy'}
-
-  def _Heartbeat(self):
-    """Dummy controller has no heartbeat."""
 
 
 class JTagController(BaseController):
@@ -268,6 +252,11 @@ class JTagController(BaseController):
   ONE_OUTPUT = '$%d,%d,%d,%d\n'
   HEARTBEAT = 'H\n'
   RESPONSE = 'R\r\n'
+
+  def __init__(self, *args, **kwds):
+    super(JTagController, self).__init__(*args, **kwds)
+    self.frequency = self._DetectFrequency()
+    Heartbeat(self._Heartbeat)
 
   def _CommandSetAll(self, *colors):
     """Sets all outputs to the same color."""
@@ -313,3 +302,51 @@ class JTagController(BaseController):
     if response != self.RESPONSE:
       raise ConnectionError('Incorrect acknowledgment: expected %r got: %r.' % (
           self.RESPONSE, response))
+
+
+class NewController(BaseController):
+  """Lightbox controller optimized for minimal serial communication.
+
+  The controller accepts commands over a 57k6 serial connection. The protocol
+  for this controller is binary, as opposed to the human readable for the
+  JTagController. The controller accepts two different commands, in TLV format:
+
+  The first byte indicates the TYPE of command. The type value to set all
+  outputs to a single color is `0x01`. The command to set a single output to a
+  color is `0x02`.
+
+  Following this type value is the LENGTH of the data. To set all outputs, three
+  color bytes must follow and the length value is `0x03`. For single-output
+  commands, the payload is 4 bytes (output, red, green, blue) and the length
+  value comes out as `0x04`.
+
+  Output and color values are written as single bytes in the range 0-4 and 0-255
+  respectively.
+
+  Commands may be at most 1000ms apart. After 10 missed commands (timeouts) the
+  outputs on the controller turn dark. If individual characters in a command are
+  more than 10ms apart, the command is discarded and retransmission must begin.
+
+  Note that there are NO confirmations by the hardware. This maximizes
+  throughput but reduces the opportunity for debugging.
+  """
+  FREQUENCY = 200
+  ALL_OUTPUTS = '\x01\x03%c%c%c'
+  ONE_OUTPUT = '\x02\x04%c%c%c%c'
+
+  def _CommandSetAll(self, *colors):
+    """Sets all outputs to the same color."""
+    return self.ALL_OUTPUTS % colors
+
+  def _CommandSetSingle(self, *args):
+    """Sets a single output to a given color."""
+    return self.ONE_OUTPUT % args
+
+  def _Connect(self, conn_info):
+    """Returns a tested and confirmed serial connection to the hardware.
+
+    We're waiting for a second after opening the device, this is because the
+    LED controller needs some time before it behaves properly.
+    """
+    conn_info['baudrate'] = 57600
+    return super(NewController, self)._Connect(conn_info)
