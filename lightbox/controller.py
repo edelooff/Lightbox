@@ -104,12 +104,10 @@ class BaseController(list):
   def _Connect(conn_info):
     """Connects to the given serial device."""
     try:
-      conn = serial.Serial(port=conn_info['device'],
-                           baudrate=conn_info.get('baudrate', 9600),
-                           timeout=conn_info.get('timeout', .5))
-      conn.flushInput()
       print 'Connecting to %s' % conn_info['device']
-      return conn
+      return serial.Serial(port=conn_info['device'],
+                           baudrate=conn_info.get('baudrate', 9600),
+                           timeout=conn_info.get('timeout', 0.25))
     except serial.SerialException:
       raise ConnectionError('Could not open device %s.' % conn_info['device'])
 
@@ -269,11 +267,13 @@ class JTagController(BaseController):
   def _Connect(self, conn_info):
     """Returns a tested and confirmed serial connection to the hardware.
 
-    We're waiting for a second after opening the device, this is because the
-    LED controller needs some time before it behaves properly.
+    After connecting, we attempt to send a command and verify the confirmation.
+    This is tried a number of times, to allow for synchronization and/or boot
+    requirements of the connected hardware.
     """
     conn_info['baudrate'] = 57600
     conn = super(JTagController, self)._Connect(conn_info)
+    conn.flushInput()
     for _attempt in range(5):
       conn.write(self.ALL_OUTPUTS % BLACK)
       if conn.read(3) == self.RESPONSE:
@@ -345,8 +345,16 @@ class NewController(BaseController):
   def _Connect(self, conn_info):
     """Returns a tested and confirmed serial connection to the hardware.
 
-    We're waiting for a second after opening the device, this is because the
-    LED controller needs some time before it behaves properly.
+    After connecting to the serial port, we pulse the DTR line once. This resets
+    the Arduino hardware, which should as its first action after booting send
+    the string [Lightbox] down the line.
     """
     conn_info['baudrate'] = 57600
-    return super(NewController, self)._Connect(conn_info)
+    conn_info['timeout'] = 3 # We read once to confirm hardware; no perf. impact
+    conn = super(NewController, self)._Connect(conn_info)
+    # This resets the connected Arduino hardware
+    conn.setDTR(True)
+    conn.setDTR(False)
+    if conn.readline().strip() != '[Lightbox]':
+      raise ConnectionError('Device is not a [Lightbox].')
+    return conn
