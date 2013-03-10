@@ -6,13 +6,13 @@
 
 const byte
   characterTimeout = 10,
-  maxErrors = 10,
+  outputs = 5,
   pcaBaseAddress = 0x40,
   pcaFirstLedOn  = 0x06,
   pcaFirstLedOff = 0x08,
   pcaMode1 = 0x00,
   pcaMode2 = 0x01;
-const int messageTimeout = 1000;
+const int commandTimeout = 1000;
 PROGMEM prog_uint16_t gammaCorrected[256] = {
     // 8-bit intensity levels mapped to 12-bit PWM values corrected for the
     // non-linear sensitivity of the human eye. Gamma value = 2.2
@@ -44,47 +44,47 @@ PROGMEM prog_uint16_t gammaCorrected[256] = {
 void setup(void) {
   Wire.begin();
   setupDriver();
-  for (byte output = 16; output-- > 0;)
-    setDriverPinLevel(output, 0);
+  for (byte pin = 16; pin-- > 0;)
+    setDriverPinLevel(pin, 0);
   Serial.begin(57600);
+  // Tell the connecting side that this is a Lightbox.
   Serial.println("[Lightbox]");
 }
 
 void loop(void) {
-  static byte errorCount = 0;
   byte receivedByte;
-  if (readByte(receivedByte, messageTimeout)) {
-    errorCount = 0;
+  if (readByte(receivedByte, commandTimeout)) {
     switch (receivedByte) {
       case '\x01':
-        messageAllOutputs();
+        commandAllOutputs();
         break;
       case '\x02':
-        messageSingleOutput();
+        commandSingleOutput();
         break;
+      default:
+        // Bad command TYPE, turn off all inputs
+        for (byte output = outputs; output-- > 0;)
+          setOutputColor(output, 0, 0, 0);
     }
-  } else if (++errorCount > maxErrors) {
-    // No transmission for 10 seconds, everything dark.
-    for (byte output = 16; output-- > 0;)
-      setDriverPinLevel(output, 0);
-    errorCount = 0;
   }
 }
 
 void messageAllOutputs(void) {
   byte receivedByte, red, green, blue;
+  // Verify payload length, if correct, read payload and set colors.
   if (readByte(receivedByte, characterTimeout) && receivedByte == '\x03')
     if (readByte(red, characterTimeout) &&
         readByte(green, characterTimeout) &&
         readByte(blue, characterTimeout))
-      for (byte output = 5; output-- > 0;)
+      for (byte output = outputs; output-- > 0;)
         setOutputColor(output, red, green, blue);
 }
 
 void messageSingleOutput(void) {
   byte receivedByte, red, green, blue, output;
+  // Verify payload length, if correct, read payload and set output color.
   if (readByte(receivedByte, characterTimeout) && receivedByte == '\x04')
-    if (readByte(output, characterTimeout) && output < 5 &&
+    if (readByte(output, characterTimeout) && output < outputs &&
         readByte(red, characterTimeout) &&
         readByte(green, characterTimeout) &&
         readByte(blue, characterTimeout))
@@ -92,6 +92,7 @@ void messageSingleOutput(void) {
 }
 
 void setOutputColor(byte output, byte red, byte green, byte blue) {
+  // Set the given output to the configured red, green and blue levels.
   output *= 3;
   setDriverPinLevel(output++, red);
   setDriverPinLevel(output++, green);
@@ -99,6 +100,7 @@ void setOutputColor(byte output, byte red, byte green, byte blue) {
 }
 
 bool readByte(byte &receivedByte, int timeout) {
+  // Read a single byte from Serial, with a provided timeout
   long starttime = millis();
   while (!Serial.available())
     if ((millis() - starttime) > timeout)
@@ -114,19 +116,21 @@ void setupDriver() {
 }
 
 void writeRegister(byte regAddress, byte regData) {
+  // Writes register values for the PCA9685 driver
   Wire.beginTransmission(pcaBaseAddress);
   Wire.write(regAddress);
   Wire.write(regData);
   Wire.endTransmission();
 }
 
-void setDriverPinLevel(byte output, byte level) {
+void setDriverPinLevel(byte pin, byte level) {
+  // Sets the 12-bit PWM pin value based on the 8-bit level input.
   int intensity = pgm_read_word_near(gammaCorrected + level);
   Wire.beginTransmission(pcaBaseAddress);
   // Only write OFF registers, skip ON registers.
   // This means all PWM load starts at zero, which is not ideal
   // but will have to do for the moment.
-  Wire.write(pcaFirstLedOff + 4 * output);
+  Wire.write(pcaFirstLedOff + 4 * pin);
   Wire.write(lowByte(intensity));  // OFF_LOW
   Wire.write(highByte(intensity)); // OFF_HIGH
   Wire.endTransmission();
