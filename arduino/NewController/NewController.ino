@@ -69,7 +69,7 @@ void loop(void) {
   }
 }
 
-void messageAllOutputs(void) {
+void commandAllOutputs(void) {
   byte receivedByte, red, green, blue;
   // Verify payload length, if correct, read payload and set colors.
   if (readByte(receivedByte, characterTimeout) && receivedByte == '\x03')
@@ -80,7 +80,7 @@ void messageAllOutputs(void) {
         setOutputColor(output, red, green, blue);
 }
 
-void messageSingleOutput(void) {
+void commandSingleOutput(void) {
   byte receivedByte, red, green, blue, output;
   // Verify payload length, if correct, read payload and set output color.
   if (readByte(receivedByte, characterTimeout) && receivedByte == '\x04')
