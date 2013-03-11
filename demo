@@ -93,7 +93,7 @@ def main():
   import optparse
   import sys
   parser = optparse.OptionParser()
-  parser.add_option('-c', '--controller', default='JTagController',
+  parser.add_option('-c', '--controller', default='NewController',
                     help='Controller class to instantiate.')
   options, _arguments = parser.parse_args()
   try:
