@@ -23,29 +23,6 @@ class ConnectionError(Exception):
   """A problem connecting to the USB serial light controller."""
 
 
-class Heartbeat(threading.Thread):
-  """Heartbeat keepalive thread to keep the Lightbox controller online."""
-  def __init__(self, callback, delay=5, fail_delay=1):
-    super(Heartbeat, self).__init__(name=type(self).__name__)
-    self.daemon = True
-    # Heartbeat controls:
-    self.beat = True
-    self.callback = callback
-    self.delay = delay
-    self.fail_delay = fail_delay
-    self.start()
-
-  def run(self):
-    """Main thread to send periodic keepalives."""
-    time.sleep(self.delay)
-    while self.beat:
-      try:
-        self.callback()
-        time.sleep(self.delay)
-      except ConnectionError:
-        time.sleep(self.fail_delay)
-
-
 class BaseController(list):
   """Base class for a Lightbox controller."""
   FREQUENCY = 100
@@ -198,6 +175,32 @@ class BaseController(list):
     """Verifies the repsonse received from the hardware is correct."""
 
 
+class Heartbeat(threading.Thread):
+  """Heartbeat keepalive thread to keep the Lightbox controller online."""
+  def __init__(self, callback, delay=5, fail_delay=1):
+    super(Heartbeat, self).__init__(name=type(self).__name__)
+    self.daemon = True
+    # Heartbeat controls:
+    self.beat = True
+    self.callback = callback
+    self.delay = delay
+    self.fail_delay = fail_delay
+    self.start()
+
+  def run(self):
+    """Main thread to send periodic keepalives."""
+    time.sleep(self.delay)
+    while self.beat:
+      try:
+        self.callback()
+        time.sleep(self.delay)
+      except ConnectionError:
+        time.sleep(self.fail_delay)
+
+
+# ##############################################################################
+# Lightbox controller implementations
+#
 class Dummy(BaseController):
   """A dummy controller that doesn't connect to any device.
 
