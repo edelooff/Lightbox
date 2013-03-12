@@ -27,6 +27,7 @@ class BaseController(list):
   """Base class for a Lightbox controller."""
   FREQUENCY = 100
   GAMMA = 1
+  LAYERS = 3
   OUTPUTS = 5
   VERIFY_COMMAND = True
 
@@ -35,10 +36,13 @@ class BaseController(list):
     super(BaseController, self).__init__()
     self.gamma_table = utils.GammaCorrectionList(kwds.get('gamma', self.GAMMA))
     self.last_output_id = -1
+    self.layers = kwds.get('layers', self.LAYERS)
     self.lock = threading.Lock()
     self.output_cls = kwds.get('output_cls', light.Output)
     self.connection = self._Connect(conn_info)
-    self.frequency = kwds.get('frequency', self.FREQUENCY)
+    self._frequency = kwds.get('frequency', self.FREQUENCY)
+    self._period = 1
+    self.metronome = Metronome(self)
     for _num in range(kwds.get('outputs', self.OUTPUTS)):
       self.Add()
 
@@ -93,9 +97,8 @@ class BaseController(list):
   #
   def Add(self):
     """Adds an output to the controller."""
-    self.append(self.output_cls(self, len(self)))
-    output_frequency = float(self.frequency) / len(self)
-    print 'Individual output frequency now %.1fHz' % output_frequency
+    self.append(self.output_cls(layers=self.layers))
+    self._UpdateOutputFrequency()
 
   def Remove(self):
     """Removes an output from the controller."""
@@ -103,6 +106,7 @@ class BaseController(list):
     del_output.InstantChange(BLACK)
     if del_output.output_id == self.last_output_id:
       self.last_output_id -= 1
+    self._UpdateOutputFrequency()
 
   def __getitem__(self, index):
     """Returns the requested output and writes it to `self.last_output_id`."""
@@ -115,6 +119,38 @@ class BaseController(list):
     if not isinstance(item, self.output_cls):
       raise TypeError('Can only add proper output objects to the controller.')
     super(BaseController, self).append(item)
+
+  # ############################################################################
+  # Output frequency and period control
+  #
+  @property
+  def frequency(self):
+    """Returns the current frequency of the controller."""
+    return self._frequency
+
+  @frequency.setter
+  def frequency(self, frequency):
+    """Sets the new controller frequency, calculates per-output frequency."""
+    self._frequency = frequency
+    self._UpdateOutputFrequency()
+
+  @property
+  def period(self):
+    """Returns the current per-output update period."""
+    return self._period
+
+  def _UpdateOutputFrequency(self):
+    """Calculates the new per output command frequency.
+
+    Also sets the period time for the Metronome.
+    """
+    if self:
+      per_output_hz = float(self._frequency) / len(self)
+      self._period = 1.0 / per_output_hz
+      print 'Individual output frequency now %.1fHz' % per_output_hz
+    else:
+      print 'No outputs defined'
+      self._period = 0.1
 
   # ############################################################################
   # Output cycling
@@ -179,12 +215,12 @@ class Heartbeat(threading.Thread):
   """Heartbeat keepalive thread to keep the Lightbox controller online."""
   def __init__(self, callback, delay=5, fail_delay=1):
     super(Heartbeat, self).__init__(name=type(self).__name__)
-    self.daemon = True
-    # Heartbeat controls:
     self.beat = True
     self.callback = callback
     self.delay = delay
     self.fail_delay = fail_delay
+    # Daemonize and run
+    self.daemon = True
     self.start()
 
   def run(self):
@@ -196,6 +232,42 @@ class Heartbeat(threading.Thread):
         time.sleep(self.delay)
       except ConnectionError:
         time.sleep(self.fail_delay)
+
+
+class Metronome(threading.Thread):
+  """Sends color commands to the hardware for output objects on the controller.
+
+  This ensures that all outputs are written briefly after eachother, without
+  interleaving of commands that would happen if each output were to generate
+  their own commands for the serial controller.
+  """
+  def __init__(self, controller):
+    """Initializes the Metronome object."""
+    super(Metronome, self).__init__(name=type(self).__name__)
+    self.controller = controller
+    # Daemonize and run
+    self.daemon = True
+    self.start()
+
+  def run(self):
+    """Updates outputs and sleeps the remaining time"""
+    while True:
+      begin_time = time.time()
+      self._UpdateOutputs()
+      self._SleepRemainder(begin_time)
+
+  def _SleepRemainder(self, begin_time):
+    """Sleeps for the remainder of this period."""
+    remainder = begin_time + self.controller.period - time.time()
+    if remainder > 0:
+      time.sleep(remainder)
+
+  def _UpdateOutputs(self):
+    """Sends color commands for all outputs that have changed."""
+    for index, output in enumerate(self.controller):
+      color = output.NewColor()
+      if color:
+        self.controller.SetSingle(index, color)
 
 
 # ##############################################################################
@@ -336,6 +408,10 @@ class NewController(BaseController):
   FREQUENCY = 200
   ALL_OUTPUTS = '\x01\x03%c%c%c'
   ONE_OUTPUT = '\x02\x04%c%c%c%c'
+
+  def __init__(self, *args, **kwds):
+    super(NewController, self).__init__(*args, **kwds)
+    self.frequency = 300
 
   def _CommandSetAll(self, *colors):
     """Sets all outputs to the same color."""

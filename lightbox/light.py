@@ -9,8 +9,6 @@ __version__ = '2.0'
 
 # Standard modules
 import collections
-import threading
-import time
 
 # Application modules
 import utils
@@ -21,12 +19,9 @@ class Output(object):
 
   Allows color changing using the associated controller.
   """
-  def __init__(self, controller, output_id, layers=3):
+  def __init__(self, layers=3):
     self.color = 0, 0, 0
-    self.controller = controller
-    self.output_id = output_id
     self.layers = [Layer() for _number in range(max(1, layers))]
-    self.ticker = OutputTicker(self._WriteNextColor)
 
   # ############################################################################
   # Output control actions
@@ -81,65 +76,16 @@ class Output(object):
     index = -1 if index is None else index
     self.layers.pop(index)
 
-  def _WriteNextColor(self):
-    """Writes the next (mixed and adjusted) color to the controller.
+  def NewColor(self):
+    """Calculates and returns the new color tuple for this output.
 
-    There is no color written if the calculated output color is the same as the
-    current on. After writing the color, the `self.color` attribute is updated
-    to reflect the current output color.
+    If the new color is the same as the current color, None is returned instead
+    of an RGB color tuple.
     """
-    begin_time = time.time()
     new_color = next(self)
     if new_color != self.color:
       self.color = new_color
-      self.controller.SetSingle(self.output_id, new_color)
-    self._WaitForTick(begin_time)
-
-  # ############################################################################
-  # Ticker control methods and timing
-  #
-  def __del__(self):
-    """When the Output is finalized, ensure the Ticker stops running."""
-    self.StopTicker()
-
-  def StartTicker(self):
-    """(Re)starts the progression ticker."""
-    self.ticker.running = True
-
-  def StopTicker(self):
-    """Temporarily stop the progression ticker."""
-    self.ticker.running = False
-
-  def _WaitForTick(self, begin_time):
-    """Sleeps for the remainder of the output's cycle time."""
-    remainder = begin_time + self.period - time.time()
-    if remainder > 0:
-      time.sleep(remainder)
-
-  @property
-  def period(self):
-    """Returns the cyclic period time for the output as a float (seconds).
-
-    This is based on the controller's frequency and the number of connected
-    outputs. The period is 1 second divided by the frequency, multiplied by the
-    connected outputs. This achieves a constant cycle time for each output,
-    regardless of the number of outputs actually sending commands
-    """
-    return 1.0 / self.controller.frequency * len(self.controller)
-
-
-class OutputTicker(threading.Thread):
-  """Separate thread that continuously sends commands for the output color."""
-  def __init__(self, function):
-    super(OutputTicker, self).__init__()
-    self.daemon = True
-    self.function = function
-    self.running = True
-    self.start()
-
-  def run(self):
-    while self.running:
-      self.function()
+      return new_color
 
 
 class Layer(object):

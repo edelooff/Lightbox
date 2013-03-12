@@ -82,9 +82,9 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   def OutputInfo(self):
     """Returns a JSON object with Lightbox output information."""
     outputs = []
-    for output in self.server.box:
+    for output_id, output in enumerate(self.server.box):
       outputs.append({
-          'outputNumber': output.output_id,
+          'outputNumber': output_id,
           'mixedColorRgb': output.color,
           'mixedColorHex': '#%02x%02x%02x' % tuple(output.color),
           'layerCount': len(output.layers),
