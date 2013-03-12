@@ -409,10 +409,6 @@ class NewController(BaseController):
   ALL_OUTPUTS = '\x01\x03%c%c%c'
   ONE_OUTPUT = '\x02\x04%c%c%c%c'
 
-  def __init__(self, *args, **kwds):
-    super(NewController, self).__init__(*args, **kwds)
-    self.frequency = 300
-
   def _CommandSetAll(self, *colors):
     """Sets all outputs to the same color."""
     return self.ALL_OUTPUTS % colors
