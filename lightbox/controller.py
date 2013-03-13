@@ -29,7 +29,6 @@ class BaseController(list):
   GAMMA = 1
   LAYERS = 3
   OUTPUTS = 5
-  VERIFY_COMMAND = True
 
   def __init__(self, conn_info, **kwds):
     """Initializes the BaseController for Lightbox."""
@@ -173,12 +172,11 @@ class BaseController(list):
   # ############################################################################
   # Command options for the hardware
   #
-  def Command(self, command, verify=VERIFY_COMMAND):
+  def Command(self, command):
     """Send the command to the serial device and wait for the confirmation."""
     with self.lock:
       self._Command(command)
-      if verify:
-        self._Verify()
+      self._Verify()
 
   def SetAll(self, color):
     """Sets the color for all outputs."""
@@ -209,6 +207,7 @@ class BaseController(list):
 
   def _Verify(self):
     """Verifies the repsonse received from the hardware is correct."""
+    # Controllers that do verification of commands should implement this.
 
 
 class Heartbeat(threading.Thread):
@@ -279,8 +278,6 @@ class Dummy(BaseController):
   This is useful for testing all the other parts of Lightbox when the required
   hardware is not available.
   """
-  VERIFY_COMMAND = False
-
   @classmethod
   def FirstDevice(cls, outputs=5):
     """Returns a functional Dummy controller."""
@@ -368,8 +365,8 @@ class JTagController(BaseController):
     return frequency
 
   def _Heartbeat(self):
-    """Sends a heartbeat signal to the controller without verifying response."""
-    self.Command(self.HEARTBEAT, verify=False)
+    """Sends a heartbeat signal to the controller."""
+    self._Command(self.HEARTBEAT)
 
   def _Verify(self):
     """Verifies the proper response from the Lightbox controller hardware."""
