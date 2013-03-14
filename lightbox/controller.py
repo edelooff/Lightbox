@@ -348,7 +348,7 @@ class JTagController(BaseController):
     conn.flushInput()
     for _attempt in range(5):
       conn.write(self.ALL_OUTPUTS % BLACK)
-      if conn.read(3) == self.RESPONSE:
+      if conn.readline() == self.RESPONSE:
         return conn
     else:
       raise ConnectionError('Device on port %s not a proper %s.' % (
