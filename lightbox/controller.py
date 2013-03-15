@@ -424,9 +424,14 @@ class NewController(BaseController):
     conn_info['baudrate'] = 57600
     conn_info['timeout'] = 3 # We read once to confirm hardware; no perf. impact
     conn = super(NewController, self)._Connect(conn_info)
-    # This resets the connected Arduino hardware
-    conn.setDTR(True)
-    conn.setDTR(False)
+    try:
+      # Reset the connected ATmega by pulsing DTR.
+      conn.setDTR(True)
+      conn.setDTR(False)
+    except IOError:
+      # Some USB serial drivers do not implement DSR/DTR. This raises IOErrors
+      # We'll try to continue like nothing happened, though we'll likely fail.
+      pass
     if conn.readline().strip() != '[Lightbox]':
       raise ConnectionError('Device is not a [Lightbox].')
     return conn
