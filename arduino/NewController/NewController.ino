@@ -9,9 +9,16 @@ const byte
   outputs = 5;
 PCA9685_RGB controller = PCA9685_RGB();
 
+// Declare functions to benefit commandline compiling
+bool readByte(byte &receivedByte);
+void commandAllOutputs(void);
+void commandGrayScale(void);
+void commandSingleOutput(void);
+
 void setup(void) {
   Wire.begin();
   controller.begin();
+  controller.setAll(0);
   Serial.begin(57600);
   // Tell the connecting side that this is a Lightbox.
   Serial.println("[Lightbox]");
