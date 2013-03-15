@@ -11,9 +11,7 @@
 #define PCA9685_MODE2 0x01
 #define PCA9685_ALLCALLADR 0x05
 #define PCA9685_PRESCALE 0xFE
-#define PCA9685_LED0 0x6
-
-#define PCA9685_MAX_HIGH 16
+#define PCA9685_LED0 0x06
 
 class PCA9685_RGB {
   public:
@@ -27,9 +25,7 @@ class PCA9685_RGB {
       setLed(const byte led, const byte greyscale);
 
   private:
-    const static byte
-      outputs = 5,
-      groupOffset[outputs];
+    const static byte outputs = 5;
     void
       writeRegister(byte regAddress, byte regData),
       setGroupLevels(byte group, pwm_grey_t levels),

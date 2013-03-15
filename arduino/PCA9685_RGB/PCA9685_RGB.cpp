@@ -1,9 +1,4 @@
-#pragma once
-
 #include "PCA9685_RGB.h"
-
-// The delay in the highByte of the PWM ON/OFF setting
-const byte PCA9685_RGB::groupOffset[] = {1, 3, 6, 9, 12};
 
 PCA9685_RGB::PCA9685_RGB(byte pcaAddress): pcaAddress(pcaAddress) {}
 
@@ -48,40 +43,34 @@ void PCA9685_RGB::setLed(const byte led, const byte greyscale) {
 }
 
 void PCA9685_RGB::setGroupLevels(byte output, pwm_grey_t levels) {
-  byte
-    pwm_on_lo = 0,
-    pwm_on_hi = groupOffset[output],
-    pwm_off_lo = levels.int_lo,
-    pwm_off_hi = (levels.int_hi + pwm_on_hi) % PCA9685_MAX_HIGH;
+  const byte zero = 0;
   Wire.beginTransmission(pcaAddress);
   Wire.write(PCA9685_LED0 + 12 * output);
   for (byte pin = 3; pin-- > 0;) {
-    Wire.write(pwm_on_lo);
-    Wire.write(pwm_on_hi);
-    Wire.write(pwm_off_lo);
-    Wire.write(pwm_off_hi);
+    Wire.write(zero);
+    Wire.write(zero);
+    Wire.write(levels.int_lo);
+    Wire.write(levels.int_hi);
   }
   Wire.endTransmission();
 }
 
 void PCA9685_RGB::setGroupLevels(byte output, pwm_rgb_t levels) {
-  byte
-    pwm_on_lo = 0,
-    pwm_on_hi = groupOffset[output];
+  const byte zero = 0;
   Wire.beginTransmission(pcaAddress);
   Wire.write(PCA9685_LED0 + 12 * output);
-  Wire.write(pwm_on_lo);
-  Wire.write(pwm_on_hi);
+  Wire.write(zero);
+  Wire.write(zero);
   Wire.write(levels.red_lo);
-  Wire.write((levels.red_hi + pwm_on_hi) % PCA9685_MAX_HIGH);
-  Wire.write(pwm_on_lo);
-  Wire.write(pwm_on_hi);
+  Wire.write(levels.red_hi);
+  Wire.write(zero);
+  Wire.write(zero);
   Wire.write(levels.green_lo);
-  Wire.write((levels.green_hi + pwm_on_hi) % PCA9685_MAX_HIGH);
-  Wire.write(pwm_on_lo);
-  Wire.write(pwm_on_hi);
+  Wire.write(levels.green_hi);
+  Wire.write(zero);
+  Wire.write(zero);
   Wire.write(levels.blue_lo);
-  Wire.write((levels.blue_hi + pwm_on_hi) % PCA9685_MAX_HIGH);
+  Wire.write(levels.blue_hi);
   Wire.endTransmission();
 }
 
