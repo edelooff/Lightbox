@@ -1,7 +1,7 @@
 #pragma once
 
 #include <avr/pgmspace.h>
-#include "gammacorrect.h"
+#include "gamma.h"
 
 PROGMEM prog_uint16_t gammaTable[256] = {
     // 8-bit intensity levels mapped to 12-bit PWM values corrected for the
@@ -31,6 +31,19 @@ PROGMEM prog_uint16_t gammaTable[256] = {
     3554, 3587, 3620, 3653, 3686, 3719, 3753, 3786, 3820, 3854, 3888, 3923,
     3957, 3992, 4026, 4061};
 
-int gammaCorrected(byte level) {
-  return pgm_read_word_near(gammaTable + level);
-}
+const pwm_grey_t gammaCorrect(byte level) {
+  // Returns the gamma-corrected 12-bit PWM level for a given 8-bit input.
+  int intensity = pgm_read_word_near(gammaTable + level);
+  return pwm_grey_t {lowByte(intensity), highByte(intensity)};
+};
+
+const pwm_rgb_t gammaCorrect(byte red, byte green, byte blue) {
+  int
+    pwm_red = pgm_read_word_near(gammaTable + red),
+    pwm_green = pgm_read_word_near(gammaTable + green),
+    pwm_blue = pgm_read_word_near(gammaTable + blue);
+  return pwm_rgb_t {
+      lowByte(pwm_red), highByte(pwm_red),
+      lowByte(pwm_green), highByte(pwm_green),
+      lowByte(pwm_blue), highByte(pwm_blue)};
+};
