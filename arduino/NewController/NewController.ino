@@ -4,6 +4,13 @@
 #include <Wire.h>
 #include <PCA9685_RGB.h>
 
+const char
+  typeAllColor = '\x01',
+  typeOneColor = 'x\02',
+  typeAllGray  = '\x03',
+  lengthAllColor = '\x03',
+  lengthOneColor = '\x04',
+  lengthAllGray  = '\x01';
 PCA9685_RGB controller = PCA9685_RGB();
 
 // Declare functions to benefit commandline compiling
@@ -25,13 +32,13 @@ void loop(void) {
   byte receivedByte;
   if (readByte(receivedByte)) {
     switch (receivedByte) {
-      case '\x01':
+      case typeAllColor:
         commandAllOutputs();
         break;
-      case '\x02':
+      case typeOneColor:
         commandSingleOutput();
         break;
-      case '\x03':
+      case typeAllGray:
         commandGrayScale();
         break;
       default:
@@ -45,7 +52,7 @@ void commandAllOutputs(void) {
   // Sets an RGB color for all outputs on the Lightbox.
   byte receivedByte, red, green, blue;
   // Verify payload length, if correct, read payload and set colors.
-  if (readByte(receivedByte) && receivedByte == '\x03')
+  if (readByte(receivedByte) && receivedByte == lengthAllColor)
     if (readByte(red) && readByte(green) && readByte(blue))
       controller.setAll(red, green, blue);
 }
@@ -55,7 +62,7 @@ void commandSingleOutput(void) {
   const byte outputs = 5;
   byte receivedByte, red, green, blue, output;
   // Verify payload length, if correct, read payload and set output color.
-  if (readByte(receivedByte) && receivedByte == '\x04')
+  if (readByte(receivedByte) && receivedByte == lengthOneColor)
     if (readByte(output) && output < outputs &&
         readByte(red) && readByte(green) && readByte(blue))
       controller.setLed(output, red, green, blue);
@@ -65,7 +72,7 @@ void commandGrayScale(void) {
   // Sets a grayscale level for all outputs on the Lightbox.
   byte receivedByte, level;
   // Verify payload length, if correct, set controller output level
-  if (readByte(receivedByte) && receivedByte == '\x01')
+  if (readByte(receivedByte) && receivedByte == lengthAllGray)
     if (readByte(level))
       controller.setAll(level);
 }
