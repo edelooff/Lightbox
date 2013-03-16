@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "gamma.h"
+#include "lightness.h"
 
 
 /* Section 7.3: Register definitions */

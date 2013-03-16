@@ -1,4 +1,4 @@
-#include "gamma.h"
+#include "lightness.h"
 
 prog_uint16_t lightnessTable[256] PROGMEM = {
     // 8-bit intensity levels mapped to 12-bit PWM values corrected for the
