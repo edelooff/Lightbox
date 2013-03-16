@@ -4,9 +4,6 @@
 #include <Wire.h>
 #include <PCA9685_RGB.h>
 
-const byte
-  readTimeout = 10,
-  outputs = 5;
 PCA9685_RGB controller = PCA9685_RGB();
 
 // Declare functions to benefit commandline compiling
@@ -55,6 +52,7 @@ void commandAllOutputs(void) {
 
 void commandSingleOutput(void) {
   // Sets an RGB color for a single output of the Lightbox.
+  const byte outputs = 5;
   byte receivedByte, red, green, blue, output;
   // Verify payload length, if correct, read payload and set output color.
   if (readByte(receivedByte) && receivedByte == '\x04')
@@ -74,6 +72,7 @@ void commandGrayScale(void) {
 
 bool readByte(byte &receivedByte) {
   // Read a single byte from Serial, with a global read timeout.
+  const byte readTimeout = 10;
   long starttime = millis();
   while (!Serial.available())
     if ((millis() - starttime) > readTimeout)
