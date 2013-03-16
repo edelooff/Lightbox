@@ -6,7 +6,7 @@
 
 const char
   typeAllColor = '\x01',
-  typeOneColor = 'x\02',
+  typeOneColor = '\x02',
   typeAllGray  = '\x03',
   lengthAllColor = '\x03',
   lengthOneColor = '\x04',
