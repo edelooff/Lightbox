@@ -23,23 +23,23 @@ void PCA9685_RGB::begin() {
 }
 
 void PCA9685_RGB::setAll(const byte red, const byte green, const byte blue) {
-  pwm_rgb_t levels = gammaCorrect(red, green, blue);
+  pwm_rgb_t levels = lightnessCorrect(red, green, blue);
   for (byte output = outputs; output-- > 0;)
     setGroupLevels(output, levels);
 }
 
 void PCA9685_RGB::setAll(const byte greyscale) {
-  pwm_grey_t levels = gammaCorrect(greyscale);
+  pwm_grey_t levels = lightnessCorrect(greyscale);
   for (byte output = outputs; output-- > 0;)
     setGroupLevels(output, levels);
 }
 
 void PCA9685_RGB::setLed(const byte led, const byte red, const byte green, const byte blue) {
-  setGroupLevels(led, gammaCorrect(red, green, blue));
+  setGroupLevels(led, lightnessCorrect(red, green, blue));
 }
 
 void PCA9685_RGB::setLed(const byte led, const byte greyscale) {
-  setGroupLevels(led, gammaCorrect(greyscale));
+  setGroupLevels(led, lightnessCorrect(greyscale));
 }
 
 void PCA9685_RGB::setGroupLevels(byte output, pwm_grey_t levels) {
