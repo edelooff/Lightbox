@@ -346,6 +346,7 @@ class JTagController(BaseController):
     conn_info['baudrate'] = 57600
     conn = super(JTagController, self)._Connect(conn_info)
     conn.flushInput()
+    time.sleep(1.5)  # Wait for ATmega to reboot on connect
     for _attempt in range(5):
       conn.write(self.ALL_OUTPUTS % BLACK)
       if conn.readline() == self.RESPONSE:
@@ -370,7 +371,7 @@ class JTagController(BaseController):
 
   def _Verify(self):
     """Verifies the proper response from the Lightbox controller hardware."""
-    response = self.connection.read(len(self.RESPONSE))
+    response = self.connection.readline()
     if response != self.RESPONSE:
       raise ConnectionError('Incorrect acknowledgment: expected %r got: %r.' % (
           self.RESPONSE, response))
