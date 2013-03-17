@@ -75,11 +75,11 @@ def Secondary(box):
     time.sleep(1)
 
 
-def LayerDemo(controller_name):
+def LayerDemo(controller_name, outputs):
   """Demonstrates layer blending operation of Lightbox."""
   print 'Demonstrating layer blending in Lightbox.\n'
   print 'Initiating controller %r ...\n' % controller_name
-  box = getattr(controller, controller_name).FirstDevice()
+  box = getattr(controller, controller_name).FirstDevice(outputs=outputs)
   Statics(box)
   time.sleep(.5)
   Primary(box)
@@ -93,9 +93,11 @@ def main():
   parser = optparse.OptionParser()
   parser.add_option('-c', '--controller', default='NewController',
                     help='Controller class to instantiate.')
+  parser.add_option('-o', '--outputs', type='int', default=5,
+                    help='Number of outputs to use on the hardware.')
   options, _arguments = parser.parse_args()
   try:
-    LayerDemo(options.controller)
+    LayerDemo(options.controller, options.outputs)
   except controller.ConnectionError:
     sys.exit('ABORT: Could not find a suitable device.')
   except KeyboardInterrupt:
