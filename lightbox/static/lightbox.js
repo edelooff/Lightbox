@@ -1,9 +1,17 @@
+/*jslint indent: 2, plusplus: true */
+"use strict";
+
+$(function() {
+  $.getJSON('/api', createLightbox);
+});
+
 function createLightbox(controller) {
-  var previewNode = $('#preview'),
+  var index = 0,
+      previewNode = $('#preview'),
       outputStruct = $('.output').detach();
 
   // Create a number ouf live view outputs corresponding to the hardware
-  for(var index = 0; index < controller.outputCount; index++) {
+  for (index = 0; index < controller.outputCount; index++) {
     createOutput(outputStruct, previewNode, index);
   }
   // Update periodically
@@ -18,13 +26,13 @@ function createOutput(outputStruct, previewNode, outputIndex) {
 }
 
 function updateLightbox() {
-  outputNodes = $('#preview .output');
+  var outputNodes = $('#preview .output');
   return function() {
     // Updates the complete live view with current data from the API
     $.getJSON('/api/outputs', function (outputs) {
       outputNodes.each(updateOutput(outputs));
     });
-  }
+  };
 }
 
 function updateOutput(outputs) {
@@ -32,10 +40,10 @@ function updateOutput(outputs) {
   return function(outputIndex) {
     var outputJson = outputs[outputIndex],
         outputNode = $(this);
-    outputNode.find('.mixed').css('background-color',
-                                  outputJson.mixedColorHex);
+    outputNode.find('.mixed').css(
+        'background-color', outputJson.mixedColorHex);
     outputNode.find('.layer').each(updateLayerInfo(outputJson));
-  }
+  };
 }
 
 function updateLayerInfo(outputJson) {
@@ -48,5 +56,5 @@ function updateLayerInfo(outputJson) {
     layerNode.find('.blender').text(layerJson.blender);
     layerNode.find('.envelope').text(layerJson.envelope);
     layerNode.find('.opacity').text(Math.round(layerJson.opacity * 100));
-  }
+  };
 }

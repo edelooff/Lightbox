@@ -1,6 +1,6 @@
 #include "lightness.h"
 
-prog_uint16_t lightnessTable[256] PROGMEM = {
+const uint16_t lightnessTable[256] PROGMEM = {
     // 8-bit intensity levels mapped to 12-bit PWM values corrected for the
     // non-linear sensitivity of the human eye. From the CIELAB L* function:
     //

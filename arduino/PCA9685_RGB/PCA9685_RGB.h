@@ -4,7 +4,6 @@
 #include <Wire.h>
 #include "lightness.h"
 
-
 /* Section 7.3: Register definitions */
 #define PCA9685_BASE_ADDRESS 0x40
 #define PCA9685_MODE1 0x00
