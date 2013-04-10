@@ -1,6 +1,6 @@
 # Lightbox
 
-Lightbox is a Python library that controls hardware to drive LED-strips. It was originally written for the Twitterboom (http://twitterboom.nl) project at [Frack](http://frack.nl/wiki), and has since seen continued development. All color transitions are performed in LAB color space, ensuring that there are no dips or peaks in perceived lightness during a transition.
+Lightbox is a Python library that controls hardware to drive LED-strips. It was originally written for the [Twitterboom](http://twitterboom.nl) project at [Frack](http://frack.nl/wiki), and has since seen continued development. All color transitions are performed in LAB color space, ensuring that there are no dips or peaks in perceived lightness during a transition.
 
 ## Overview
 
