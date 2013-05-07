@@ -156,15 +156,6 @@ def ApiServer(box, port=8000, quiet=False):
   server.serve_forever()
 
 
-def HtmlEscape(text):
-  """Prevent XSS problems bij escaping the 5 characters that cause trouble."""
-  text = text.replace('&', '&amp;')
-  text = text.replace('"', '&quot;')
-  text = text.replace("'", '&#39;')  # &apos; is valid, but poorly supported.
-  text = text.replace('>', '&gt;')
-  return text.replace('<', '&lt;')
-
-
 def LayerReport(output):
   """Yields a dictionary with the state of each layer in the given output."""
   for layer in output:

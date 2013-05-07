@@ -30,7 +30,7 @@
     }
   };
 
-  Lightbox.prototype.update = function () {
+  Lightbox.prototype.update = function() {
     $.getJSON('/api/outputs', this.updateOutputs.bind(this));
   };
 
