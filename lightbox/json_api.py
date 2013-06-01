@@ -87,7 +87,6 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           'outputNumber': output_id,
           'mixedColorRgb': output.color,
           'mixedColorHex': '#%02x%02x%02x' % tuple(output.color),
-          'layerCount': len(output.layers),
           'layers': list(LayerReport(output))})
     self._JsonResponse(outputs)
 

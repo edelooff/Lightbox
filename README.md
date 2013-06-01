@@ -27,6 +27,8 @@ There is a basic JSON API available for Lightbox. This can be started using the 
 
 Information about the controller and commands that can be sent. The name for the controller is present under the key `controller`, the number of outputs is given as an integer under the key `outputs`. Command rates are specified on the key `commandRate`, this object has entries for both the `combined` and `perOutput` rates.
 
+The number of outputs is provided in the `outputCount` key, the number of layers on each output is provided by the `layerCount` key.
+
 The physical device information is provided, the `type` of this is always provided, other keys for this are present dependant on the type of the attached hardware.
 
 For transitions, the action, layer blending method, and transition envelope can be configured. The available values for these can be gathered from the API output. The keys `layerBlenders`, `outputActions` and `transitionEnvelopes` have the information for this.
@@ -52,6 +54,7 @@ The controller information can be retrieved from `/api`.
         "RgbAverage",
         "RootSumSquare"
     ],
+    "layerCount": 3,
     "outputActions": [
         "Blink",
         "Constant",
@@ -69,7 +72,6 @@ The controller information can be retrieved from `/api`.
 
 The current color information for each of the outputs can be requested. This will return an array of all outputs on the controller. For each of the outputs the following information will be provided:
 
-* `layerCount`: The number of layers in this output, slightly easier than getting the length of `layers`
 * `layers`: Detailed information for each of the layers in this output, looks like this:
  * `colorHex`: Current color of the layer as hex string
  * `colorRgb`: As above, but as array of red, green and blue intensity (0-255)
@@ -85,7 +87,6 @@ Output information can be retrieved from `/api/outputs` and would look like this
 ```json
 [
   {
-    "layerCount": 3,
     "layers": [
       {
         "colorHex": "#6acfe3",

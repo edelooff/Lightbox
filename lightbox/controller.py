@@ -56,6 +56,7 @@ class BaseController(list):
                 'combined': self.frequency,
                 'perOutput': float(self.frequency) / len(self)},
             'layerBlenders': utils.BLENDERS,
+            'layerCount': self.layers,
             'outputActions': self.output_cls.ACTIONS,
             'outputCount': len(self),
             'transitionEnvelopes': utils.ENVELOPES}
