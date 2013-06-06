@@ -7,6 +7,7 @@
   </head>
   <body>
     <script src="/static/jquery-1.9.1.min.js"></script>
+    <script src="/static/jquery.lightbox_me.js"></script>
     <script src="/static/colorpicker-r54.js"></script>
     <script src="/static/lightbox.js"></script>
     <h1>Lightbox JSON API</h1>
@@ -30,10 +31,11 @@
         </ol>
       </div>
     </div>
-    <div id="channel_popup">
+    <div id="channel_popup" style="display: none">
       <div id="picker"></div>
       <div id="tinybox"></div>
     </div>
+    <button id="clicker">New color!</button>
     <h2>API Information</h2>
     <ul>
       <li>API commands should be sent to <code>/api</code> (HTTP POST, argument <code>json</code>);</li>

@@ -60,7 +60,7 @@ body {
 }
 
 /* ********************************** */
-/* Color picker styles        */
+/* Color picker styles                */
 .picker-wrapper,
 .slide-wrapper {
   position: relative;
@@ -116,4 +116,12 @@ body {
   height: 20px;
   margin: 20px;
   border: 1px solid #000;
+}
+
+#channel_popup {
+  width: 400px;
+  padding: 25px;
+  border: 2px solid #555;
+  background: #f7f7f7;
+  box-shadow: 0 0 12px 2px rgba(0, 0, 0, .6);
 }

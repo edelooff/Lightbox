@@ -10,8 +10,20 @@
     var lightbox = new Lightbox('#preview');
     lightbox.init();
     lightbox.automaticUpdates(150);
-    ColorPicker($('#picker')[0], function(hex, hsv, rgb) {
-        $('#tinybox').css('background-color', hex);
+    window.picker = $('#channel_popup').removeAttr('id').detach();
+    $('#clicker').click(function(event) {
+        $('body').append(window.picker.clone().attr('id', 'channel_popup'));
+        ColorPicker($('#picker')[0], function(hex, hsv, rgb) {
+            $('#tinybox').css('background-color', hex);
+        });
+        $('#channel_popup').lightbox_me({
+            centered: true,
+            onClose: function() {
+                $('#channel_popup').detach();
+                $(".js_lb_overlay").last().remove();
+            }
+        });
+        event.preventDefault();
     });
   });
 
