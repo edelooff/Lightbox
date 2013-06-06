@@ -10,6 +10,9 @@
     var lightbox = new Lightbox('#preview');
     lightbox.init();
     lightbox.automaticUpdates(150);
+    ColorPicker($('#picker')[0], function(hex, hsv, rgb) {
+        $('#tinybox').css('background-color', hex);
+    });
   });
 
   function Lightbox(node) {
