@@ -119,7 +119,11 @@ Output information can be retrieved from `/api/outputs` and would look like this
 
 ### Sending commands
 
-Send commands to `/api` using HTTP POST. The `json` parameter should contain a single JSON object, or an array of objects. Each object describes a single transition for an `output` + `layer` combination. Transitions should generally specify a `color` and/or an `opacity` to transition to. Additionally, a number of `steps` should be defined, unless an immediate (single-step) transition is desired.
+Send commands to `/api` using HTTP POST. The body of the request should be valid JSON and the `content-type` should be `application/json`.
+
+The body should describe either a single transition, or a list of transitions. Each transition should indicate an `output` and a `layer` and typically describes a target `color` or `opacity`. The number of `steps` will determine how fast a transition occurs. The default number of steps is 1, causing an immediate transition.
+
+Transitions are queued at the layer level, so sending multiple transitions for different layers or different outputs will cause the transitions to happen simultaneously. Sending multiple transitions for the same layer on the same output will cause them to be queued and performed in sequence.
 
 Example to set the second output to teal:
 
