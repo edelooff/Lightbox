@@ -94,16 +94,16 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """Processes Lightbox controls via JSON."""
     if self.path not in ('/', '/api'):
       return self._ErrorResponse('No path %r. Try the root please.' % self.path)
-    form = cgi.FieldStorage(
-        self.rfile, self.headers, environ={'REQUEST_METHOD': 'POST'})
-    try:
-      json = simplejson.loads(form.getfirst('json'))
-      if isinstance(json, list):
-        map(self.ProcessCommand, json)
-      else:
-        self.ProcessCommand(json)
-    except Exception, error:
-      return self._ErrorResponse(str(error))
+    if self.headers['content-type'] != 'application/json':
+      return self._ErrorResponse('Only application/json is allowed for POST.')
+    if 'content-length' not in self.headers:
+      return self._ErrorResponse('Headers must provide the message length.')
+    payload = simplejson.loads(
+        self.rfile.read(int(self.headers['content-length'])))
+    if isinstance(payload, list):
+      map(self.ProcessCommand, payload)
+    else:
+      self.ProcessCommand(payload)
     if self.path == '/':
       return self._Redirect('/', code=303)  # Redirect after successful POST
     self.send_response(200)

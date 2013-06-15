@@ -8,7 +8,7 @@ __version__ = '0.4'
 
 # Standard modules
 import requests
-import simplejson
+import simplejson as json
 import time
 
 PALETTE_FEED = ('http://www.colourlovers.com/api/'
@@ -18,6 +18,7 @@ PALETTE_FEED = ('http://www.colourlovers.com/api/'
 def ColourLovers(host, port, interval, layer):
   """Downloads color palettes from the web and displays them on the Lightbox."""
   api_address = 'http://%s:%d/api' % (host, port)
+  headers = {'content-type': 'application/json'}
   while True:
     info = requests.get(api_address).json()
     outputs = info['outputCount']
@@ -32,7 +33,7 @@ def ColourLovers(host, port, interval, layer):
                          'color': color,
                          'opacity': 1,
                          'steps': 50})
-      requests.post(api_address, data={'json': simplejson.dumps(commands)})
+      requests.post(api_address, data=json.dumps(commands), headers=headers)
       print '%s: New color palette applied' % time.ctime()
       time.sleep(interval)
 

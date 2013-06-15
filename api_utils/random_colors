@@ -9,7 +9,7 @@ __version__ = '1.0'
 # Standard modules
 import random
 import requests
-import simplejson
+import simplejson as json
 import time
 
 
@@ -24,6 +24,7 @@ def RandomColor(saturate=False):
 def RandomColorSender(host, port, interval, layer):
   """Updates the Lightbox outputs sequentially with random colors."""
   api_address = 'http://%s:%d/api' % (host, port)
+  headers = {'content-type': 'application/json'}
   while True:
     outputs = requests.get(api_address).json()['outputCount']
     for output in range(outputs):
@@ -31,7 +32,7 @@ def RandomColorSender(host, port, interval, layer):
                  'layer': layer,
                  'color': RandomColor(),
                  'steps': 40}
-      requests.post(api_address, data={'json': simplejson.dumps(command)})
+      requests.post(api_address, data=json.dumps(command), headers=headers)
       time.sleep(interval)
     print '%s: All outputs have new random colors.' % time.ctime()
 

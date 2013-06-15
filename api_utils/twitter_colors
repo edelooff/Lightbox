@@ -13,7 +13,7 @@ import Queue
 import random
 import re
 import requests
-import simplejson
+import simplejson as json
 import threading
 import time
 
@@ -84,6 +84,7 @@ def ColorFromMessage(string, color_mapping=None):
 def TwitterColors(host, port, hashtags, delay, layer):
   """Updated Lightbox outputs based on tweets posted on configured hashtags."""
   api_address = 'http://%s:%d/api' % (host, port)
+  headers = {'content-type': 'application/json'}
   print 'Running Twitter search plugin for Lightbox API ...'
   print 'Hashtags we\'re searching: %s' % ', '.join(hashtags)
   tweet_queue = Queue.Queue()
@@ -97,7 +98,7 @@ def TwitterColors(host, port, hashtags, delay, layer):
                'layer': layer,
                'color': color,
                'steps': 50}
-    requests.post(api_address, data={'json': simplejson.dumps(command)})
+    requests.post(api_address, data=json.dumps(command), headers=headers)
     time.sleep(delay)
 
 
