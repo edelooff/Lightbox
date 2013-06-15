@@ -37,17 +37,9 @@
     </div>
     <h2>API Information</h2>
     <ul>
-      <li>API commands should be sent to <code>/api</code> (HTTP POST, argument <code>json</code>);</li>
+      <li>API commands should be sent to <code>/api</code> (JSON body, content-type <code>application/json</code>);</li>
       <li>Controller information can be retrieved from <a href="/api"><code>/api</code></a>;</li>
       <li>Output information (mixed and layer colors, opacity etc) can be retrieved from <a href="/api/outputs"><code>/api/outputs</code></a>.</li>
     </ul>
-    <h2>Send API commands</h2>
-    <p>API commands can be one object that describes a transition for a single output+layer, or an array of these.</p>
-    <p>Multiple transitions for a single output will be executed in series, multiple transitions for different outputs will be excecuted in unison.</p>
-    <form action="/" method="post">
-      <textarea name="json" cols="80" rows="20"></textarea>
-      <br>
-      <input type="submit" value="push!" />
-    </form>
   </body>
 </html>
