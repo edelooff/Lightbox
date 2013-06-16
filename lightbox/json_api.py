@@ -92,11 +92,11 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
   def do_POST(self):
     """Processes Lightbox controls via JSON."""
-    if self.path not in ('/', '/api'):
-      return self._ErrorResponse('No path %r. Try the root please.' % self.path)
-    if self.headers['content-type'] != 'application/json':
+    if self.path != '/api':
+      return self._ErrorResponse('Can only write to /api.')
+    elif self.headers['content-type'] != 'application/json':
       return self._ErrorResponse('Only application/json is allowed for POST.')
-    if 'content-length' not in self.headers:
+    elif 'content-length' not in self.headers:
       return self._ErrorResponse('Headers must provide the message length.')
     payload = simplejson.loads(
         self.rfile.read(int(self.headers['content-length'])))
@@ -104,8 +104,6 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       map(self.ProcessCommand, payload)
     else:
       self.ProcessCommand(payload)
-    if self.path == '/':
-      return self._Redirect('/', code=303)  # Redirect after successful POST
     self.send_response(200)
     self.end_headers()
 
