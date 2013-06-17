@@ -132,45 +132,78 @@
     this.opacity = this.layer.opacity;
     this.immediateUpdate = true;
     // Initialize color picker
-    this.node = window.picker.clone();
-    this.node.appendTo('body');
-    this.node.find('#opacitySlider').slider({
-        range: 'min',
-        max: 100
-        });
-    this.node.find('#stepsSlider').slider({
-        range: 'min',
-        max: 200
-        });
-    this.lightbox = this.node.lightbox_me({
-        centered: true,
-        destroyOnClose: true,
-        onLoad: this.createPicker.bind(this)
-      });
+    this.node = this.createWindow(window.picker.clone());
+    this.picker = new ColorPicker($('#picker')[0], this.newColor.bind(this));
   }
 
-  LayerColorPicker.prototype.createPicker = function() {
-    var picker = new ColorPicker($('#picker')[0], this.sliderUpdate.bind(this));
-    picker.setHex(this.color);
-    this.lightbox.trigger('reposition');
-  }
+  LayerColorPicker.prototype.createWindow = function(node) {
+    node.appendTo('body');
+    node.find('#opacityValue').text(this.opacity * 100);
+    node.find('#opacitySlider').slider({
+      range: 'min',
+      max: 100,
+      value: this.opacity * 100,
+      slide: this.newOpacity.bind(this),
+      change: this.newOpacity.bind(this),
+    });
+    node.find('#stepsValue').text(40);
+    node.find('#stepsSlider').slider({
+      range: 'min',
+      max: 200,
+      value: 40,
+      slide: this.newSteps.bind(this),
+      change: this.newSteps.bind(this),
+    });
+    node.lightbox_me({
+      centered: true,
+      destroyOnClose: true,
+      onLoad: this.updatePicker.bind(this)
+    });
+    return node;
+  };
 
-  LayerColorPicker.prototype.sliderUpdate = function(hex) {
+  LayerColorPicker.prototype.updatePicker = function() {
+    this.picker.setHex(this.color);
+  };
+
+  LayerColorPicker.prototype.newColor = function(hex) {
     this.color = hex;
     this.node.find('.preview .color').css('background-color', hex);
     this.node.find('.preview .opacity').css('opacity', this.opacity);
     if (this.immediateUpdate) {
-      this.sendCommand({color: hex});
+      this.setColorImmediate();
     }
   };
 
+  LayerColorPicker.prototype.newOpacity = function(event, ui) {
+    this.opacity = ui.value / 100
+    this.node.find('#opacityValue').text(ui.value);
+    this.node.find('.preview .opacity').css('opacity', this.opacity);
+    if (this.immediateUpdate) {
+      this.setColorImmediate();
+    }
+  }
+
+  LayerColorPicker.prototype.newSteps = function(event, ui) {
+    this.steps = ui.value
+    this.node.find('#stepsValue').text(this.steps);
+  }
+
   LayerColorPicker.prototype.setColor = function() {
-    var command = {
-        color: this.color,
-        opacity: this.opacity,
-        steps: this.steps
-      };
+    this.sendCommand({
+      color: this.color,
+      opacity: this.opacity,
+      steps: this.steps
+    });
     this.sendCommand(command);
+  };
+
+  LayerColorPicker.prototype.setColorImmediate = function() {
+    this.sendCommand({
+      color: this.color,
+      opacity: this.opacity,
+      steps: 1
+    });
   };
 
   LayerColorPicker.prototype.sendCommand = function(command) {
