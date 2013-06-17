@@ -1,7 +1,12 @@
+/* Generic body styles
+--------------------------------------------*/
 html,
 body {
   font-family: Arial, sans-serif;
 }
+
+/* Lightbox live view (outputs and layers)
+--------------------------------------------*/
 #preview ul,
 #preview ol {
   margin: 0;
@@ -45,11 +50,15 @@ body {
   margin-top: 10px;
   overflow: auto;
 }
-.output .layer .color {
+.output .layer .colorContainer {
   float: right;
   width: 45px;
   height: 45px;
   border: 1px solid #000;
+  background: url(checkerboard.png);
+}
+.output .layer .color {
+  height: 100%;
   transition: background-color 150ms linear;
   -webkit-transition: background-color 150ms linear;
 }
@@ -59,8 +68,8 @@ body {
   font-size: 10px;
 }
 
-/* ********************************** */
-/* Color picker styles                */
+/* Color picker
+--------------------------------------------*/
 .picker-wrapper,
 .slide-wrapper {
   position: relative;
@@ -82,46 +91,67 @@ body {
   float: left;
 }
 #picker .picker {
-  width: 250px;
-  height: 250px;
+  width: 240px;
+  height: 240px;
 }
 #picker .slide {
-  width: 50px;
-  height: 250px;
+  width: 40px;
+  height: 240px;
 }
 #picker .picker-wrapper,
 #picker .slide-wrapper {
-  border: 6px solid #555;
+  border: 2px solid #555;
 }
 #picker .slide-wrapper {
-  margin-left: 20px;
+  margin-left: 12px;
 }
 #picker .picker-indicator {
   width: 6px;
   height: 6px;
   border-radius: 4px;
-  opacity: .6;
   background-color: #333;
+  opacity: .6;
 }
 #picker .slide-indicator {
   width: 100%;
   height: 4px;
-  opacity: .6;
   background-color: #333;
+  opacity: .6;
 }
 
+/* New transition dialog window
+--------------------------------------------*/
 #picker_popup {
-  width: 400px;
-  padding: 25px;
+  width: 356px;
+  min-height: 300px;
+  padding: 20px;
   border: 2px solid #555;
   background: #f7f7f7;
   box-shadow: 0 0 12px 2px rgba(0, 0, 0, .6);
 }
-
 #picker_popup .preview {
   float: right;
-  width: 20px;
-  height: 20px;
-  margin: 20px;
-  border: 1px solid #000;
+}
+#picker_popup .preview .colorContainer {
+  width: 40px;
+  height: 80px;
+  margin-bottom: 12px;
+  margin-bottom: 76px;
+  border: 2px solid #555;
+  background: url(checkerboard.png);
+}
+#picker_popup .preview .color {
+  height: 100%;
+}
+#picker_popup .selectors {
+  float: left;
+}
+#picker_popup h3 {
+  display: inline-block;
+  margin: 8px 0;
+  font-size: 13px;
+}
+#picker_popup .slider {
+  width: 240px;
+  font-size: 13px;
 }

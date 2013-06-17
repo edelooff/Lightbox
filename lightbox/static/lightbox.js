@@ -110,6 +110,7 @@
 
   Layer.prototype.render = function() {
     this.node.find('.color').css('background-color', this.color);
+    this.node.find('.color').css('opacity', this.opacity);
     this.node.find('.opacity').text(Math.round(this.opacity * 100));
     this.node.find('.blender').text(this.blender);
     this.node.find('.envelope').text(this.envelope);
@@ -127,28 +128,37 @@
     this.commandPath = '/api';
     this.layer = layer;
     // Color and other variables controlled by the user
-    this.color = '#000';
-    this.opacity = 0;
+    this.color = this.layer.color;
+    this.opacity = this.layer.opacity;
     this.immediateUpdate = true;
     // Initialize color picker
     this.node = window.picker.clone();
     this.node.appendTo('body');
-    new ColorPicker($('#picker')[0], this.sliderUpdate.bind(this));
-    this.node.lightbox_me({
+    this.node.find('#opacitySlider').slider({
+        range: 'min',
+        max: 100
+        });
+    this.node.find('#stepsSlider').slider({
+        range: 'min',
+        max: 200
+        });
+    this.lightbox = this.node.lightbox_me({
         centered: true,
-        onClose: this.cleanUp.bind(this)
+        destroyOnClose: true,
+        onLoad: this.createPicker.bind(this)
       });
   }
 
-  LayerColorPicker.prototype.cleanUp = function() {
-    // Removes the picker and the overlay.
-    this.node.remove();
-    $(".js_lb_overlay").last().remove();
-  };
+  LayerColorPicker.prototype.createPicker = function() {
+    var picker = new ColorPicker($('#picker')[0], this.sliderUpdate.bind(this));
+    picker.setHex(this.color);
+    this.lightbox.trigger('reposition');
+  }
 
   LayerColorPicker.prototype.sliderUpdate = function(hex) {
     this.color = hex;
-    this.node.find('.preview').css('background-color', hex);
+    this.node.find('.preview .color').css('background-color', hex);
+    this.node.find('.preview .opacity').css('opacity', this.opacity);
     if (this.immediateUpdate) {
       this.sendCommand({color: hex});
     }

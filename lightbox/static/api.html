@@ -3,11 +3,13 @@
   <head>
     <title>Lightbox JSON API</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link type="text/css" rel="stylesheet" media="screen" href="/static/lightbox.css" />
+    <link href="/static/lightbox.css" rel="stylesheet" />
+    <link href="/static/smoothness/jquery-ui-1.10.3.custom.css" rel="stylesheet">
   </head>
   <body>
     <script src="/static/jquery-1.9.1.min.js"></script>
     <script src="/static/jquery.lightbox_me.js"></script>
+    <script src="/static/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="/static/colorpicker-r54.js"></script>
     <script src="/static/lightbox.js"></script>
     <h1>Lightbox JSON API</h1>
@@ -21,7 +23,9 @@
         <div class="mixed"></div>
         <ol class="layers">
           <li class="layer">
-            <div class="color"></div>
+            <div class="colorContainer">
+              <div class="color"></div>
+            </div>
             <ul>
               <li>Opacity: <span class="opacity"></span>%</li>
               <li class="blender"></li>
@@ -33,7 +37,20 @@
     </div>
     <div id="picker_popup" style="display: none">
       <div id="picker"></div>
-      <div class="preview"></div>
+      <div class="preview">
+        <div class="colorContainer">
+          <div class="color"></div>
+        </div>
+        <div class="colorContainer">
+          <div class="color opacity"></div>
+        </div>
+      </div>
+      <div class="selectors">
+        <h3>Opacity setting</h3>
+        <div class="slider" id="opacitySlider"></div>
+        <h3>Steps slider</h3>
+        <div class="slider" id="stepsSlider"></div>
+      </div>
     </div>
     <h2>API Information</h2>
     <ul>
