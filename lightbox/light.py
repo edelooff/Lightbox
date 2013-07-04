@@ -114,11 +114,11 @@ class Layer(object):
     """
     if not isinstance(transition, Transition):
       raise TypeError('Can only append Transition objects.')
-    if not transition.options.get('queue', True):
+    if transition.options.get('queue', True):
+      self.queue.append(transition)
+    else:
       self.NewTransition(transition)
       self.queue.clear()
-    else:
-      self.queue.append(transition)
 
   def Kill(self):
     """Resets the Layer, immediately disabling output."""
