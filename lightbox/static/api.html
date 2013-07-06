@@ -2,8 +2,8 @@
 <html>
   <head>
     <title>Lightbox JSON API</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link href="/static/lightbox.css" rel="stylesheet" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link href="/static/lightbox.css" rel="stylesheet">
     <link href="/static/smoothness/jquery-ui-1.10.3.custom.css" rel="stylesheet">
   </head>
   <body>
@@ -45,12 +45,31 @@
           <div class="color opacity"></div>
         </div>
       </div>
-      <div class="selectors">
+      <div class="sliders">
         <h3>Opacity slider [<span id="opacityValue"></span>]</h3>
         <div class="slider" id="opacitySlider"></div>
         <h3>Steps  [<span id="stepsValue"></span>]</h3>
         <div class="slider" id="stepsSlider"></div>
       </div>
+      <div class="options">
+        <h3>Layer blender</h3>
+        <select id="blender">
+          <option value="RGBAverage">RGBAverage</option>
+          <option value="LABAverage">LABAverage</option>
+          <option value="Lighten">Lighten</option>
+          <option value="Darken">Darken</option>
+        </select>
+        <h3>Trans. envelope</h3>
+        <select id="envelope">
+          <option value="Linear">Linear</option>
+          <option value="Cosine">Cosine</option>
+        </select>
+      </div>
+      <div class="bottomrow">
+        <input type="checkbox" id="updatesImmediate"><label for="updatesImmediate">Immediately transition to new values</label><br>
+        <input type="checkbox" id="updatesQueue"><label for="updatesQueue">Place transition at end of queue</label>
+      </div>
+      <input class="submit" type="submit" value="Send" />
     </div>
     <h2>API Information</h2>
     <ul>

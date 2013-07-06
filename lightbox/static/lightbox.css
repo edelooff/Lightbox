@@ -5,6 +5,16 @@ body {
   font-family: Arial, sans-serif;
 }
 
+h3,
+label {
+  margin: 8px 0;
+  font-size: 13px;
+  font-weight: bold;
+}
+select {
+  width: 100%;
+  margin: 0;
+}
 /* Lightbox live view (outputs and layers)
 --------------------------------------------*/
 #preview ul,
@@ -100,10 +110,10 @@ body {
 }
 #picker .picker-wrapper,
 #picker .slide-wrapper {
-  border: 2px solid #555;
+  border: 1px solid #555;
 }
 #picker .slide-wrapper {
-  margin-left: 12px;
+  margin-left: 16px;
 }
 #picker .picker-indicator {
   width: 6px;
@@ -122,9 +132,9 @@ body {
 /* New transition dialog window
 --------------------------------------------*/
 #picker_popup {
-  width: 356px;
+  width: 360px;
   min-height: 300px;
-  padding: 20px;
+  padding: 20px 20px 15px;
   border: 2px solid #555;
   background: #f7f7f7;
   box-shadow: 0 0 12px 2px rgba(0, 0, 0, .6);
@@ -135,23 +145,40 @@ body {
 #picker_popup .preview .colorContainer {
   width: 40px;
   height: 80px;
-  margin-bottom: 12px;
-  margin-bottom: 76px;
-  border: 2px solid #555;
+  border: 1px solid #555;
   background: url(checkerboard.png);
+}
+#picker_popup .preview .colorContainer:first-child {
+  margin-bottom: 78px;
 }
 #picker_popup .preview .color {
   height: 100%;
 }
-#picker_popup .selectors {
+#picker_popup .sliders {
   float: left;
-}
-#picker_popup h3 {
-  display: inline-block;
-  margin: 8px 0;
-  font-size: 13px;
 }
 #picker_popup .slider {
   width: 240px;
+  margin-bottom: 16px;
   font-size: 13px;
+}
+#picker_popup .options {
+  float: right;
+  min-width: 102px;
+}
+#picker_popup .bottomrow {
+  clear: both;
+  line-height: 18px;
+}
+#picker_popup .bottomrow input[type=checkbox] {
+  width: 13px;
+  height: 13px;
+  margin: 5px 5px 2px 0;
+  vertical-align: bottom;
+}
+#picker_popup .submit {
+  position: absolute;
+  right: 20px;
+  bottom: 15px;
+  margin: 0;
 }

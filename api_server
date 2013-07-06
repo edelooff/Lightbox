@@ -17,7 +17,7 @@ def StartLightboxApi(controller_name, port, outputs, quiet):
   """
   print 'Initiating controller %r ...' % controller_name
   ctrl_obj = getattr(controller, controller_name).FirstDevice(outputs=outputs)
-  print 'Starting API server on port %d ...' % port
+  print 'Starting API server on http://localhost:%d/ ...' % port
   json_api.ApiServer(ctrl_obj, port=port, quiet=quiet)
 
 
