@@ -1,10 +1,18 @@
 /* Generic body styles
 --------------------------------------------*/
-html,
 body {
   font-family: Arial, sans-serif;
+  margin: 0 20px;
+  color: #333;
 }
-
+h1 {
+  margin: 0 -20px;
+  padding: 20px;
+  background: #25b;
+  font-size: 30px;
+  color: #f3f3f3;
+  text-align: center;
+}
 h3,
 label {
   margin: 8px 0;
@@ -15,6 +23,9 @@ select {
   width: 100%;
   margin: 0;
 }
+h2, h3, label, select, strong {
+  color: #25b;
+}
 /* Lightbox live view (outputs and layers)
 --------------------------------------------*/
 #preview ul,
@@ -24,15 +35,16 @@ select {
 }
 #preview {
   overflow: auto;
+  margin: 0 -10px;
 }
 .output {
   position: relative;
   float: left;
   width: 195px;
   height: 190px;
-  margin: 0 20px 20px 0;
+  margin: 0 10px 20px;
   padding: 5px;
-  border: 2px solid #777;
+  border: 2px solid #555;
   border-radius: 10px;
   overflow: auto;
 }
