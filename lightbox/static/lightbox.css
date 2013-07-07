@@ -59,7 +59,6 @@ h2, h3, label, select, strong {
   height: 159px;
   border: 1px solid #000;
   transition: background-color 150ms linear;
-  -webkit-transition: background-color 150ms linear;
 }
 .output .layers {
   position: absolute;
@@ -82,7 +81,6 @@ h2, h3, label, select, strong {
 .output .layer .color {
   height: 100%;
   transition: background-color 150ms linear;
-  -webkit-transition: background-color 150ms linear;
 }
 .output .layer ul {
   margin-top: 4px;
@@ -176,7 +174,7 @@ h2, h3, label, select, strong {
 }
 #picker_popup .options {
   float: right;
-  min-width: 102px;
+  width: 102px;
 }
 #picker_popup .bottomrow {
   clear: both;
