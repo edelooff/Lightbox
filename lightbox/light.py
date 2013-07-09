@@ -14,18 +14,8 @@ import collections
 import utils
 
 
-class Output(object):
-  """Abstraction for an RGB output.
-
-  Allows color changing using the associated controller.
-  """
-  def __init__(self, layers=3):
-    self.color = 0, 0, 0
-    self.layers = [Layer() for _number in range(max(1, layers))]
-
-  # ############################################################################
-  # Output control actions
-  #
+class ActionsMixIn(object):
+  """Provides the common actions for Output classes."""
   def Blink(self, layer=0, count=1, **options):
     """Blinks the output to the given `color` and back, `count` times."""
     options['withreverse'] = True
@@ -41,8 +31,16 @@ class Output(object):
     """Fades the output to the given `color` in `steps` steps."""
     self[layer].Append(Transition(**options))
 
-  # ACTIONS defines the methods that the JSON API may use to control colors
-  ACTIONS = 'Blink', 'Constant', 'Fade'
+
+class Output(ActionsMixIn):
+  """Abstraction for an RGB output.
+
+  Allows color changing using the associated controller.
+  """
+  def __init__(self, layers=3):
+    super(Output, self).__init__()
+    self.color = 0, 0, 0
+    self.layers = [Layer() for _number in range(max(1, layers))]
 
   # ############################################################################
   # Actual color changing/writing and layer management
@@ -99,11 +97,11 @@ class Layer(object):
   def __init__(self, **opts):
     """Initliazes a Layer."""
     # Layer management
-    self.blender = opts.get('blender', utils.LabAverage)
+    self.blender = opts.get('blender', utils.Blenders.LabAverage)
     self.color = opts.get('color', (0, 0, 0))
     self.opacity = opts.get('opacity', 0)
     # Transition management
-    self.envelope = opts.get('envelope', utils.CosineEnvelope)
+    self.envelope = opts.get('envelope', utils.Envelopes.Cosine)
     self.queue = collections.deque()
     self.transition = None
 

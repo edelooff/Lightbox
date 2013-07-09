@@ -9,7 +9,6 @@ __version__ = '2.0'
 
 # Standard modules
 import BaseHTTPServer
-import cgi
 import datetime
 import mimetypes
 import os
@@ -17,6 +16,7 @@ import simplejson
 import sys
 
 # Package modules
+from . import light
 from . import utils
 
 
@@ -116,23 +116,23 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """
     command = api_command.copy()
     if 'blender' in command:
-      if command['blender'] not in utils.BLENDERS:
+      if not hasattr(utils.Blenders, command['blender']):
         raise ValueError('Provided blender %r is not a known blender.' % (
             command['blender']))
-      command['blender'] = getattr(utils, command['blender'])
+      command['blender'] = getattr(utils.Blenders, command['blender'])
     if 'envelope' in command:
-      if command['envelope'] not in utils.ENVELOPES:
+      if not hasattr(utils.Envelopes, command['envelope']):
         raise ValueError('Provided envelope %r is not a known envelope.' % (
             command['envelope']))
-      command['envelope'] = getattr(utils, command['envelope'])
+      command['envelope'] = getattr(utils.Envelopes, command['envelope'])
     channel = self.server.box[command.get('output', 0)]
     api_command['action'] = action = command.get('action', 'fade').capitalize()
-    if action not in channel.ACTIONS:
+    if not hasattr(light.ActionsMixIn, action):
       raise ValueError(
           'Chosen action %r is not an action for this channel.' %  action)
     getattr(channel, action)(**command)
 
-  def log_message(self, format, *args):
+  def log_message(self, fmt, *args):
     """Logs the messages from the RequestHandler
 
     This logs the requesting host (without reverse dns lookup), the time
@@ -142,7 +142,7 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       sys.stderr.write("%s - [%s] %s\n" % (
           self.client_address[0],
           datetime.datetime.now().strftime('%F %T.%f'),
-          format % args))
+          fmt % args))
 
 
 def ApiServer(box, port=8000, quiet=False):

@@ -50,16 +50,17 @@ class BaseController(list):
   #
   def Info(self):
     """Returns a dictionary of Lightbox controller info."""
+    public_methods = lambda method: not method.startswith('_')
     return {'controller': type(self).__name__,
             'device': self._DeviceInfo(),
             'commandRate': {
                 'combined': self.frequency,
                 'perOutput': float(self.frequency) / len(self)},
-            'layerBlenders': utils.BLENDERS,
+            'layerBlenders': filter(public_methods, dir(utils.Blenders)),
             'layerCount': self.layers,
-            'outputActions': self.output_cls.ACTIONS,
+            'outputActions': filter(public_methods, dir(light.ActionsMixIn)),
             'outputCount': len(self),
-            'transitionEnvelopes': utils.ENVELOPES}
+            'transitionEnvelopes': filter(public_methods, dir(utils.Envelopes))}
 
   def _DeviceInfo(self):
     """Returns a batch of hardware-specific info."""
