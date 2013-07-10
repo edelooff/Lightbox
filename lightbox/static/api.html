@@ -21,11 +21,11 @@
     <div id="preview">
       <div class="output">
         <strong>Output 42</strong>
-        <div class="mixed"></div>
+        <div class="mixed smoothed"></div>
         <ol class="layers">
           <li class="layer">
             <div class="colorContainer">
-              <div class="color"></div>
+              <div class="color smoothed"></div>
             </div>
             <ul>
               <li>Opacity: <span class="opacity"></span>%</li>
@@ -37,37 +37,42 @@
       </div>
     </div>
     <div id="picker_popup" style="display: none">
-      <h3>Transition to new color</h3>
-      <div id="picker"></div>
-      <div class="preview">
-        <div class="colorContainer">
-          <div class="color"></div>
+      <div class="modal_close close"></div>
+      <div class="modal_header">
+        <h3>Transition to new color</h3>
+      </div>
+      <div class="modal_content">
+        <div id="picker"></div>
+        <div class="preview">
+          <div class="colorContainer">
+            <div class="color"></div>
+          </div>
+          <div class="colorContainer">
+            <div class="color opacity"></div>
+          </div>
         </div>
-        <div class="colorContainer">
-          <div class="color opacity"></div>
+        <div class="sliders">
+          <h4>Opacity slider [<span id="opacityValue"></span>]</h4>
+          <div class="slider" id="opacitySlider"></div>
+          <h4>Steps  [<span id="stepsValue"></span>]</h4>
+          <div class="slider" id="stepsSlider"></div>
         </div>
+        <div class="options">
+          <h4>Layer blender</h4>
+          <select id="blender">
+            <option value="dummy">Dummy</option>
+          </select>
+          <h4>Trans. envelope</h4>
+          <select id="envelope">
+            <option value="dummy">Dummy</option>
+          </select>
+        </div>
+        <div class="bottomrow">
+          <input type="checkbox" id="updateImmediate"><label for="updateImmediate">Immediately apply color on change</label><br>
+          <input type="checkbox" id="updateQueued" checked="checked"><label for="updateQueued">New transitions queue after current</label>
+        </div>
+        <input class="submit" type="submit" value="Apply" />
       </div>
-      <div class="sliders">
-        <h4>Opacity slider [<span id="opacityValue"></span>]</h4>
-        <div class="slider" id="opacitySlider"></div>
-        <h4>Steps  [<span id="stepsValue"></span>]</h4>
-        <div class="slider" id="stepsSlider"></div>
-      </div>
-      <div class="options">
-        <h4>Layer blender</h4>
-        <select id="blender">
-          <option value="dummy">Dummy</option>
-        </select>
-        <h4>Trans. envelope</h4>
-        <select id="envelope">
-          <option value="dummy">Dummy</option>
-        </select>
-      </div>
-      <div class="bottomrow">
-        <input type="checkbox" id="updateImmediate"><label for="updateImmediate">Immediately apply color on change</label><br>
-        <input type="checkbox" id="updateQueued" checked="checked"><label for="updateQueued">New transitions queue after current</label>
-      </div>
-      <input class="submit" type="submit" value="Apply" />
     </div>
     <h2>API Information</h2>
     <ul>

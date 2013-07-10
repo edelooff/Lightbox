@@ -5,14 +5,13 @@ body {
   margin: 0 20px;
   color: #333;
 }
-h1,
-h3 {
+h1 {
   margin: 0 -20px;
-  padding: 20px;
   background: #25b;
   font-size: 30px;
   font-weight: bold;
-  color: #f3f3f3;
+  color: #f6f6f6;
+  line-height: 70px;
   text-align: center;
 }
 h2 {
@@ -20,7 +19,9 @@ h2 {
   font-weight: bold;
 }
 h3 {
-  font-size: 16px;
+  font-size: 14px;
+  color: #f6f6f6;
+  text-align: center;
 }
 h4,
 label {
@@ -67,7 +68,6 @@ h2, h4, label, select, strong {
   width: 45px;
   height: 159px;
   border: 1px solid #000;
-  transition: background-color 150ms linear;
 }
 .output .layers {
   position: absolute;
@@ -89,12 +89,15 @@ h2, h4, label, select, strong {
 }
 .output .layer .color {
   height: 100%;
-  transition: background-color 150ms linear;
 }
 .output .layer ul {
   margin-top: 4px;
   list-style: none;
   font-size: 10px;
+}
+.smoothed {
+  transition: 150ms linear;
+  transition-property: background-color, opacity;
 }
 
 /* Color picker
@@ -151,16 +154,38 @@ h2, h4, label, select, strong {
 /* New transition dialog window
 --------------------------------------------*/
 #picker_popup {
-  width: 360px;
-  min-height: 300px;
-  padding: 20px 20px 15px;
-  border: 2px solid #25b;
-  background: #f3f3f3;
+  position: relative;
+  width: 400px;
+  border-radius: 6px;
   box-shadow: 0 0 12px 2px rgba(0, 0, 0, .6);
 }
-#picker_popup h3 {
-  margin: -20px -20px 20px -20px;
-  padding: 5px 0;
+.modal_close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 29px;
+  height: 29px;
+  border-left: 1px solid #14a;
+  background: url(close.png) 50% 50% no-repeat;
+  cursor: pointer;
+}
+.modal_close:hover {
+  background: url(close-active.png) 50% 50% no-repeat;
+}
+.modal_header {
+  padding: 7px 0 6px 0;
+  border-radius: 6px 6px 0 0;
+  background: #25b;
+}
+.modal_header h3 {
+  margin: 0;
+}
+.modal_content {
+  padding: 15px 20px;
+  border: solid #25b;
+  border-width: 0 2px 2px;
+  border-radius: 0 0 6px 6px;
+  background: #f6f6f6;
 }
 #picker_popup .preview {
   float: right;
@@ -207,7 +232,7 @@ h2, h4, label, select, strong {
   padding: 6px 18px;
   border: 0;
   background: #25b;
-  color: #f3f3f3;
+  color: #f6f6f6;
   font-size: 14px;
   font-weight: bold;
 }
