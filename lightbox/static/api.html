@@ -54,17 +54,17 @@
       </div>
       <div class="options">
         <h3>Layer blender</h3>
-        <select id="blenders">
+        <select id="blender">
           <option value="dummy">Dummy</option>
         </select>
         <h3>Trans. envelope</h3>
-        <select id="envelopes">
+        <select id="envelope">
           <option value="dummy">Dummy</option>
         </select>
       </div>
       <div class="bottomrow">
-        <input type="checkbox" id="updatesImmediate"><label for="updatesImmediate">Immediately transition to new values</label><br>
-        <input type="checkbox" id="updatesQueue"><label for="updatesQueue">Place transition at end of queue</label>
+        <input type="checkbox" id="updateImmediate"><label for="updateImmediate">Immediately apply color on change</label><br>
+        <input type="checkbox" id="updateQueued" checked="checked"><label for="updateQueued">New transitions queue after current</label>
       </div>
       <input class="submit" type="submit" value="Send" />
     </div>

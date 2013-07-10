@@ -169,7 +169,7 @@ h2, h3, label, select, strong {
 }
 #picker_popup .slider {
   width: 240px;
-  margin-bottom: 16px;
+  margin: 12px 0;
   font-size: 13px;
 }
 #picker_popup .options {
@@ -191,4 +191,13 @@ h2, h3, label, select, strong {
   right: 20px;
   bottom: 15px;
   margin: 0;
+  padding: 6px 18px;
+  border: 0;
+  background: #25b;
+  color: #f3f3f3;
+  font-size: 14px;
+  font-weight: bold;
+}
+#picker_popup .submit:active {
+  bottom: 14px;
 }

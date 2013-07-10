@@ -42,16 +42,16 @@
       this.outputs.push(output);
       this.node.append(output.node);
     }
-    var blenders = picker.find('#blenders');
+    var blenders = picker.find('#blender');
     blenders.empty();
     $.each(lightbox.controllerInfo.layerBlenders, function(_, blender) {
       blenders.append($('<option>', {"value": blender}).text(blender));
     });
-    var envelopes = picker.find('#envelopes');
+    var envelopes = picker.find('#envelope');
     envelopes.empty();
     $.each(lightbox.controllerInfo.transitionEnvelopes, function(_, envelope) {
       envelopes.append(
-          $('<option>', {"value": envelope}).text(envelope.slice(0, -8)));
+          $('<option>', {"value": envelope}).text(envelope));
     });
   };
 
@@ -117,7 +117,6 @@
   }
 
   Layer.prototype.colorPicker = function(event) {
-    console.log(this);
     new LayerColorPicker(this);
     event.preventDefault();
   };
@@ -144,7 +143,10 @@
     this.color = this.layer.color;
     this.opacity = this.layer.opacity;
     this.steps = 40;
-    this.immediateUpdate = false;
+    this.blender = this.layer.blender;
+    this.envelope = this.layer.envelope;
+    this.updateImmediate = false;
+    this.updateQueued = false;
     // Initialize color picker
     this.node = this.createWindow(picker);
     this.picker = new ColorPicker($('#picker')[0], this.newColor.bind(this));
@@ -166,11 +168,21 @@
     node.find('#stepsValue').text(40);
     node.find('#stepsSlider').slider({
       range: 'min',
+      min: 1,
       max: 200,
       value: 40,
       slide: this.newSteps.bind(this),
       change: this.newSteps.bind(this),
     });
+    node.find('#blender')
+        .val(this.blender)
+        .on('change', this.newBlender.bind(this));
+    node.find('#envelope')
+        .val(this.envelope)
+        .on('change', this.newEnvelope.bind(this));
+    node.find('#updateImmediate').on('change', this.setImmediate.bind(this));
+    node.find('#updateQueued').on('change', this.setQueued.bind(this));
+    node.find('.submit').click(this.submit.bind(this));
     node.lightbox_me({
       centered: true,
       destroyOnClose: true,
@@ -181,14 +193,15 @@
 
   LayerColorPicker.prototype.updatePicker = function() {
     this.picker.setHex(this.color);
-    this.immediateUpdate = true;
+    this.updateImmediate = this.node.find('#updateImmediate').is(':checked');
+    this.updateQueued = this.node.find('#updateQueued').is(':checked');
   };
 
   LayerColorPicker.prototype.newColor = function(hex) {
     this.color = hex;
     this.node.find('.preview .color').css('background-color', hex);
     this.node.find('.preview .opacity').css('opacity', this.opacity);
-    if (this.immediateUpdate) {
+    if (this.updateImmediate) {
       this.updateThrottler(this.currentCommand());
     }
   };
@@ -197,9 +210,17 @@
     this.opacity = ui.value / 100;
     this.node.find('#opacityValue').text(ui.value);
     this.node.find('.preview .opacity').css('opacity', this.opacity);
-    if (this.immediateUpdate) {
+    if (this.updateImmediate) {
       this.updateThrottler(this.currentCommand());
     }
+  };
+
+  LayerColorPicker.prototype.newBlender = function(event) {
+    this.blender = event.target.value;
+  };
+
+  LayerColorPicker.prototype.newEnvelope = function(event) {
+    this.envelope = event.target.value;
   };
 
   LayerColorPicker.prototype.newSteps = function(event, ui) {
@@ -213,8 +234,18 @@
       color: this.color,
       opacity: this.opacity,
       steps: this.steps,
-      queue: this.queueTransition
+      queue: this.updateQueued,
+      blender: this.blender,
+      envelope: this.envelope,
     };
+  };
+
+  LayerColorPicker.prototype.setImmediate = function(event) {
+    this.updateImmediate = event.target.checked;
+  };
+
+  LayerColorPicker.prototype.setQueued = function(event) {
+    this.updateQueued = event.target.checked;
   };
 
   LayerColorPicker.prototype.setUpdateThrottler = function() {
@@ -232,4 +263,9 @@
         type: 'POST'
       });
   };
+
+  LayerColorPicker.prototype.submit = function() {
+    this.sendCommand(this.currentCommand());
+    this.node.trigger('close');
+  }
 }());
