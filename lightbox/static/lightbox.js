@@ -176,13 +176,21 @@
     });
     node.find('#blender')
         .val(this.blender)
+        .off('change')
         .on('change', this.newBlender.bind(this));
     node.find('#envelope')
         .val(this.envelope)
+        .off('change')
         .on('change', this.newEnvelope.bind(this));
-    node.find('#updateImmediate').on('change', this.setImmediate.bind(this));
-    node.find('#updateQueued').on('change', this.setQueued.bind(this));
-    node.find('.submit').click(this.submit.bind(this));
+    node.find('#updateImmediate')
+        .off('change')
+        .on('change', this.setImmediate.bind(this));
+    node.find('#updateQueued')
+        .off('change')
+        .on('change', this.setQueued.bind(this));
+    node.find('.submit')
+        .off('click')
+        .on('click', this.submit.bind(this));
     node.lightbox_me({
       centered: true,
       destroyOnClose: true,
@@ -267,5 +275,6 @@
   LayerColorPicker.prototype.submit = function() {
     this.sendCommand(this.currentCommand());
     this.node.trigger('close');
-  }
+  };
+
 }());
