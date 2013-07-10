@@ -169,7 +169,7 @@ For `Blink` actions, this sets the number of blinks, defaulting to one. When the
 
 #### `envelope`
 
-Selects an envelope function to use for the transition. These are also known as "easings", and a list of available options can be gotten from the controller information API. When not provided, the last selected transition for the layer is used, the initial envelope function is `CosineEnvelope`.
+Selects an envelope function to use for the transition. These are also known as "easings", and a list of available options can be gotten from the controller information API. When not provided, the last selected transition for the layer is used, the initial envelope function is `Cosine`.
 
 #### `blender`
 
