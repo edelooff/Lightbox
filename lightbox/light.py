@@ -58,7 +58,7 @@ class Output(ActionsMixIn):
     color, _opacity = next(self[0])
     for layer in self[1:]:
       color = layer.NextBlendedColor(color)
-    return color
+    return tuple(map(int, color))
 
   def AddLayer(self):
     """Adds an additional layer to this output."""
