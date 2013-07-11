@@ -2,6 +2,31 @@
 
 Lightbox is a Python library that controls hardware to drive LED-strips. It was originally written for the [Twitterboom](http://twitterboom.nl) project at [Frack](http://frack.nl/wiki), and has since seen continued development. All color transitions are performed in LAB color space, ensuring that there are no dips or peaks in perceived lightness during a transition.
 
+## Quick installation
+
+The easiest and quickest way to install Lightbox is using Python's `virtualenv` and the provided install script:
+
+```bash
+# Set up the Python virtualenv:
+virtualenv target
+source target/bin/activate
+
+# Install the lightbox package
+python setup.py install
+
+# Run the commandline demo
+cd scripts
+python demo.py
+
+# Or (from the same directory) start the API server and some utilities
+# provide the API server with `-c Dummy` if there is no Lightbox hardware present
+python api_server.py
+```
+
+### API utilities
+
+Once you have a Lightbox JSON API server running, there is a directory with a number of small utilities. These send commands to the Lightbox server (localhost port 8000 by default). These are present in the `api_utils` directory.
+
 ## Overview
 
 At the heart of Lightbox is the _Controller_, which interfaces with the attached hardware box. For our existing solution, this is plain serial at 57600 baud. This controller object maintains a number of _Outputs_, abstractions of the physically connected strips. Each output can only assume one color; individually addressable strips are not the target for this library.
