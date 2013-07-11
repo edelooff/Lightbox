@@ -1,3 +1,22 @@
-# Ignore temporary files from gEdit and .pyc files
-*~
-*.pyc
+# Python compiled runtime files
+*.py[cod]
+
+# Vim swap and gedit temp files
+*.swp
+*.*~
+*.vim
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
