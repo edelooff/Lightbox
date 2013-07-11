@@ -96,6 +96,7 @@
 	width: 1.2em;
 	height: 1.2em;
 	cursor: default;
+	transition: background-color 100ms ease-in-out;
 }
 .ui-slider .ui-slider-range {
 	position: absolute;
