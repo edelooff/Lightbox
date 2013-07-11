@@ -36,6 +36,9 @@ select {
 h2, h4, label, select, strong {
   color: #25b;
 }
+*:focus {
+  outline: none;
+}
 /* Lightbox live view (outputs and layers)
 --------------------------------------------*/
 #preview ul,
