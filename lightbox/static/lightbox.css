@@ -3,7 +3,8 @@
 body {
   font-family: Arial, sans-serif;
   margin: 0 20px;
-  color: #333;
+  color: #f6f6f6;
+  background: #333;
 }
 h1 {
   margin: 0 -20px;
@@ -15,15 +16,22 @@ h1 {
   text-align: center;
 }
 h2 {
+  color: #3ad;
   font-size: 24px;
   font-weight: bold;
 }
 h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #3ad;
+}
+h4 {
+  margin: 0;
   font-size: 14px;
   color: #f6f6f6;
   text-align: center;
 }
-h4,
+h5,
 label {
   margin: 8px 0;
   font-size: 13px;
@@ -33,11 +41,21 @@ select {
   width: 100%;
   margin: 0;
 }
-h2, h4, label, select, strong {
+h5, label, select, strong {
   color: #25b;
 }
 *:focus {
   outline: none;
+}
+:link {
+  color: #3af;
+  transition: color 200ms ease-in-out;
+}
+:link:hover {
+  color: #6cf;
+}
+.maxheight {
+  height: 100%;
 }
 /* Lightbox live view (outputs and layers)
 --------------------------------------------*/
@@ -53,50 +71,45 @@ h2, h4, label, select, strong {
 .output {
   position: relative;
   float: left;
-  width: 195px;
+  width: 158px;
   height: 190px;
   margin: 0 10px 20px;
-  padding: 5px;
-  border: 2px solid #555;
-  border-radius: 10px;
+  padding: 5px 10px 0;
+  border: 1px solid #555;
+  background: #444;
+  font-size: 10px;
   overflow: auto;
+  transition: background-color 150ms ease-in-out;
 }
-.output strong {
-  margin-left: 20px;
+.output:hover {
+  background: #4f4f4f;
+}
+.output .mixedContainer {
+  float: right;
+  margin-top: 5px;
+  font-size: 10px;
+  text-align: center;
 }
 .output .mixed {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
   width: 45px;
-  height: 159px;
-  border: 1px solid #000;
+  height: 145px;
+  border: 1px solid #222;
 }
 .output .layers {
-  position: absolute;
-  bottom: 10px;
-  left: 5px;
-  width: 133px;
+  width: 100px;
   list-style: none;
 }
 .output .layer {
-  margin-top: 10px;
+  margin-top: 5px;
   overflow: auto;
 }
 .output .layer .colorContainer {
-  float: right;
-  width: 45px;
-  height: 45px;
-  border: 1px solid #000;
+  height: 35px;
+  border: 1px solid #222;
   background: url(checkerboard.png);
 }
-.output .layer .color {
-  height: 100%;
-}
-.output .layer ul {
-  margin-top: 4px;
-  list-style: none;
-  font-size: 10px;
+.output .layer .opacity {
+  float: right;
 }
 .smoothed {
   transition: 150ms linear;
@@ -180,9 +193,6 @@ h2, h4, label, select, strong {
   border-radius: 6px 6px 0 0;
   background: #25b;
 }
-.modal_header h3 {
-  margin: 0;
-}
 .modal_content {
   padding: 15px 20px;
   border: solid #25b;
@@ -201,9 +211,6 @@ h2, h4, label, select, strong {
 }
 #picker_popup .preview .colorContainer:first-child {
   margin-bottom: 78px;
-}
-#picker_popup .preview .color {
-  height: 100%;
 }
 #picker_popup .sliders {
   float: left;
@@ -231,9 +238,10 @@ h2, h4, label, select, strong {
   position: absolute;
   right: 20px;
   bottom: 15px;
+  width: 102px;
   margin: 0;
-  padding: 6px 18px;
-  border: 0;
+  padding: 6px 0;
+  border: 1px outset #36c;
   background: #25b;
   color: #f6f6f6;
   font-size: 14px;
@@ -241,4 +249,5 @@ h2, h4, label, select, strong {
 }
 #picker_popup .submit:active {
   bottom: 14px;
+  border-style: inset;
 }

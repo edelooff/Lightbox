@@ -91,7 +91,7 @@
 
   Output.prototype.setTitle = function(title) {
     // Sets the title that is displayed on the output node.
-    this.node.find('strong').text(title);
+    this.node.find('h3').text(title);
   };
 
   Output.prototype.update = function(info) {
@@ -124,7 +124,7 @@
   Layer.prototype.render = function() {
     this.node.find('.color').css('background-color', this.color);
     this.node.find('.color').css('opacity', this.opacity);
-    this.node.find('.opacity').text(Math.round(this.opacity * 100));
+    this.node.find('.opacity').text(Math.round(this.opacity * 100) + '%');
     this.node.find('.blender').text(this.blender);
     this.node.find('.envelope').text(this.envelope);
   };

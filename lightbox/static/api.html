@@ -20,18 +20,18 @@
     <p>Basic jQuery/JavaScript retrieval for the current colors on the strip.</p>
     <div id="preview">
       <div class="output">
-        <strong>Output 42</strong>
-        <div class="mixed smoothed"></div>
+        <h3>Output 1</h3>
+        <div class="mixedContainer">
+          <div class="mixed smoothed"></div>
+          mixed
+        </div>
         <ol class="layers">
           <li class="layer">
             <div class="colorContainer">
-              <div class="color smoothed"></div>
+              <div class="color maxheight smoothed"></div>
             </div>
-            <ul>
-              <li>Opacity: <span class="opacity"></span>%</li>
-              <li class="blender"></li>
-              <li class="envelope"></li>
-            </ul>
+            <span class="blender"></span>
+            <span class="opacity"></span>
           </li>
         </ol>
       </div>
@@ -39,30 +39,30 @@
     <div id="picker_popup" style="display: none">
       <div class="modal_close close"></div>
       <div class="modal_header">
-        <h3>Transition to new color</h3>
+        <h4>Transition to new color</h4>
       </div>
       <div class="modal_content">
         <div id="picker"></div>
         <div class="preview">
           <div class="colorContainer">
-            <div class="color"></div>
+            <div class="color maxheight"></div>
           </div>
           <div class="colorContainer">
-            <div class="color opacity"></div>
+            <div class="color maxheight opacity"></div>
           </div>
         </div>
         <div class="sliders">
-          <h4>Opacity slider [<span id="opacityValue"></span>]</h4>
+          <h5>Opacity slider [<span id="opacityValue"></span>]</h5>
           <div class="slider" id="opacitySlider"></div>
-          <h4>Steps  [<span id="stepsValue"></span>]</h4>
+          <h5>Steps  [<span id="stepsValue"></span>]</h5>
           <div class="slider" id="stepsSlider"></div>
         </div>
         <div class="options">
-          <h4>Layer blender</h4>
+          <h5>Layer blender</h5>
           <select id="blender">
             <option value="dummy">Dummy</option>
           </select>
-          <h4>Trans. envelope</h4>
+          <h5>Trans. envelope</h5>
           <select id="envelope">
             <option value="dummy">Dummy</option>
           </select>
