@@ -57,19 +57,18 @@ h5, label, select, strong {
 .maxheight {
   height: 100%;
 }
+.smoothed {
+  transition: 150ms linear;
+  transition-property: background-color, opacity;
+}
+
 /* Lightbox live view (outputs and layers)
 --------------------------------------------*/
-#preview ul,
-#preview ol {
-  margin: 0;
-  padding: 0;
-}
 #preview {
   overflow: auto;
   margin: 0 -10px;
 }
 .output {
-  position: relative;
   float: left;
   width: 158px;
   height: 190px;
@@ -97,6 +96,8 @@ h5, label, select, strong {
 }
 .output .layers {
   width: 100px;
+  margin: 0;
+  padding: 0;
   list-style: none;
 }
 .output .layer {
@@ -110,10 +111,6 @@ h5, label, select, strong {
 }
 .output .layer .opacity {
   float: right;
-}
-.smoothed {
-  transition: 150ms linear;
-  transition-property: background-color, opacity;
 }
 
 /* Color picker
