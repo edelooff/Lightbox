@@ -5,7 +5,12 @@
 // outside this source file.
 (function() {
   "use strict";
-  var lightbox, picker;
+
+  var apiCommandPath = '/api',
+      apiQueryController = '/api',
+      apiQueryOutputs = '/api/outputs',
+      lightbox,
+      picker;
 
   $(document).ready(function() {
     lightbox = new Lightbox('#preview');
@@ -16,9 +21,6 @@
 
   function Lightbox(node) {
     this.node = $(node);
-    this.apiController = '/api';
-    this.apiCommand = '/api';
-    this.apiOutputs = '/api/outputs';
     this.controllerInfo = undefined;
     this.outputTemplate = $('.output').detach();
     this.outputs = [];
@@ -30,7 +32,7 @@
   };
 
   Lightbox.prototype.init = function() {
-    $.getJSON(this.apiCommand, this.createOutputs.bind(this));
+    $.getJSON(apiQueryController, this.createOutputs.bind(this));
   };
 
   Lightbox.prototype.createOutputs = function(apiInfo) {
@@ -44,19 +46,19 @@
     }
     var blenders = picker.find('#blender');
     blenders.empty();
-    $.each(lightbox.controllerInfo.layerBlenders, function(_, blender) {
+    $.each(this.controllerInfo.layerBlenders, function(_, blender) {
       blenders.append($('<option>', {"value": blender}).text(blender));
     });
     var envelopes = picker.find('#envelope');
     envelopes.empty();
-    $.each(lightbox.controllerInfo.transitionEnvelopes, function(_, envelope) {
+    $.each(this.controllerInfo.transitionEnvelopes, function(_, envelope) {
       envelopes.append(
           $('<option>', {"value": envelope}).text(envelope));
     });
   };
 
   Lightbox.prototype.update = function() {
-    $.getJSON(this.apiOutputs, this.updateOutputs.bind(this));
+    $.getJSON(apiQueryOutputs, this.updateOutputs.bind(this));
   };
 
   Lightbox.prototype.updateOutputs = function(info) {
@@ -72,6 +74,7 @@
     this.layerNodes = node.find('.layers');
     this.layerTemplate = node.find('.layer').detach();
     this.layers = [];
+    this.commandRate = apiInfo.controllerInfo.commandRate.perOutput;
     this.setTitle('Output ' + (index + 1));
     this.addLayers(apiInfo.layerCount);
   }
@@ -258,14 +261,14 @@
 
   LayerColorPicker.prototype.setUpdateThrottler = function() {
     this.updateThrottler = $.throttle(
-        1000 * this.steps / lightbox.controllerInfo.commandRate.perOutput,
+        1000 * this.steps / this.layer.output.commandRate,
         this.sendCommand.bind(this));
   };
 
   LayerColorPicker.prototype.sendCommand = function(command) {
     command.output = this.layer.output.index;
     command.layer = this.layer.index;
-    $.ajax(lightbox.apiCommand, {
+    $.ajax(apiCommandPath, {
         data: JSON.stringify(command),
         contentType: 'application/json',
         type: 'POST'
