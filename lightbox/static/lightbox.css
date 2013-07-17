@@ -10,7 +10,6 @@ h1 {
   margin: 0 -20px;
   background: #25b;
   font-size: 30px;
-  font-weight: bold;
   color: #f6f6f6;
   line-height: 70px;
   text-align: center;
@@ -18,7 +17,6 @@ h1 {
 h2 {
   color: #3ad;
   font-size: 24px;
-  font-weight: bold;
 }
 h3 {
   margin: 0;
@@ -47,11 +45,13 @@ h5, label, select, strong {
 *:focus {
   outline: none;
 }
-:link {
+:link,
+:visited {
   color: #3af;
   transition: color 200ms ease-in-out;
 }
-:link:hover {
+:link:hover,
+:visited:hover {
   color: #6cf;
 }
 .maxheight {
@@ -92,22 +92,28 @@ h5, label, select, strong {
 .output .mixed {
   width: 45px;
   height: 145px;
-  border: 1px solid #222;
+  border: 1px solid #333;
 }
 .output .layers {
-  width: 100px;
-  margin: 0;
+  width: 120px;
+  margin: 0 0 0 -10px;
   padding: 0;
   list-style: none;
 }
 .output .layer {
-  margin-top: 5px;
+  padding: 5px 10px 0;
   overflow: auto;
 }
 .output .layer .colorContainer {
   height: 35px;
-  border: 1px solid #222;
+  border: 1px solid #333;
   background: url(checkerboard.png);
+  transition: 150ms ease-in-out;
+  transition-property: box-shadow, border-color;
+}
+.output .layer:hover .colorContainer {
+  border-color: #ddd;
+  box-shadow: 0 0 4px 1px #ddd;
 }
 .output .layer .opacity {
   float: right;
