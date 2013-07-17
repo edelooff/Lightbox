@@ -13,10 +13,10 @@
       picker;
 
   $(document).ready(function() {
+    picker = $('#picker-popup').detach();
     lightbox = new Lightbox('#preview');
     lightbox.init();
     lightbox.automaticUpdates(150);
-    picker = $('#picker_popup').detach();
   });
 
   function Lightbox(node) {
@@ -160,16 +160,16 @@
   LayerColorPicker.prototype.createWindow = function(node) {
     var opacityPercents = Math.round(this.opacity * 100);
     node.appendTo('body');
-    node.find('#opacityValue').text(opacityPercents);
-    node.find('#opacitySlider').slider({
+    node.find('#opacity-value').text(opacityPercents);
+    node.find('#opacity-slider').slider({
       range: 'min',
       max: 100,
       value: opacityPercents,
       slide: this.newOpacity.bind(this),
       change: this.newOpacity.bind(this),
     });
-    node.find('#stepsValue').text(40);
-    node.find('#stepsSlider').slider({
+    node.find('#steps-value').text(40);
+    node.find('#steps-slider').slider({
       range: 'min',
       min: 1,
       max: 200,
@@ -185,10 +185,10 @@
         .val(this.envelope)
         .off('change')
         .on('change', this.newEnvelope.bind(this));
-    node.find('#updateImmediate')
+    node.find('#update-immediate')
         .off('change')
         .on('change', this.setImmediate.bind(this));
-    node.find('#updateQueued')
+    node.find('#update-queued')
         .off('change')
         .on('change', this.setQueued.bind(this));
     node.find('.submit')
@@ -204,8 +204,8 @@
 
   LayerColorPicker.prototype.updatePicker = function() {
     this.picker.setHex(this.color);
-    this.updateImmediate = this.node.find('#updateImmediate').is(':checked');
-    this.updateQueued = this.node.find('#updateQueued').is(':checked');
+    this.updateImmediate = this.node.find('#update-immediate').is(':checked');
+    this.updateQueued = this.node.find('#update-queued').is(':checked');
   };
 
   LayerColorPicker.prototype.newColor = function(hex) {
@@ -219,7 +219,7 @@
 
   LayerColorPicker.prototype.newOpacity = function(event, ui) {
     this.opacity = ui.value / 100;
-    this.node.find('#opacityValue').text(ui.value);
+    this.node.find('#opacity-value').text(ui.value);
     this.node.find('.preview .opacity').css('opacity', this.opacity);
     if (this.updateImmediate) {
       this.updateThrottler(this.currentCommand());
@@ -236,7 +236,7 @@
 
   LayerColorPicker.prototype.newSteps = function(event, ui) {
     this.steps = ui.value;
-    this.node.find('#stepsValue').text(this.steps);
+    this.node.find('#steps-value').text(this.steps);
     this.setUpdateThrottler();
   };
 

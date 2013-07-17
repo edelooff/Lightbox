@@ -21,13 +21,13 @@
     <div id="preview">
       <div class="output">
         <h3>Output 1</h3>
-        <div class="mixedContainer">
+        <div class="mixed-container">
           <div class="mixed smoothed"></div>
           mixed
         </div>
         <ol class="layers">
           <li class="layer">
-            <div class="colorContainer">
+            <div class="color-container">
               <div class="color maxheight smoothed"></div>
             </div>
             <span class="blender"></span>
@@ -36,26 +36,26 @@
         </ol>
       </div>
     </div>
-    <div id="picker_popup" style="display: none">
-      <div class="modal_close close"></div>
-      <div class="modal_header">
+    <div id="picker-popup" style="display: none">
+      <div class="modal-close close"></div>
+      <div class="modal-header">
         <h4>Transition to new color</h4>
       </div>
-      <div class="modal_content">
+      <div class="modal-content">
         <div id="picker"></div>
         <div class="preview">
-          <div class="colorContainer">
+          <div class="color-container">
             <div class="color maxheight"></div>
           </div>
-          <div class="colorContainer">
+          <div class="color-container">
             <div class="color maxheight opacity"></div>
           </div>
         </div>
         <div class="sliders">
-          <h5>Opacity slider [<span id="opacityValue"></span>]</h5>
-          <div class="slider" id="opacitySlider"></div>
-          <h5>Steps  [<span id="stepsValue"></span>]</h5>
-          <div class="slider" id="stepsSlider"></div>
+          <h5>Opacity slider [<span id="opacity-value"></span>]</h5>
+          <div class="slider" id="opacity-slider"></div>
+          <h5>Steps  [<span id="steps-value"></span>]</h5>
+          <div class="slider" id="steps-slider"></div>
         </div>
         <div class="options">
           <h5>Layer blender</h5>
@@ -68,8 +68,8 @@
           </select>
         </div>
         <div class="bottomrow">
-          <input type="checkbox" id="updateImmediate"><label for="updateImmediate">Immediately apply color on change</label><br>
-          <input type="checkbox" id="updateQueued" checked="checked"><label for="updateQueued">New transitions queue after current</label>
+          <input type="checkbox" id="update-immediate"><label for="update-immediate">Immediately apply color on change</label><br>
+          <input type="checkbox" id="update-queued" checked="checked"><label for="update-queued">New transitions queue after current</label>
         </div>
         <input class="submit" type="submit" value="Apply" />
       </div>

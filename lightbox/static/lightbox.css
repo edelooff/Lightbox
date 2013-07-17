@@ -83,7 +83,7 @@ h5, label, select, strong {
 .output:hover {
   background: #4f4f4f;
 }
-.output .mixedContainer {
+.output .mixed-container {
   float: right;
   margin-top: 5px;
   font-size: 10px;
@@ -105,14 +105,14 @@ h5, label, select, strong {
   overflow: auto;
   cursor: pointer;
 }
-.output .layer .colorContainer {
+.output .layer .color-container {
   height: 35px;
   border: 1px solid #333;
   background: url(checkerboard.png);
   transition: 150ms ease-in-out;
   transition-property: box-shadow, border-color;
 }
-.output .layer:hover .colorContainer {
+.output .layer:hover .color-container {
   border-color: #ddd;
   box-shadow: 0 0 4px 1px #ddd;
 }
@@ -173,13 +173,13 @@ h5, label, select, strong {
 
 /* New transition dialog window
 --------------------------------------------*/
-#picker_popup {
+#picker-popup {
   position: relative;
   width: 400px;
   border-radius: 6px;
   box-shadow: 0 0 12px 2px rgba(0, 0, 0, .6);
 }
-.modal_close {
+.modal-close {
   position: absolute;
   top: 0;
   right: 0;
@@ -189,56 +189,56 @@ h5, label, select, strong {
   background: url(close.png) 50% 50% no-repeat;
   cursor: pointer;
 }
-.modal_close:hover {
+.modal-close:hover {
   background: url(close-active.png) 50% 50% no-repeat;
 }
-.modal_header {
+.modal-header {
   padding: 7px 0 6px 0;
   border-radius: 6px 6px 0 0;
   background: #25b;
 }
-.modal_content {
+.modal-content {
   padding: 15px 20px;
   border: solid #25b;
   border-width: 0 2px 2px;
   border-radius: 0 0 6px 6px;
   background: #f6f6f6;
 }
-#picker_popup .preview {
+#picker-popup .preview {
   float: right;
 }
-#picker_popup .preview .colorContainer {
+#picker-popup .preview .color-container {
   width: 40px;
   height: 80px;
   border: 1px solid #555;
   background: url(checkerboard.png);
 }
-#picker_popup .preview .colorContainer:first-child {
+#picker-popup .preview .color-container:first-child {
   margin-bottom: 78px;
 }
-#picker_popup .sliders {
+#picker-popup .sliders {
   float: left;
 }
-#picker_popup .slider {
+#picker-popup .slider {
   width: 240px;
   margin: 12px 0;
   font-size: 13px;
 }
-#picker_popup .options {
+#picker-popup .options {
   float: right;
   width: 102px;
 }
-#picker_popup .bottomrow {
+#picker-popup .bottomrow {
   clear: both;
   line-height: 18px;
 }
-#picker_popup .bottomrow input[type=checkbox] {
+#picker-popup .bottomrow input[type=checkbox] {
   width: 13px;
   height: 13px;
   margin: 5px 5px 2px 0;
   vertical-align: bottom;
 }
-#picker_popup .submit {
+#picker-popup .submit {
   position: absolute;
   right: 20px;
   bottom: 15px;
@@ -251,7 +251,7 @@ h5, label, select, strong {
   font-size: 14px;
   font-weight: bold;
 }
-#picker_popup .submit:active {
+#picker-popup .submit:active {
   bottom: 14px;
   border-style: inset;
 }
