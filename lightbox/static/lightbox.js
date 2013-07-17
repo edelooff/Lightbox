@@ -74,7 +74,7 @@
     this.layerNodes = node.find('.layers');
     this.layerTemplate = node.find('.layer').detach();
     this.layers = [];
-    this.commandRate = apiInfo.controllerInfo.commandRate.perOutput;
+    this.commandRate = apiInfo.commandRate.perOutput;
     this.setTitle('Output ' + (index + 1));
     this.addLayers(apiInfo.layerCount);
   }
