@@ -95,14 +95,15 @@ h5, label, select, strong {
   border: 1px solid #333;
 }
 .output .layers {
-  width: 120px;
-  margin: 0 0 0 -10px;
+  width: 110px;
+  margin: 0 0 0 -5px;
   padding: 0;
   list-style: none;
 }
 .output .layer {
-  padding: 5px 10px 0;
+  padding: 5px 5px 0;
   overflow: auto;
+  cursor: pointer;
 }
 .output .layer .colorContainer {
   height: 35px;

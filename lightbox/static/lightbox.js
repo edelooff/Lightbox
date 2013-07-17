@@ -105,7 +105,7 @@
   function Layer(index, node, output) {
     this.index = index;
     this.node = node;
-    this.node.click(this.colorPicker.bind(this));
+    this.node.on('click', this.colorPicker.bind(this));
     this.output = output;
     // Default layer color and opacity values
     this.color = '#000';
