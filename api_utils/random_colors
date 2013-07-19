@@ -26,14 +26,15 @@ def RandomColorSender(host, port, interval, layer):
   api_address = 'http://%s:%d/api' % (host, port)
   headers = {'content-type': 'application/json'}
   while True:
-    outputs = requests.get(api_address).json()['outputCount']
-    for output in range(outputs):
-      command = {'output': output,
-                 'layer': layer,
-                 'color': RandomColor(),
-                 'steps': 40}
+    api_info = requests.get(api_address).json()
+    output_count = api_info['outputCount']
+    output_rate = api_info['commandRate']['perOutput']
+    color = RandomColor(saturate=True)
+    for output in range(output_count):
+      command = {'output': output, 'layer': layer, 'color': color,
+                 'steps': interval * output_rate * output_count}
       requests.post(api_address, data=json.dumps(command), headers=headers)
-      time.sleep(interval)
+      time.sleep(interval * 1.1)
     print '%s: All outputs have new random colors.' % time.ctime()
 
 
