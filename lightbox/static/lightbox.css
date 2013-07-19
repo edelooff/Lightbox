@@ -1,5 +1,6 @@
+/* -------------------------------------------- */
 /* Generic body styles
---------------------------------------------*/
+/* -------------------------------------------- */
 body {
   font-family: Arial, sans-serif;
   margin: 0 20px;
@@ -62,8 +63,9 @@ h5, label, select, strong {
   transition-property: background-color, opacity;
 }
 
+/* -------------------------------------------- */
 /* Lightbox live view (outputs and layers)
---------------------------------------------*/
+/* -------------------------------------------- */
 #preview {
   overflow: auto;
   margin: 0 -10px;
@@ -120,8 +122,9 @@ h5, label, select, strong {
   float: right;
 }
 
+/* -------------------------------------------- */
 /* Color picker
---------------------------------------------*/
+/* -------------------------------------------- */
 .picker-wrapper,
 .slide-wrapper {
   position: relative;
@@ -171,8 +174,9 @@ h5, label, select, strong {
   opacity: .6;
 }
 
+/* -------------------------------------------- */
 /* New transition dialog window
---------------------------------------------*/
+/* -------------------------------------------- */
 #picker-popup {
   position: relative;
   width: 400px;

@@ -93,10 +93,15 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
   def do_POST(self):
     """Processes Lightbox controls via JSON."""
     if self.path != '/api':
+      self.log_error('Received POST on address other than /api.')
       return self._ErrorResponse('Can only write to /api.')
-    elif self.headers['content-type'] != 'application/json':
+    content_type = self.headers['content-type'].split(';')[0]
+    if content_type != 'application/json':
+      self.log_error(
+          'Received POST with unsupported content-type %r.', content_type)
       return self._ErrorResponse('Only application/json is allowed for POST.')
-    elif 'content-length' not in self.headers:
+    if 'content-length' not in self.headers:
+      self.log_error('Received POST without a specified content-length.')
       return self._ErrorResponse('Headers must provide the message length.')
     payload = simplejson.loads(
         self.rfile.read(int(self.headers['content-length'])))
@@ -131,6 +136,10 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
       raise ValueError(
           'Chosen action %r is not an action for this channel.' %  action)
     getattr(channel, action)(**command)
+
+  def log_error(self, fmt, *args):
+    """Logs an error by prefixing 'Error' and sending it to log_message."""
+    self.log_message('Error: %s' % fmt, *args)
 
   def log_message(self, fmt, *args):
     """Logs the messages from the RequestHandler
