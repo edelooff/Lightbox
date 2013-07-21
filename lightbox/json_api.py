@@ -46,10 +46,11 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """Successful request, send response to client as JSON."""
     return self._SuccessResponse(simplejson.dumps(data), 'application/json')
 
-  def _SuccessResponse(self, data, content_type):
+  def _SuccessResponse(self, data, content_type, max_age=0):
     """Returns a 200 OK with the given data and content-type."""
     self.send_response(200)
     self.send_header('content-type', content_type)
+    self.send_header('max-age', max_age)
     self.end_headers()
     self.wfile.write(data)
 
@@ -75,7 +76,8 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         content_type, _encoding = mimetypes.guess_type(static_path)
         if not content_type:
           content_type = 'text/plain'
-        return self._SuccessResponse(static_file.read(), content_type)
+        return self._SuccessResponse(
+            static_file.read(), content_type, max_age=86400)
     except IOError:
       self.log_error('File not found: %r', self.path)
       return self._ErrorResponse('File not found: %r' % self.path)
