@@ -15,6 +15,7 @@ header button {
   position: absolute;
   right: 20px;
   top: 20px;
+  transition: border-color 200ms ease-in-out;
 }
 header button:active {
   top: 21px;
@@ -57,7 +58,7 @@ h5, label, select, strong {
 button {
   margin: 0;
   padding: 6px 30px;
-  border: 1px solid #36c;
+  border: 1px solid #13a;
   background: #25b;
   color: #f6f6f6;
   font-size: 14px;
@@ -280,6 +281,9 @@ body {
 body.dark {
   background: #333;
   color: #f6f6f6;
+}
+body.dark header button {
+  border-color: #36c;
 }
 body.dark .output .mixed,
 body.dark .output .layer .color-container {
