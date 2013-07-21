@@ -13,6 +13,9 @@
       picker;
 
   $(document).ready(function() {
+    $('.theme-toggle').on('click', function() {
+      $('body').toggleClass('light dark');
+    });
     picker = $('#picker-popup').detach();
     lightbox = new Lightbox('#preview');
     lightbox.init();

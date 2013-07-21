@@ -6,14 +6,17 @@
     <link href="/static/lightbox.css" rel="stylesheet">
     <link href="/static/jquery-ui-1.10.3.custom.css" rel="stylesheet">
   </head>
-  <body>
+  <body class="dark">
     <script src="/static/jquery-1.9.1.min.js"></script>
     <script src="/static/jquery.lightbox_me.js"></script>
     <script src="/static/jquery.throttle.min.js"></script>
     <script src="/static/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="/static/colorpicker-r54.js"></script>
     <script src="/static/lightbox.js"></script>
-    <h1>Lightbox JSON API</h1>
+    <header>
+      <h1>Lightbox JSON API</h1>
+      <button class="theme-toggle">Toggle theme</button>
+    </header>
     <p>Lightbox was originally developed for the <a href="http://twitterboom.nl">Twitterboom</a>, which was demonstrated to the public during the Christmas season of 2011 in the public library of Leeuwarden, the hometown of <a href="http://frack.nl/wiki/">Frack</a>.</p>
     <p>All code and documentation is <a href="https://github.com/frack/Lightbox">available on GitHub</a>.</p>
     <h2>Lightbox live view</h2>
@@ -71,7 +74,7 @@
           <input type="checkbox" id="update-immediate"><label for="update-immediate">Immediately apply color on change</label><br>
           <input type="checkbox" id="update-queued" checked="checked"><label for="update-queued">New transitions queue after current</label>
         </div>
-        <input class="submit" type="submit" value="Apply" />
+        <button class="submit">Apply</button>
       </div>
     </div>
     <h2>API Information</h2>
