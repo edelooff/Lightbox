@@ -77,6 +77,7 @@ class ApiHandler(BaseHTTPServer.BaseHTTPRequestHandler):
           content_type = 'text/plain'
         return self._SuccessResponse(static_file.read(), content_type)
     except IOError:
+      self.log_error('File not found: %r', self.path)
       return self._ErrorResponse('File not found: %r' % self.path)
 
   def OutputInfo(self):
