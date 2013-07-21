@@ -17,7 +17,7 @@
     $('.theme-toggle').on('click', function() {
       $('body').toggleClass('light dark');
     });
-    picker = $('#picker-popup').detach();
+    picker = $('#picker').detach();
     lightbox = new Lightbox('#preview');
     lightbox.init();
     lightbox.automaticUpdates(150);
@@ -156,7 +156,8 @@
     this.updateQueued = false;
     // Initialize color picker
     this.node = this.createWindow(picker);
-    this.picker = new ColorPicker($('#picker')[0], this.newColor.bind(this));
+    this.picker = new ColorPicker(
+        picker.find('.color-picker')[0], this.newColor.bind(this));
     // Command rate management
     this.setUpdateThrottler();
   }
@@ -215,8 +216,8 @@
 
   LayerColorPicker.prototype.newColor = function(hex) {
     this.color = hex;
-    this.node.find('.preview .color').css('background-color', hex);
-    this.node.find('.preview .opacity').css('opacity', this.opacity);
+    this.node.find('.preview .selected-color').css('background-color', hex);
+    this.node.find('.preview .selected-opacity').css('opacity', this.opacity);
     if (this.updateImmediate) {
       this.updateThrottler(this.currentCommand());
     }
@@ -225,7 +226,7 @@
   LayerColorPicker.prototype.newOpacity = function(event, ui) {
     this.opacity = ui.value / 100;
     this.node.find('.opacity-value').text(ui.value + '%');
-    this.node.find('.preview .opacity').css('opacity', this.opacity);
+    this.node.find('.preview .selected-opacity').css('opacity', this.opacity);
     if (this.updateImmediate) {
       this.updateThrottler(this.currentCommand());
     }

@@ -39,25 +39,25 @@
         </ol>
       </div>
     </div>
-    <div id="picker-popup" style="display: none">
+    <div id="picker" class="modal transition-popup">
       <div class="modal-close close"></div>
       <div class="modal-header">
         <h4>Transition to new color</h4>
       </div>
       <div class="modal-content">
-        <div id="picker"></div>
+        <div class="color-picker"></div>
         <div class="preview">
           <div class="color-container">
-            <div class="color maxheight"></div>
+            <div class="maxheight selected-color"></div>
           </div>
           <div class="color-container">
-            <div class="color maxheight opacity"></div>
+            <div class="maxheight selected-color selected-opacity"></div>
           </div>
         </div>
         <div class="sliders">
-          <h5>Target opacity <span class="slider-value opacity-value"></span></h5>
+          <h5>Target opacity: <span class="slider-value opacity-value"></span></h5>
           <div class="slider opacity-slider"></div>
-          <h5>Transition duration<span class="slider-value steps-value"></span></h5>
+          <h5>Transition duration: <span class="slider-value steps-value"></span></h5>
           <div class="slider steps-slider"></div>
         </div>
         <div class="options">

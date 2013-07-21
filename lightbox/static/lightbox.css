@@ -139,65 +139,12 @@ button {
 }
 
 /* -------------------------------------------- */
-/* Color picker
-/* -------------------------------------------- */
-.picker-wrapper,
-.slide-wrapper {
-  position: relative;
-  float: left;
-}
-.picker-indicator,
-.slide-indicator {
-  position: absolute;
-  left: 0;
-  top: 0;
-  pointer-events: none;
-}
-.picker,
-.slide {
-  cursor: crosshair;
-  float: left;
-}
-#picker {
-  float: left;
-}
-#picker .picker {
-  width: 240px;
-  height: 240px;
-}
-#picker .slide {
-  width: 40px;
-  height: 240px;
-}
-#picker .picker-wrapper,
-#picker .slide-wrapper {
-  border: 1px solid #555;
-}
-#picker .slide-wrapper {
-  margin-left: 16px;
-}
-#picker .picker-indicator {
-  width: 6px;
-  height: 6px;
-  border-radius: 4px;
-  background-color: #333;
-  opacity: .6;
-}
-#picker .slide-indicator {
-  width: 100%;
-  height: 4px;
-  background-color: #333;
-  opacity: .6;
-}
-
-/* -------------------------------------------- */
 /* New transition dialog window
 /* -------------------------------------------- */
-#picker-popup {
-  position: relative;
-  width: 400px;
-  border-radius: 6px;
-  box-shadow: 0 0 12px 2px rgba(0, 0, 0, .6);
+
+/* Basic modal window styles */
+.modal {
+  display: none;
 }
 .modal-close {
   position: absolute;
@@ -224,51 +171,101 @@ button {
   border-radius: 0 0 6px 6px;
   background: #f6f6f6;
 }
-#picker-popup .preview {
+
+/* Styles specific to the transition dialog */
+.transition-popup {
+  position: relative;
+  width: 400px;
+  border-radius: 6px;
+  box-shadow: 0 0 12px 2px rgba(0, 0, 0, .6);
+}
+.transition-popup .preview {
   float: right;
 }
-#picker-popup .preview .color-container {
+.transition-popup .preview .color-container {
   width: 40px;
   height: 80px;
   border: 1px solid #555;
   background: url(checkerboard.png);
 }
-#picker-popup .preview .color-container:first-child {
+.transition-popup .preview .color-container:first-child {
   margin-bottom: 78px;
 }
-#picker-popup .sliders {
+.transition-popup .sliders {
   float: left;
 }
-#picker-popup .slider {
+.transition-popup .slider {
   width: 240px;
   margin: 12px 0;
   font-size: 13px;
 }
-#picker-popup .slider-value {
-  float: right;
+.transition-popup .slider-value {
+  color: #08d;
 }
-#picker-popup .options {
+.transition-popup .options {
   float: right;
   width: 102px;
 }
-#picker-popup .bottomrow {
+.transition-popup .bottomrow {
   clear: both;
   line-height: 18px;
 }
-#picker-popup .bottomrow input[type=checkbox] {
+.transition-popup .bottomrow input[type=checkbox] {
   width: 13px;
   height: 13px;
   margin: 5px 5px 2px 0;
   vertical-align: bottom;
 }
-#picker-popup .submit {
+.transition-popup .submit {
   position: absolute;
   right: 20px;
   bottom: 15px;
   width: 102px;
 }
-#picker-popup .submit:active {
+.transition-popup .submit:active {
   bottom: 14px;
+}
+
+/* Color picker styles */
+.color-picker {
+  float: left;
+}
+.color-picker .picker,
+.color-picker .slide {
+  float: left;
+  width: 240px;
+  height: 240px;
+  cursor: crosshair;
+}
+.color-picker .slide {
+  width: 40px;
+}
+.color-picker .picker-wrapper,
+.color-picker .slide-wrapper {
+  position: relative;
+  float: left;
+  border: 1px solid #555;
+}
+.color-picker .slide-wrapper {
+  margin-left: 16px;
+}
+.color-picker .picker-indicator,
+.color-picker .slide-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color: #333;
+  opacity: .6;
+  pointer-events: none;
+}
+.color-picker .picker-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 4px;
+}
+.color-picker .slide-indicator {
+  width: 100%;
+  height: 4px;
 }
 
 /* -------------------------------------------- */
@@ -278,7 +275,6 @@ body {
   transition: 200ms ease-in-out;
   transition-property: background-color, color;
 }
-
 
 /* Dark theme */
 body.dark {
@@ -293,6 +289,7 @@ body.dark .output .layer:hover .color-container {
   border-color: #ddd;
   box-shadow: 0 0 4px 1px #ddd;
 }
+
 /* Light theme */
 body.light {
   background: #f6f6f6;
