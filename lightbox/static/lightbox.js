@@ -10,7 +10,8 @@
       apiQueryController = '/api',
       apiQueryOutputs = '/api/outputs',
       lightbox,
-      picker;
+      picker,
+      transitionStepsCount;
 
   $(document).ready(function() {
     $('.theme-toggle').on('click', function() {
@@ -47,12 +48,12 @@
       this.outputs.push(output);
       this.node.append(output.node);
     }
-    var blenders = picker.find('#blender');
+    var blenders = picker.find('.blender');
     blenders.empty();
     $.each(this.controllerInfo.layerBlenders, function(_, blender) {
       blenders.append($('<option>', {"value": blender}).text(blender));
     });
-    var envelopes = picker.find('#envelope');
+    var envelopes = picker.find('.envelope');
     envelopes.empty();
     $.each(this.controllerInfo.transitionEnvelopes, function(_, envelope) {
       envelopes.append(
@@ -148,7 +149,7 @@
     // Color and other variables controlled by the user
     this.color = this.layer.color;
     this.opacity = this.layer.opacity;
-    this.steps = 40;
+    this.steps = transitionStepsCount || 40;
     this.blender = this.layer.blender;
     this.envelope = this.layer.envelope;
     this.updateImmediate = false;
@@ -163,28 +164,29 @@
   LayerColorPicker.prototype.createWindow = function(node) {
     var opacityPercents = Math.round(this.opacity * 100);
     node.appendTo('body');
-    node.find('#opacity-value').text(opacityPercents);
-    node.find('#opacity-slider').slider({
+    node.find('.opacity-value').text(opacityPercents + '%');
+    node.find('.opacity-slider').slider({
       range: 'min',
       max: 100,
       value: opacityPercents,
       slide: this.newOpacity.bind(this),
       change: this.newOpacity.bind(this),
     });
-    node.find('#steps-value').text(40);
-    node.find('#steps-slider').slider({
+    node.find('.steps-value').text(
+      this.transitionDuration(this.steps) + '\u200ams');
+    node.find('.steps-slider').slider({
       range: 'min',
       min: 1,
       max: 200,
-      value: 40,
+      value: this.steps,
       slide: this.newSteps.bind(this),
       change: this.newSteps.bind(this),
     });
-    node.find('#blender')
+    node.find('.blender')
         .val(this.blender)
         .off('change')
         .on('change', this.newBlender.bind(this));
-    node.find('#envelope')
+    node.find('.envelope')
         .val(this.envelope)
         .off('change')
         .on('change', this.newEnvelope.bind(this));
@@ -222,7 +224,7 @@
 
   LayerColorPicker.prototype.newOpacity = function(event, ui) {
     this.opacity = ui.value / 100;
-    this.node.find('#opacity-value').text(ui.value);
+    this.node.find('.opacity-value').text(ui.value + '%');
     this.node.find('.preview .opacity').css('opacity', this.opacity);
     if (this.updateImmediate) {
       this.updateThrottler(this.currentCommand());
@@ -238,8 +240,9 @@
   };
 
   LayerColorPicker.prototype.newSteps = function(event, ui) {
-    this.steps = ui.value;
-    this.node.find('#steps-value').text(this.steps);
+    this.steps = transitionStepsCount = ui.value;
+    this.node.find('.steps-value').text(
+      this.transitionDuration(this.steps) + '\u200ams');
     this.setUpdateThrottler();
   };
 
@@ -264,7 +267,7 @@
 
   LayerColorPicker.prototype.setUpdateThrottler = function() {
     this.updateThrottler = $.throttle(
-        1000 * this.steps / this.layer.output.commandRate,
+        this.transitionDuration(this.steps),
         this.sendCommand.bind(this));
   };
 
@@ -281,6 +284,10 @@
   LayerColorPicker.prototype.submit = function() {
     this.sendCommand(this.currentCommand());
     this.node.trigger('close');
+  };
+
+  LayerColorPicker.prototype.transitionDuration = function(steps) {
+    return 1000 * steps / this.layer.output.commandRate;
   };
 
 }());

@@ -244,6 +244,9 @@ button {
   margin: 12px 0;
   font-size: 13px;
 }
+#picker-popup .slider-value {
+  float: right;
+}
 #picker-popup .options {
   float: right;
   width: 102px;
