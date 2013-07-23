@@ -281,6 +281,7 @@ header button {
   transition: border-color 400ms ease-in-out;
 }
 header button .container {
+  display: inline-block;
   position: relative;
   height: 16px;
 }
