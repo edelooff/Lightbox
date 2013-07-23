@@ -10,18 +10,38 @@
       apiQueryController = '/api',
       apiQueryOutputs = '/api/outputs',
       lightbox,
-      picker,
-      transitionStepsCount;
+      transitionDialog,
+      transitionStepsCount,
+      toggleButton;
 
   $(document).ready(function() {
-    $('.theme-toggle').on('click', function() {
-      $('body').toggleClass('light dark');
-    });
-    picker = $('#picker').detach();
+    // Set up theme and theme toggling
+    toggleButton = $('.theme-toggle');
+    toggleButton.show().find('.dark').show();
+    toggleButton.find('.container').width(toggleButton.find('.dark').width());
+    toggleButton.on('click', themeToggle);
+    // Prepare the transition dialog and Lightbox instance
+    transitionDialog = $('#picker').detach();
     lightbox = new Lightbox('#preview');
     lightbox.init();
     lightbox.automaticUpdates(150);
   });
+
+  function themeToggle() {
+    var body = $('body');
+    if (body.hasClass('dark')) {
+      toggleButton.find('.light').fadeIn();
+      toggleButton.find('.dark').fadeOut();
+      toggleButton.find('.container').animate(
+        {'width': toggleButton.find('.light').width()});
+    } else {
+      toggleButton.find('.light').fadeOut();
+      toggleButton.find('.dark').fadeIn();
+      toggleButton.find('.container').animate(
+        {'width': toggleButton.find('.dark').width()});
+    }
+    body.toggleClass('light dark');
+  }
 
   function Lightbox(node) {
     this.node = $(node);
@@ -36,11 +56,16 @@
   };
 
   Lightbox.prototype.init = function() {
-    $.getJSON(apiQueryController, this.createOutputs.bind(this));
+    $.getJSON(apiQueryController, this.setupLightbox.bind(this));
   };
 
-  Lightbox.prototype.createOutputs = function(apiInfo) {
+  Lightbox.prototype.setupLightbox = function(apiInfo) {
+    // Store API info and unhide dummy paragraph if necessary
     this.controllerInfo = apiInfo;
+    if (apiInfo.device.type === 'dummy') {
+      $('.dummy-controller').removeClass('hidden');
+    }
+    // Create the outputs
     var index, output, outputNode;
     for (index = 0; index < apiInfo.outputCount; index++) {
       outputNode = this.outputTemplate.clone();
@@ -48,12 +73,13 @@
       this.outputs.push(output);
       this.node.append(output.node);
     }
-    var blenders = picker.find('.blender');
+    // Configure the transition dialog
+    var blenders = transitionDialog.find('.blender');
     blenders.empty();
     $.each(this.controllerInfo.layerBlenders, function(_, blender) {
       blenders.append($('<option>', {"value": blender}).text(blender));
     });
-    var envelopes = picker.find('.envelope');
+    var envelopes = transitionDialog.find('.envelope');
     envelopes.empty();
     $.each(this.controllerInfo.transitionEnvelopes, function(_, envelope) {
       envelopes.append(
@@ -155,9 +181,9 @@
     this.updateImmediate = false;
     this.updateQueued = false;
     // Initialize color picker
-    this.node = this.createWindow(picker);
+    this.node = this.createWindow(transitionDialog);
     this.picker = new ColorPicker(
-        picker.find('.color-picker')[0], this.newColor.bind(this));
+        this.node.find('.color-picker')[0], this.newColor.bind(this));
     // Command rate management
     this.setUpdateThrottler();
   }

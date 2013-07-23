@@ -14,13 +14,17 @@
     <script src="/static/colorpicker-r54.js"></script>
     <script src="/static/lightbox.js"></script>
     <header>
-      <h1>Lightbox JSON API</h1>
-      <button class="theme-toggle">Toggle theme</button>
+      <h1>Lightbox Live</h1>
+      <button class="theme-toggle" title="Theme selector">
+        <div class="container">
+          <span class="button-text light">Switch: dark evening</span>
+          <span class="button-text dark">Switch: bright morning</span>
+        </div>
+      </button>
     </header>
-    <p>Lightbox was originally developed for the <a href="http://twitterboom.nl">Twitterboom</a>, which was demonstrated to the public during the Christmas season of 2011 in the public library of Leeuwarden, the hometown of <a href="http://frack.nl/wiki/">Frack</a>.</p>
-    <p>All code and documentation is <a href="https://github.com/frack/Lightbox">available on GitHub</a>.</p>
-    <h2>Lightbox live view</h2>
-    <p>Basic jQuery/JavaScript retrieval for the current colors on the strip.</p>
+    <p>Just below here you can see the the outputs of the Lightbox server. These are continuously updated from the server and show the live output of the LED strips or spots. On the left of each output is a stack of <em>layers</em>. Each of these layers can be set to a specific color and opacity. The server software then mixes the layers into a <em>mixed</em> output color.</p>
+    <p>Start your own transition by clicking on any of the layers on the outputs. From there you can select the target color, opacity and the transition duration. When you then <em>apply</em> your transition, it will (soon) appear on the output.</p>
+    <p class="dummy-controller hidden">The Lightbox server is currently connected with a <code>dummy</code> controller. This means that there is no actual light hardware attached, but everything else still works as intended.</p>
     <div id="preview">
       <div class="output">
         <h3>Output 1</h3>
@@ -77,9 +81,13 @@
         <button class="submit">Apply</button>
       </div>
     </div>
-    <h2>API Information</h2>
+    <h2>What is this 'Lightbox'?</h2>
+    <p>Late November 2011, we at <a href="http://frack.nl/wiki/">Frack</a> decided to do something <em>more</em> than just decorate a Christmas tree with some lights and call it a day. We envisioned an interactive internet-enabled illumination experience. To that end, we decorated a tree with five RGB LED-strips that changed color as people tweeted messages with colors (words and codes). The strips would change color, a webcam would capture the image of the tree and display this on a website, with the tweets superimposed. We dubbed it <a href="http://twitterboom.nl">Twitterboom</a> (this is Dutch for <em>Twitter tree</em>) and three weeks later it was reality.</p>
+    <p>The results of this project were visible for the duration of the Christmas season in the public library of Leeuwarden (just accross the street from our hackerspace), and of course on the internet. Highlights are mentions on <a href="http://tweakers.net/nieuws/78907/hackerspace-laat-verlichting-kerstboom-bedienen-via-twitter.html">Tweakers.net</a>, <a href="https://hackerspaces.nl/2011/12/kerst-in-hackerspaces/">Hackerspaces.nl</a> and the <a href="http://jeroendeboer.net/2011/12/21/binnen-drie-weken-een-twitterboom-in-elkaar-gehackt/">blog</a> of the then-New Media Coordinator</em> of the aforementioned library.</p>
+    <p>All code and documentation is <a href="https://github.com/frack/Lightbox">available on GitHub</a>.</p>
+    <h2>JSON API Information</h2>
     <ul>
-      <li>API commands should be sent to <code>/api</code> (JSON body, content-type <code>application/json</code>);</li>
+      <li>API commands should be sent to <code>/api</code> as <code>application/json</code>;</li>
       <li>Controller information can be retrieved from <a href="/api"><code>/api</code></a>;</li>
       <li>Output information (mixed and layer colors, opacity etc) can be retrieved from <a href="/api/outputs"><code>/api/outputs</code></a>.</li>
     </ul>

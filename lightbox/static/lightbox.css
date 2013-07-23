@@ -11,15 +11,6 @@ header {
   border-bottom: 1px solid rgba(150, 150, 150, 0.3);
   background-color: rgba(150, 150, 150, 0.2);
 }
-header button {
-  position: absolute;
-  right: 20px;
-  top: 20px;
-  transition: border-color 200ms ease-in-out;
-}
-header button:active {
-  top: 21px;
-}
 h1 {
   margin: 0;
   font-size: 2.5em;
@@ -52,12 +43,12 @@ select {
   width: 100%;
   margin: 0;
 }
-h5, label, select, strong {
+h5, label, select {
   color: #25b;
 }
 button {
   margin: 0;
-  padding: 6px 30px;
+  padding: 6px 16px;
   border: 1px solid #13a;
   background: #25b;
   color: #f6f6f6;
@@ -75,6 +66,9 @@ button {
 :link:hover,
 :visited:hover {
   color: #6cf;
+}
+.hidden {
+  display: none;
 }
 .maxheight {
   height: 100%;
@@ -272,9 +266,29 @@ button {
 /* -------------------------------------------- */
 /* Theme changes, light vs dark
 /* -------------------------------------------- */
+
+/* Theme change transition and toggle button */
 body {
-  transition: 200ms ease-in-out;
+  transition: 400ms ease-in-out;
   transition-property: background-color, color;
+}
+header button {
+  display: none;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  text-align: left;
+  transition: border-color 400ms ease-in-out;
+}
+header button .container {
+  position: relative;
+  height: 16px;
+}
+header button .button-text {
+  display: none;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
 }
 
 /* Dark theme */
@@ -297,7 +311,7 @@ body.dark .output .layer:hover .color-container {
 /* Light theme */
 body.light {
   background: #f6f6f6;
-  color: #333;
+  color: #222;
 }
 body.light .output .mixed,
 body.light .output .layer .color-container {
