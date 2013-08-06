@@ -60,12 +60,11 @@ button {
 }
 :link,
 :visited {
-  color: #3af;
-  transition: color 200ms ease-in-out;
-}
-:link:hover,
-:visited:hover {
-  color: #6cf;
+  border-bottom: 2px solid;
+  color: #3ad;
+  text-decoration: none;
+  transition: 200ms ease-in-out;
+  transition-property: border, color;
 }
 .hidden {
   display: none;
@@ -297,6 +296,15 @@ body.dark {
   background: #333;
   color: #f6f6f6;
 }
+body.dark :link,
+body.dark :visited {
+  border-color: #333;
+}
+body.dark :link:hover,
+body.dark :visited:hover {
+  border-color: #3ad;
+  color: #6cf;
+}
 body.dark header button {
   border-color: #36c;
 }
@@ -313,6 +321,15 @@ body.dark .output .layer:hover .color-container {
 body.light {
   background: #f6f6f6;
   color: #222;
+}
+body.light :link,
+body.light :visited {
+  border-color: #f6f6f6;
+}
+body.light :link:hover,
+body.light :visited:hover {
+  border-color: #3ad;
+  color: #179;
 }
 body.light .output .mixed,
 body.light .output .layer .color-container {
