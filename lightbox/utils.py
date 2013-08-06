@@ -45,21 +45,31 @@ class Blenders(object):
   """
   @staticmethod
   def Darken(base, overlay, opacity):
-    """Returns a tuple where each channel is the darkest of the given colors.
+    """Returns a tuple where the resulting lightness is the same or lower.
+
+    The lightness is the L* component of Lab color.
     """
     if opacity == 0:
       return base
-    diffs = ColorDiff(base, overlay, opacity)
-    return [chan + min(0, diff) for chan, diff in zip(base, diffs)]
+    base = LabColor(RgbToLab(base))
+    l_overlay = RgbToLab(overlay)[0]
+    if l_overlay < base.lab_l:
+      base.lab_l += (l_overlay - base.lab_l) * opacity
+    return LabToRgb(base.get_value_tuple())
 
   @staticmethod
   def Lighten(base, overlay, opacity):
-    """Returns a tuple where each channel is the lightest of the given colors.
+    """Returns a tuple where the resulting lightness is the same or higher.
+
+    The lightness is the L* component of Lab color.
     """
     if opacity == 0:
       return base
-    diffs = ColorDiff(base, overlay, opacity)
-    return [chan + max(0, diff) for chan, diff in zip(base, diffs)]
+    base = LabColor(RgbToLab(base))
+    l_overlay = RgbToLab(overlay)[0]
+    if l_overlay > base.lab_l:
+      base.lab_l += (l_overlay - base.lab_l) * opacity
+    return LabToRgb(base.get_value_tuple())
 
   @staticmethod
   def RootSumSquare(base, overlay, opacity):
@@ -169,13 +179,12 @@ def HexToRgb(hex_color):
 
 
 def LabColor(lab_color):
-  """Wrapper for colormath.LabColor to get the correct illuminant.
-  """
+  """Returns the Lab color object with correct illuminant from a value tuple."""
   return colormath.LabColor(*lab_color, illuminant='d65')
 
 
 def LabToRgb(lab_color):
-  """Returns a tuple of RGB colors for a given tuple of Lab values.
+  """Returns a tuple of RGB colors for a given tuple of Lab components.
   """
   return LabColor(lab_color).convert_to('rgb').get_value_tuple()
 
