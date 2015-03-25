@@ -4,24 +4,29 @@ Lightbox is a Python library that controls hardware to drive LED-strips. It was 
 
 ## Quick installation
 
-The easiest and quickest way to install Lightbox is using Python's `virtualenv` and the provided install script:
+The easiest and quickest way to install Lightbox is using Python's `virtualenv` and the provided install script. However, due to a [bug in numpy](https://github.com/numpy/numpy/issues/2434), installation of this requirement needs to be done separately. To build numpy you will need a Fortran compiler and Python development headers. For Ubuntu these are in packages `gfortran` and `python-dev`.
 
 ```bash
 # Set up the Python virtualenv:
-virtualenv target
-source target/bin/activate
+virtualenv env
+source env/bin/activate
 
-# Install the lightbox package
+# Install numpy and then lightbox
+pip install numpy
 python setup.py install
 
 # Run the commandline demo
-cd scripts
-python demo.py
+python scripts/demo.py
 
-# Or (from the same directory) start the API server and some utilities
-# provide the API server with `-c Dummy` if there is no Lightbox hardware present
-python api_server.py
+# Or start the API server (and some utilities).
+# If there's no Lightbox hardware present, run with `-c Dummy`
+python scripts/api_server.py
+python api_utils/random_colors
 ```
+
+### ImportError: No module named networkx
+
+This package is required by `colormath` and should be included with its installation. If you see this error pop up, run `pip install networkx` in your current virtualenv.
 
 ### API utilities
 
