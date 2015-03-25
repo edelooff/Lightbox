@@ -13,7 +13,7 @@ requires = [
 
 setup(
     name='Lightbox',
-    version='1.0',
+    version='1.0.1',
     description=('Python library and JSON HTTP interface for controlling multi-'
                  'output RGB devices with color transitions in LAB space.'),
     long_description=README,
