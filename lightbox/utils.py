@@ -13,8 +13,9 @@ import operator
 import random
 
 # Colormath module
-from colormath import color_objects as colormath
-
+import colormath
+from colormath import color_objects
+from colormath.color_conversions import convert_color
 
 def RandomColor(saturate=False):
   """Generates a random RGB color tuple.
@@ -180,13 +181,14 @@ def HexToRgb(hex_color):
 
 def LabColor(lab_color):
   """Returns the Lab color object with correct illuminant from a value tuple."""
-  return colormath.LabColor(*lab_color, illuminant='d65')
+  return color_objects.LabColor(*lab_color, illuminant='d65')
 
 
 def LabToRgb(lab_color):
   """Returns a tuple of RGB colors for a given tuple of Lab components.
   """
-  return LabColor(lab_color).convert_to('rgb').get_value_tuple()
+  rgbcolor = convert_color(LabColor(lab_color), color_objects.sRGBColor)
+  return rgbcolor.get_value_tuple()
 
 
 def RgbToLab(rgb_color):
@@ -197,5 +199,5 @@ def RgbToLab(rgb_color):
   """
   if isinstance(rgb_color, basestring):
     rgb_color = HexToRgb(rgb_color)
-  rgb_color = colormath.RGBColor(*rgb_color, illuminant='d65')
-  return rgb_color.convert_to('lab').get_value_tuple()
+  rgb_color = color_objects.sRGBColor(*rgb_color)
+  return convert_color(rgb_color, color_objects.LabColor).get_value_tuple()
