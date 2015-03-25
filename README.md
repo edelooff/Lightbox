@@ -74,7 +74,7 @@ The controller information can be retrieved from `/api`.
     "controller": "JTagController",
     "device": {
         "baudrate": 57600,
-        "port": "/dev/ttyUSB1"
+        "port": "/dev/ttyUSB1",
         "type": "serial",
     },
     "layerBlenders": [
