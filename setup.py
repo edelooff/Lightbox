@@ -7,7 +7,6 @@ README = open(os.path.join(here, 'README.md')).read()
 
 requires = [
   'colormath',
-  'numpy',
   'pyserial',
   'requests',
   'simplejson']
